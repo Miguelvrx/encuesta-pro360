@@ -19,6 +19,10 @@ class MenuNavegacion extends Component
         'dashboard' => null,
         'crear-empresa' => 'usuarios',
         'mostrar-empresa' => 'usuarios',
+        'crear-departamento' => 'departamentos',
+        'mostrar-departamento' => 'departamentos',
+      
+
         // 'index' => 'usuarios',
         // 'evaluacion' => 'usuarios',
         // 'mis-resultados' => 'usuarios',

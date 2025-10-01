@@ -132,7 +132,7 @@
                             <span class="text-sm font-medium">Empresa</span>
                         </div>
                         <svg class="w-4 h-4 transition-all duration-300 ease-in-out 
-                            {{ $this->isActiveRouteGroup(['crear-empresa', 'mostrar-empresa', 'evaluacion', 'mis-resultados', 'resultado-jefe']) ? 'text-blue-400' : 'text-gray-400' }} 
+                            {{ $this->isActiveRouteGroup(['crear-empresa', 'mostrar-empresa']) ? 'text-blue-400' : 'text-gray-400' }} 
                             {{ $this->isMenuOpen('usuarios') ? 'rotate-180' : 'rotate-0' }}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
@@ -173,9 +173,64 @@
                         </a>
                         <!-- Repetir para los demás enlaces, ajustando el estado activo y clases similares -->
                     </div>
+                    <div class="mt-3">
+                        <button wire:click="toggleMenu('departamentos')" class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg group transition-all duration-200 ease-in-out 
+                        {{ $this->isActiveRouteGroup(['crear-departamento']) ? 'bg-blue-50 text-blue-600 shadow-sm' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50 hover:shadow-md' }}">
+                            <div class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 transition-colors duration-200 
+                                {{ $this->isActiveRouteGroup(['crear-departamento', 'mostrar-departamento']) ? 'text-blue-500' : 'text-gray-400 group-hover:text-blue-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Z" />
+                                </svg>
+                                <span class="text-sm font-medium">Departamento</span>
+                            </div>
+                            <svg class="w-4 h-4 transition-all duration-300 ease-in-out 
+                            {{ $this->isActiveRouteGroup(['crear-departamento',  'mostrar-departamento']) ? 'text-blue-400' : 'text-gray-400' }} 
+                            {{ $this->isMenuOpen('departamentos') ? 'rotate-180' : 'rotate-0' }}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+
+                        <div class="overflow-hidden transition-all duration-300 ease-in-out 
+                        {{ $this->isMenuOpen('departamentos') ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0' }} mt-1 ml-4 space-y-1">
+                            <a href="{{ route('crear-departamento') }}"
+                                wire:click="closeMenus"
+                                class="flex items-center px-3 py-2.5 rounded-lg group transition-all duration-200 ease-in-out 
+                            {{ $this->isActiveRoute('crear-departamento', 'mostrar-departamento') ? 'bg-blue-50 text-blue-600 border-r-4 border-blue-600 shadow-sm' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50 hover:shadow-md' }}">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 transition-colors duration-200 
+                                {{ $this->isActiveRoute('crear-empresa') ? 'text-blue-500' : 'text-gray-400 group-hover:text-blue-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                </svg>
+                                <span class="text-sm">Crear Departamento</span>
+                            </a>
+                            <a href="{{ route('mostrar-departamento') }}"
+                                {{-- FIN DE LA CORRECCIÓN --}}
+                                wire:click="closeMenus"
+                                class="flex items-center px-3 py-2.5 rounded-lg group transition-all duration-200 ease-in-out 
+    {{-- Ajusta también la comprobación de la ruta activa si es necesario --}}
+    {{ $this->isActiveRoute('mostrar-departamento') ? 'bg-blue-50 text-blue-600 border-r-4 border-blue-600 shadow-sm' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50 hover:shadow-md' }}">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 transition-colors duration-200 
+        {{ $this->isActiveRoute('mostrar-departamento' ) ? 'text-blue-500' : 'text-gray-400 group-hover:text-blue-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    {{-- He cambiado el ícono para que sea diferente al de "Crear" --}}
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z">
+                                </svg>
+                                <span class="text-sm">Mostrar Departamentos</span>
+                            </a>
+
+                            <a href=""
+                                wire:click="closeMenus"
+                                class="flex items-center px-3 py-2.5 rounded-lg group transition-all duration-200 ease-in-out 
+                            {{ $this->isActiveRoute('index') ? 'bg-blue-50 text-blue-600 border-r-4 border-blue-600 shadow-sm' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50 hover:shadow-md' }}">
+                                <!-- <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 transition-colors duration-200 
+                                {{ $this->isActiveRoute('index') ? 'text-blue-500' : 'text-gray-400 group-hover:text-blue-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+                            </svg>
+                            <span class="text-sm">Mostrar Empresa</span> -->
+                            </a>
+                            <!-- Repetir para los demás enlaces, ajustando el estado activo y clases similares -->
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <!-- Resto del código del sidebar (agrega secciones similares con las mismas mejoras) -->
+            </div> <!-- Resto del código del sidebar (agrega secciones similares con las mismas mejoras) -->
         </nav>
     </div>
 </div>

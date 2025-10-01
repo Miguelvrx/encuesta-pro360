@@ -144,7 +144,7 @@ class CrearEmpresa extends Component
             session()->flash('message', '¡Empresa creada exitosamente!');
 
             // Redirigimos al listado de empresas.
-            // $this->redirect(route('mostrar-empresa'), navigate: true);
+            $this->redirect(route('mostrar-empresa'), navigate: true);
         } catch (\Exception $e) {
             // Si algo falla, guardamos el error en la sesión y permanecemos en la página.
             session()->flash('error', 'Error al crear la empresa: ' . $e->getMessage());
