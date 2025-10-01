@@ -101,16 +101,16 @@
     </div>
 </div>
 
-{{-- Al final de resources/views/livewire/encuesta/departamento/mostrar-departamento.blade.php --}}
+{{-- Al final de resources/views/livewire/encuesta/mostrar-empresa.blade.php --}}
 
 {{-- ... (código de la tabla y paginación) ... --}}
 
 @push('scripts')
 <script>
-    // Usamos document.addEventListener para asegurarnos de que el DOM esté listo.
+    // Nos aseguramos de que este script se ejecute después de que Livewire se haya inicializado.
     document.addEventListener('livewire:init', () => {
-        
-        // Listener para el modal de confirmación
+
+        // Listener para el modal de confirmación de eliminación
         Livewire.on('show-swal-delete', (event) => {
             const data = event[0];
             Swal.fire({
@@ -125,24 +125,10 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     // Si se confirma, despachamos el evento final que el backend escuchará.
-                    Livewire.dispatch('delete-confirmed', { id: data.id });
+                    Livewire.dispatch('delete-confirmed', {
+                        id: data.id
+                    });
                 }
-            });
-        });
-
-        // (Opcional) Listener para toasts de éxito/error si los usas en esta página
-        Livewire.on('swal-toast', (event) => {
-            const data = event[0];
-            const Toast = Swal.mixin({
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true,
-            });
-            Toast.fire({
-                icon: data.icon,
-                title: data.title
             });
         });
     });

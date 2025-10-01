@@ -117,8 +117,8 @@
 
                                     {{-- INICIO DE LA RESTAURACIÓN --}}
                                     <button
-                                        wire:click="deleteEmpresa({{ $empresa->id_empresa }})"
-                                        wire:confirm="¿Estás seguro de que deseas eliminar esta empresa? Esta acción no se puede deshacer."
+                                        x-data
+                                        @click="$dispatch('confirm-delete', { id: {{ $empresa->id_empresa }} })"
                                         class="ml-4 text-red-600 hover:text-red-900 font-medium">
                                         Eliminar
                                     </button>
@@ -151,3 +151,37 @@
         </div>
     </div>
 </div>
+
+{{-- Al final de resources/views/livewire/encuesta/mostrar-empresa.blade.php --}}
+
+{{-- ... (código de la tabla y paginación) ... --}}
+
+@push('scripts')
+<script>
+    // Nos aseguramos de que este script se ejecute después de que Livewire se haya inicializado.
+    document.addEventListener('livewire:init', () => {
+
+        // Listener para el modal de confirmación de eliminación
+        Livewire.on('show-swal-delete', (event) => {
+            const data = event[0];
+            Swal.fire({
+                title: data.title,
+                text: data.text,
+                icon: data.icon,
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, ¡eliminar!',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Si se confirma, despachamos el evento final que el backend escuchará.
+                    Livewire.dispatch('delete-confirmed', {
+                        id: data.id
+                    });
+                }
+            });
+        });
+    });
+</script>
+@endpush

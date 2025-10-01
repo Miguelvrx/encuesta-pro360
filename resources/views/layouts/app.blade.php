@@ -26,6 +26,7 @@
     <div class="min-h-screen bg-gray-100">
         @livewire('menu-navegacion')
         <livewire:headernavegacion />
+      
 
         <!-- Page Heading -->
         @if (isset($header))
@@ -50,8 +51,11 @@
 
     @livewireScripts
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> {{-- 2. Cargar SweetAlert --}}
+     
 
-    @stack('scripts' ) 
+    @stack('scripts' )
+      <livewire:encuesta.departamento.manual-usuario-dep-modal />
+   
 
 </body>
 

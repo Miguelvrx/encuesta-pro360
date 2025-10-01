@@ -3,6 +3,7 @@
 use App\Livewire\Encuesta\CrearEmpresa;
 use App\Livewire\Encuesta\Departamento\CrearDepartamento;
 use App\Livewire\Encuesta\Departamento\EditarDepartamento;
+use App\Livewire\Encuesta\Departamento\ManualUsuarioDepModal;
 use App\Livewire\Encuesta\Departamento\MostrarDepartamento;
 use App\Livewire\Encuesta\Departamento\VerDepartamento;
 use App\Livewire\Encuesta\EditarEmpresa;
@@ -34,3 +35,4 @@ Route::get('/departamentos/crear', CrearDepartamento::class)->name('crear-depart
 Route::get('/departamento', MostrarDepartamento::class)->name('mostrar-departamento');
 Route::get('/departamentos/{departamento}', VerDepartamento::class)->name('ver-departamento');
 Route::get('/departamentos/{departamento}/editar', EditarDepartamento::class)->name('editar-departamento');
+Route::get('/manual-usuario-dep-modal', ManualUsuarioDepModal::class)->name('manual-usuario-dep-modal');

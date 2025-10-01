@@ -4,12 +4,13 @@ namespace App\Livewire\Encuesta;
 
 use App\Models\Empresa;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class MostrarEmpresa extends Component
 {
-      // 2. Usar los traits necesarios
+    // 2. Usar los traits necesarios
 
     // use WithPagination;
     use WithPagination;
@@ -84,23 +85,60 @@ class MostrarEmpresa extends Component
     //     }
     // }
 
+    // public function deleteEmpresa(int $id): void
+    // {
+    //     try {
+    //         $empresa = Empresa::findOrFail($id);
+    //         if ($empresa->image) {
+    //             Storage::disk('public')->delete($empresa->image);
+    //         }
+    //         $empresa->delete();
+
+    //         // Volvemos a usar session()->flash()
+    //         session()->flash('message', 'Empresa eliminada exitosamente.');
+
+    //         $this->resetPage();
+    //     } catch (\Exception $e) {
+    //         session()->flash('error', 'Error al eliminar la empresa: ' . $e->getMessage());
+    //     }
+    // }
+
+    #[On('confirm-delete')]
+    public function showDeleteConfirmation(int $id): void
+    {
+        $this->dispatch('show-swal-delete', [
+            'id' => $id,
+            'title' => '¿Estás seguro?',
+            'text' => 'Vas a eliminar esta empresa y todos sus datos asociados (departamentos, etc.). ¡Esta acción no se puede deshacer!',
+            'icon' => 'warning',
+        ]);
+    }
+
+    /**
+     * 4. Escucha el evento final 'delete-confirmed' desde SweetAlert y elimina la empresa.
+     */
+    #[On('delete-confirmed')]
     public function deleteEmpresa(int $id): void
     {
         try {
             $empresa = Empresa::findOrFail($id);
-            if ($empresa->image) {
-                Storage::disk('public')->delete($empresa->image);
+
+            // Si la empresa tiene un logo, lo borramos del almacenamiento.
+            if ($empresa->logo) { // <-- Corregido de 'image' a 'logo' para coincidir con la BD
+                Storage::disk('public')->delete($empresa->logo);
             }
+
             $empresa->delete();
 
-            // Volvemos a usar session()->flash()
+            // Usamos session()->flash() para el mensaje de éxito.
             session()->flash('message', 'Empresa eliminada exitosamente.');
-            
+
             $this->resetPage();
         } catch (\Exception $e) {
             session()->flash('error', 'Error al eliminar la empresa: ' . $e->getMessage());
         }
     }
+
 
 
     public function render()

@@ -82,6 +82,26 @@ class CrearDepartamento extends Component
         }
     }
 
+    public function mostrarManual(): void
+    {
+        $titulo = 'Manual: Crear Departamento';
+        
+        $contenido = <<<HTML
+            <p>Esta sección le permite registrar un nuevo departamento dentro de una empresa existente.</p>
+            <h4 class="font-bold mt-4">Instrucciones:</h4>
+            <ol class="list-decimal list-inside space-y-2">
+                <li><strong>Empresa:</strong> Seleccione de la lista la empresa a la que pertenecerá este nuevo departamento. Este campo es obligatorio.</li>
+                <li><strong>Nombre del Departamento:</strong> Ingrese un nombre claro y descriptivo (ej. "Ventas", "Soporte Técnico").</li>
+                <li><strong>Descripción:</strong> Detalle las responsabilidades y funciones principales del departamento.</li>
+                <li><strong>Puesto Principal:</strong> Escriba el nombre del cargo de mayor jerarquía dentro del departamento (ej. "Director de Marketing").</li>
+                <li><strong>Estado:</strong> Por defecto es "Activo". Cámbielo a "Inactivo" si el departamento no estará operativo inmediatamente.</li>
+            </ol>
+            <p class="mt-4">Una vez completados todos los campos obligatorios, haga clic en <strong>"Guardar Departamento"</strong> para finalizar el registro.</p>
+        HTML;
+
+        $this->dispatch('abrir-manual', titulo: $titulo, contenido: $contenido);
+    }
+
 
     public function render()
     {
