@@ -21,7 +21,9 @@ class MenuNavegacion extends Component
         'mostrar-empresa' => 'usuarios',
         'crear-departamento' => 'departamentos',
         'mostrar-departamento' => 'departamentos',
-      
+        'crear-usuario' => 'users',
+        'mostrar-usuario' => 'users',
+
 
         // 'index' => 'usuarios',
         // 'evaluacion' => 'usuarios',

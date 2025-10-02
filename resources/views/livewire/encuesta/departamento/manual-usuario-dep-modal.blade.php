@@ -20,7 +20,7 @@
         x-transition:leave="ease-in duration-200"
         x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
         x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-        class="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4">
+        class="bg-white rounded-xl shadow-3xl w-full max-w-3xl mx-4">
         <!-- Cabecera del Modal -->
         <div class="flex items-center justify-between p-5 border-b border-gray-200">
             <div class="flex items-center">

@@ -5,3 +5,17 @@
 [x-cloak] {
     display: none;
 }
+
+
+
+.input-style {
+    @apply px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors;
+}
+
+.input-error {
+    @apply border-red-500 ring-red-500;
+}
+
+.error-message {
+    @apply text-red-500 text-sm mt-1;
+}

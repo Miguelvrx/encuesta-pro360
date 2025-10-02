@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -40,6 +41,7 @@ class User extends Authenticatable
         'genero',
         'escolaridad',
         'fecha_registro_usuario',
+        'departamento_id', // <-- AÑADIR ESTO
     ];
 
     /**
@@ -78,6 +80,13 @@ class User extends Authenticatable
     }
 
     //Relaciones 
+      public function departamento(): BelongsTo
+    {
+        // El primer argumento es la clase del modelo relacionado.
+        // El segundo (opcional) es la clave foránea en la tabla 'users'.
+        // El tercero (opcional) es la clave primaria en la tabla 'departamentos'.
+        return $this->belongsTo(Departamento::class, 'departamento_id', 'id_departamento');
+    }
 
     public function evaluaciones(): BelongsToMany
     {
