@@ -1,5 +1,9 @@
 <?php
 
+use App\Livewire\Encuesta\Competencia\CatalogoCompetencia;
+use App\Livewire\Encuesta\Competencia\CrearCompetencia;
+use App\Livewire\Encuesta\Competencia\EditarComptencia;
+use App\Livewire\Encuesta\Competencia\RevisarComptencia;
 use App\Livewire\Encuesta\CrearEmpresa;
 use App\Livewire\Encuesta\Departamento\CrearDepartamento;
 use App\Livewire\Encuesta\Departamento\EditarDepartamento;
@@ -14,6 +18,7 @@ use App\Livewire\Encuesta\Usuario\MostrarUsuario;
 use App\Livewire\Encuesta\Usuario\VerUsuario;
 use App\Livewire\Encuesta\VerEmpresa;
 use App\Livewire\MenuNavegacion;
+use App\Livewire\Select2Example;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -44,3 +49,8 @@ Route::get('/usuarios/crear', CrearUsuario::class)->name('crear-usuario');
 Route::get('/usuarios', MostrarUsuario::class)->name('mostrar-usuario');
 Route::get('/usuarios/{user}', VerUsuario::class)->name('ver-usuario');
 Route::get('/usuarios/{user}/editar', EditarUsuario::class)->name('editar-usuario');
+Route::get('/competencias/crear', CrearCompetencia::class)->name('crear-competencia');
+Route::get('/competencias/revisar', RevisarComptencia::class)->name('revisar-competencia');
+Route::get('/competencias/{competencia}/editar', EditarComptencia::class)->name('editar-competencia');
+Route::get('/competencias/catalogo', CatalogoCompetencia::class )->name('catalogo-competencia');
+// Route::get('/select2-example', Select2Example::class)->name('select2-example');

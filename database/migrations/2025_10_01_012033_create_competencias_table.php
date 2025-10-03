@@ -15,8 +15,6 @@ return new class extends Migration
             $table->id('id_competencia');
             $table->string('nombre_competencia', 255);
             $table->text('definicion_competencia');
-            $table->integer('nivel_comportamiento');
-            $table->text('descripcion_nivel');
             $table->unsignedBigInteger('categoria_id_competencia');
             $table->foreign('categoria_id_competencia')
                 ->references('id_categoria_competencia')

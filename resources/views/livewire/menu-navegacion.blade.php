@@ -161,17 +161,6 @@
                             </svg>
                             <span class="text-sm">Mostrar Empresa</span>
                         </a>
-                        <a href=""
-                            wire:click="closeMenus"
-                            class="flex items-center px-3 py-2.5 rounded-lg group transition-all duration-200 ease-in-out 
-                            {{ $this->isActiveRoute('index') ? 'bg-blue-50 text-blue-600 border-r-4 border-blue-600 shadow-sm' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50 hover:shadow-md' }}">
-                            <!-- <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 transition-colors duration-200 
-                                {{ $this->isActiveRoute('index') ? 'text-blue-500' : 'text-gray-400 group-hover:text-blue-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
-                            </svg>
-                            <span class="text-sm">Mostrar Empresa</span> -->
-                        </a>
-                        <!-- Repetir para los demás enlaces, ajustando el estado activo y clases similares -->
                     </div>
                     <div class="mt-3">
                         <button wire:click="toggleMenu('departamentos')" class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg group transition-all duration-200 ease-in-out 
@@ -215,18 +204,6 @@
                                 </svg>
                                 <span class="text-sm">Mostrar Departamentos</span>
                             </a>
-
-                            <a href=""
-                                wire:click="closeMenus"
-                                class="flex items-center px-3 py-2.5 rounded-lg group transition-all duration-200 ease-in-out 
-                            {{ $this->isActiveRoute('index') ? 'bg-blue-50 text-blue-600 border-r-4 border-blue-600 shadow-sm' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50 hover:shadow-md' }}">
-                                <!-- <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 transition-colors duration-200 
-                                {{ $this->isActiveRoute('index') ? 'text-blue-500' : 'text-gray-400 group-hover:text-blue-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
-                            </svg>
-                            <span class="text-sm">Mostrar Empresa</span> -->
-                            </a>
-                            <!-- Repetir para los demás enlaces, ajustando el estado activo y clases similares -->
                         </div>
                     </div>
                     <div class="mt-3">
@@ -245,10 +222,6 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </button>
-
-
-
-
                         <div class="overflow-hidden transition-all duration-300 ease-in-out 
                         {{ $this->isMenuOpen('users') ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0' }} mt-1 ml-4 space-y-1">
                             <a href="{{ route('crear-usuario') }}"
@@ -274,32 +247,62 @@
                                 </svg>
                                 <span class="text-sm">Mostrar Usuario</span>
                             </a>
-                            <!-- <a href="{{ route('mostrar-departamento') }}"
-                            {{-- FIN DE LA CORRECCIÓN --}}
-                            wire:click="closeMenus"
-                            class="flex items-center px-3 py-2.5 rounded-lg group transition-all duration-200 ease-in-out 
-    {{-- Ajusta también la comprobación de la ruta activa si es necesario --}}
-    {{ $this->isActiveRoute('mostrar-departamento') ? 'bg-blue-50 text-blue-600 border-r-4 border-blue-600 shadow-sm' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50 hover:shadow-md' }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 transition-colors duration-200 
-        {{ $this->isActiveRoute('mostrar-departamento' ) ? 'text-blue-500' : 'text-gray-400 group-hover:text-blue-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                {{-- He cambiado el ícono para que sea diferente al de "Crear" --}}
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z">
-                            </svg>
-                            <span class="text-sm">Mostrar Departamentos</span>
-                        </a> -->
-
-                            <a href=""
-                                wire:click="closeMenus"
-                                class="flex items-center px-3 py-2.5 rounded-lg group transition-all duration-200 ease-in-out 
-                            {{ $this->isActiveRoute('index') ? 'bg-blue-50 text-blue-600 border-r-4 border-blue-600 shadow-sm' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50 hover:shadow-md' }}">
-                                <!-- <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 transition-colors duration-200 
-                                {{ $this->isActiveRoute('index') ? 'text-blue-500' : 'text-gray-400 group-hover:text-blue-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
-                            </svg>
-                            <span class="text-sm">Mostrar Empresa</span> -->
-                            </a>
                             <!-- Repetir para los demás enlaces, ajustando el estado activo y clases similares -->
                         </div>
+                         <div class="mt-3">
+                        <button wire:click="toggleMenu('competencias')" class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg group transition-all duration-200 ease-in-out 
+                        {{ $this->isActiveRouteGroup(['crear-competencia', 'revisar-competencia','catalogo-competencia']) ? 'bg-blue-50 text-blue-600 shadow-sm' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50 hover:shadow-md' }}">
+                            <div class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 transition-colors duration-200 
+                                {{ $this->isActiveRouteGroup(['crear-competencia', 'revisar-competencia','catalogo-competencia']) ? 'text-blue-500' : 'text-gray-400 group-hover:text-blue-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                </svg>
+                                <span class="text-sm font-medium">Competencia</span>
+                            </div>
+                            <svg class="w-4 h-4 transition-all duration-300 ease-in-out 
+                            {{ $this->isActiveRouteGroup(['crear-competencia', 'revisar-competencia', 'catalogo-competencia']) ? 'text-blue-400' : 'text-gray-400' }} 
+                            {{ $this->isMenuOpen('competencias') ? 'rotate-180' : 'rotate-0' }}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <div class="overflow-hidden transition-all duration-300 ease-in-out 
+                        {{ $this->isMenuOpen('competencias') ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0' }} mt-1 ml-4 space-y-1">
+                            <a href="{{ route('crear-competencia') }}"
+                                wire:click="closeMenus"
+                                class="flex items-center px-3 py-2.5 rounded-lg group transition-all duration-200 ease-in-out 
+                            {{ $this->isActiveRoute('crear-competencia', 'revisar-competencia', 'catalogo-competencia') ? 'bg-blue-50 text-blue-600 border-r-4 border-blue-600 shadow-sm' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50 hover:shadow-md' }}">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 transition-colors duration-200 
+                                {{ $this->isActiveRoute('crear-usuario') ? 'text-blue-500' : 'text-gray-400 group-hover:text-blue-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                </svg>
+                                <span class="text-sm">Crear Competencia</span>
+                            </a>
+                            <a href="{{ route('revisar-competencia') }}"
+                                {{-- FIN DE LA CORRECCIÓN --}}
+                                wire:click="closeMenus"
+                                class="flex items-center px-3 py-2.5 rounded-lg group transition-all duration-200 ease-in-out 
+    {{-- Ajusta también la comprobación de la ruta activa si es necesario --}}
+    {{ $this->isActiveRoute('revisar-competencia') ? 'bg-blue-50 text-blue-600 border-r-4 border-blue-600 shadow-sm' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50 hover:shadow-md' }}">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 transition-colors duration-200 
+        {{ $this->isActiveRoute('mostrar-usuario' ) ? 'text-blue-500' : 'text-gray-400 group-hover:text-blue-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    {{-- He cambiado el ícono para que sea diferente al de "Crear" --}}
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z">
+                                </svg>
+                                <span class="text-sm">Revisar Competencia</span>
+                            </a>
+                             <a href="{{ route('catalogo-competencia') }}"
+                                {{-- FIN DE LA CORRECCIÓN --}}
+                                wire:click="closeMenus"
+                                class="flex items-center px-3 py-2.5 rounded-lg group transition-all duration-200 ease-in-out 
+    {{-- Ajusta también la comprobación de la ruta activa si es necesario --}}
+    {{ $this->isActiveRoute('revisar-competencia') ? 'bg-blue-50 text-blue-600 border-r-4 border-blue-600 shadow-sm' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50 hover:shadow-md' }}">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 transition-colors duration-200 
+        {{ $this->isActiveRoute('catalogo-competencia' ) ? 'text-blue-500' : 'text-gray-400 group-hover:text-blue-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    {{-- He cambiado el ícono para que sea diferente al de "Crear" --}}
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z">
+                                </svg>
+                                <span class="text-sm">Catalogo Competencia</span>
+                            </a>
                     </div>
                 </div>
             </div> <!-- Resto del código del sidebar (agrega secciones similares con las mismas mejoras) -->

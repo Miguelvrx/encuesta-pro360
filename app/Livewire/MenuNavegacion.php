@@ -23,6 +23,9 @@ class MenuNavegacion extends Component
         'mostrar-departamento' => 'departamentos',
         'crear-usuario' => 'users',
         'mostrar-usuario' => 'users',
+        'crear-competencia' => 'competencias',
+        'revisar-competencia' => 'competencias',
+        'catalogo-competencia' => 'competencias',
 
 
         // 'index' => 'usuarios',
