@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Encuesta\Competencia;
 
+use App\Models\Categoria;
 use App\Models\CategoriaCompetencia;
 use App\Models\Competencia;
 use Illuminate\Support\Facades\DB;
@@ -24,7 +25,7 @@ class CrearCompetencia extends Component
     public function mount(): void
     {
         // Cargar las categorías para el selector
-        $this->categorias = CategoriaCompetencia::orderBy('categoria')->get();
+        $this->categorias = Categoria::orderBy('categoria')->get();
         // Inicializar con un nivel vacío para que el usuario empiece
         $this->añadirNivel();
     }

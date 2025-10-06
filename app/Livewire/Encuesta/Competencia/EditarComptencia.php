@@ -2,8 +2,10 @@
 
 namespace App\Livewire\Encuesta\Competencia;
 
+use App\Models\Categoria;
 use App\Models\CategoriaCompetencia;
 use App\Models\Competencia;
+use App\Models\Nivel;
 use App\Models\NivelCompetencia;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -27,7 +29,7 @@ class EditarComptencia extends Component
     public function mount(Competencia $competencia): void
     {
         $this->competencia = $competencia;
-        $this->categorias = CategoriaCompetencia::orderBy('categoria')->get();
+        $this->categorias = Categoria::orderBy('categoria')->get();
 
         // Cargar los datos existentes en el formulario
         $this->nombre_competencia = $competencia->nombre_competencia;
@@ -48,7 +50,7 @@ class EditarComptencia extends Component
     {
         // Si el nivel tiene un 'id', significa que existe en la BD y debemos eliminarlo
         if (isset($this->niveles[$index]['id_nivel'])) {
-            NivelCompetencia::find($this->niveles[$index]['id_nivel'])->delete();
+            Nivel::find($this->niveles[$index]['id_nivel'])->delete();
         }
         unset($this->niveles[$index]);
         $this->niveles = array_values($this->niveles);

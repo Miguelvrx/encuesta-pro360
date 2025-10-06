@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Categoria;
 use App\Models\CategoriaCompetencia;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -23,7 +24,7 @@ class CategoriaCompetenciaSeeder extends Seeder
         ];
 
         foreach ($categorias as $categoria) {
-            CategoriaCompetencia::create(['categoria' => $categoria]);
+            Categoria::create(['categoria' => $categoria]);
         }
     }
 }

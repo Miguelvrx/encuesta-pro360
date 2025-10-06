@@ -40,14 +40,16 @@ class CrearEmpresa extends Component
     // 2. Propiedades para almacenar los listados que vienen de la API
     public array $paises = [];
     public array $estados = [];
-    public array $municipios = [];
+    public array $ciudades = []; // NUEVO: Para el selector de Ciudad
+    public array $municipios = []; // Ya lo tenías, lo usaremos para el selector de Municipio
 
     // 3. Renombramos las propiedades que guardan la selección para evitar conflictos.
     //    Usaremos 'paisSeleccionado', 'estadoSeleccionado', 'ciudadSeleccionada'.
     //    Las propiedades originales 'pais', 'estado', 'ciudad' se llenarán antes de guardar.
     public $paisSeleccionado = null;
     public $estadoSeleccionado = null;
-    public $ciudadSeleccionada = null; // Usamos 'ciudadSeleccionada' para el municipio
+    public $ciudadSeleccionada = null; // NUEVO: Para la selección de Ciudad
+    public $municipioSeleccionado = null; // NUEVO: Para la selección de Municipio
 
     // 4. Mapeamos las propiedades del selector a las del modelo para la validación.
     //    Esto es clave para que las reglas de validación funcionen correctamente.
@@ -55,6 +57,7 @@ class CrearEmpresa extends Component
         'paisSeleccionado' => 'país',
         'estadoSeleccionado' => 'estado',
         'ciudadSeleccionada' => 'ciudad',
+        'municipioSeleccionado' => 'municipio', // NUEVO
     ];
 
     // 5. El método mount se ejecuta al iniciar el componente.
@@ -68,26 +71,24 @@ class CrearEmpresa extends Component
     // 6. Hook que se dispara cuando el usuario selecciona un país.
     public function updatedPaisSeleccionado($pais): void
     {
-        if (!is_null($pais)) {
-            $this->estados = $this->obtenerEstados($pais);
-        } else {
-            $this->estados = [];
-        }
-        // Reseteamos las selecciones y listas dependientes.
-        $this->reset('estadoSeleccionado', 'ciudadSeleccionada');
+       $this->estados = !is_null($pais) ? $this->obtenerEstados($pais) : [];
+        // Reseteamos todos los niveles inferiores
+        $this->reset('estadoSeleccionado', 'ciudadSeleccionada', 'municipioSeleccionado');
+        $this->ciudades = [];
         $this->municipios = [];
     }
 
     // 7. Hook que se dispara cuando el usuario selecciona un estado.
     public function updatedEstadoSeleccionado($estado): void
     {
-        if (!is_null($estado)) {
-            $this->municipios = $this->obtenerMunicipios($this->paisSeleccionado, $estado);
-        } else {
-            $this->municipios = [];
-        }
-        // Reseteamos la selección de ciudad.
-        $this->reset('ciudadSeleccionada');
+      // La API nos da una lista de "ciudades" que usaremos para ambos selectores
+        $listaCiudadesMunicipios = !is_null($estado) ? $this->obtenerCiudadesMunicipios($this->paisSeleccionado, $estado) : [];
+        
+        $this->ciudades = $listaCiudadesMunicipios;
+        $this->municipios = $listaCiudadesMunicipios; // Usamos la misma lista
+
+        // Reseteamos los niveles inferiores
+        $this->reset('ciudadSeleccionada', 'municipioSeleccionado');
     }
 
     protected function rules()
@@ -114,6 +115,7 @@ class CrearEmpresa extends Component
             'paisSeleccionado' => 'required|string|max:100',
             'estadoSeleccionado' => 'required|string|max:100',
             'ciudadSeleccionada' => 'required|string|max:100',
+            'municipioSeleccionado' => 'required|string|max:100', // NUEVO  
         ];
     }
 
@@ -128,6 +130,7 @@ class CrearEmpresa extends Component
         $validatedData['pais'] = $this->paisSeleccionado;
         $validatedData['estado'] = $this->estadoSeleccionado;
         $validatedData['ciudad'] = $this->ciudadSeleccionada;
+        $validatedData['municipio'] = $this->municipioSeleccionado; // NUEVO
 
         // 3. Manejamos la subida de la imagen (logo).
         //    Cambiamos 'image' por 'logo' para que coincida con el nombre de la columna en la BD.
@@ -175,6 +178,15 @@ class CrearEmpresa extends Component
     private function obtenerMunicipios($pais, $estado): array
     {
         $response = Http::post('https://countriesnow.space/api/v0.1/countries/state/cities', ['country' => $pais, 'state' => $estado]);
+        if ($response->successful() && !empty($response->json()['data'])) {
+            return collect($response->json()['data'])->sort()->all();
+        }
+        return [];
+    }
+
+    private function obtenerCiudadesMunicipios($pais, $estado): array
+    {
+        $response = Http::post('https://countriesnow.space/api/v0.1/countries/state/cities', ['country' => $pais, 'state' => $estado] );
         if ($response->successful() && !empty($response->json()['data'])) {
             return collect($response->json()['data'])->sort()->all();
         }

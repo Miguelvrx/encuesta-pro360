@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Encuesta\Competencia;
 
+use App\Models\Categoria;
 use App\Models\CategoriaCompetencia;
 use App\Models\Competencia;
 use Livewire\Attributes\Url;
@@ -26,7 +27,7 @@ class RevisarComptencia extends Component
     public function mount(): void
     {
         // Cargar las categorías una sola vez al iniciar el componente
-        $this->categorias = CategoriaCompetencia::orderBy('categoria')->get();
+        $this->categorias = Categoria::orderBy('categoria')->get();
     }
 
     // Este método se ejecuta automáticamente cuando cambia la propiedad 'busqueda' o 'categoriaFiltro'

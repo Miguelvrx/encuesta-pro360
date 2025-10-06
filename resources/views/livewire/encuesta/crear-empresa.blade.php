@@ -15,7 +15,7 @@
 <div>
     <div class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-white py-8 px-4 sm:px-6 lg:px-8">
         {{-- El elemento raíz ahora es el FORMULARIO. Los estilos de los divs exteriores se han movido aquí. --}}
-        <form wire:submit.prevent="save"  class="space-y-8 max-w-5xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <form wire:submit.prevent="save" class="space-y-8 max-w-5xl mx-auto py-1 px-4 sm:px-6 lg:px-8">
 
             <!-- Header (sin cambios, solo está dentro del nuevo form raíz) -->
             <div class="mb-8 text-center">
@@ -27,8 +27,8 @@
                 <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
                     <h1 class="text-2xl font-bold text-white mb-2">Complete el formulario para agregar una nueva empresa</h1>
                     <div class="flex items-center">
-                        <h2 class="text-lg font-semibold text-white">Información Básica</h2>
-                        <span class="ml-2 text-blue-200">/ Campos Obligatorios</span>
+                        <h2 class="text-lg font-semibold text-white">Información Básica / (Campos Obligatorios) </h2>
+                        <!-- <span class="ml-2 text-blue-200">/ Campos Obligatorios</span> -->
                     </div>
                 </div>
 
@@ -175,24 +175,20 @@
             <!-- Información Fiscal -->
             <div class="bg-white rounded-xl shadow-lg overflow-hidden">
                 <div class="bg-gradient-to-r from-indigo-600 to-indigo-700 px-6 py-4">
-                    <div class="flex items-center">
-                        <h2 class="text-lg font-semibold text-white">Información Fiscal</h2>
-                        <span class="ml-2 text-indigo-200">/ Campos obligatorios</span>
-                    </div>
+                    <h2 class="text-lg font-semibold text-white">Información Fiscal y Ubicación / (Campos Obligatorios)</h2>
+                    <!-- <span class="ml-2 text-blue-200">/ Campos Obligatorios</span> -->
                 </div>
                 <div class="p-6">
-                    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                        {{-- RFC --}}
+                    {{-- Fila 1: RFC y País --}}
+                    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 mb-6">
                         <div>
                             <label for="rfc" class="block text-sm font-medium text-gray-700 mb-2">RFC</label>
-                            <input type="text" wire:model="rfc" id="rfc" placeholder="Ej. ABC123456XYZ" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors @error('rfc') border-red-500 ring-red-500 @enderror">
+                            <input type="text" wire:model="rfc" id="rfc" placeholder="Ej. ABC123456XYZ" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
                             @error('rfc') <span class="text-red-500 text-sm mt-1">{{ $message }}</span> @enderror
                         </div>
-
-                        {{-- SELECT DE PAÍS --}}
                         <div>
                             <label for="pais" class="block text-sm font-medium text-gray-700 mb-2">País</label>
-                            <select wire:model.live="paisSeleccionado" id="pais" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors @error('paisSeleccionado') border-red-500 @enderror">
+                            <select wire:model.live="paisSeleccionado" id="pais" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
                                 <option value="">Selecciona un país</option>
                                 @foreach ($paises as $pais)
                                 <option value="{{ $pais['name'] }}">{{ $pais['name'] }}</option>
@@ -200,11 +196,14 @@
                             </select>
                             @error('paisSeleccionado') <span class="text-red-500 text-sm mt-1">{{ $message }}</span> @enderror
                         </div>
+                    </div>
 
+                    {{-- Fila 2: Estado, Ciudad y Municipio --}}
+                    <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
                         {{-- SELECT DE ESTADO --}}
                         <div>
                             <label for="estado" class="block text-sm font-medium text-gray-700 mb-2">Estado</label>
-                            <select wire:model.live="estadoSeleccionado" id="estado" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors @error('estadoSeleccionado') border-red-500 @enderror" @if(empty($estados)) disabled @endif>
+                            <select wire:model.live="estadoSeleccionado" id="estado" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" @if(empty($estados)) disabled @endif>
                                 <option value="">Selecciona un estado</option>
                                 @foreach ($estados as $estado)
                                 <option value="{{ $estado['name'] }}">{{ $estado['name'] }}</option>
@@ -214,30 +213,45 @@
                             @error('estadoSeleccionado') <span class="text-red-500 text-sm mt-1">{{ $message }}</span> @enderror
                         </div>
 
-                        {{-- SELECT DE CIUDAD/MUNICIPIO --}}
+                        {{-- SELECT DE CIUDAD --}}
                         <div>
-                            <label for="ciudad" class="block text-sm font-medium text-gray-700 mb-2">Ciudad / Municipio</label>
-                            <select wire:model="ciudadSeleccionada" id="ciudad" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors @error('ciudadSeleccionada') border-red-500 @enderror" @if(empty($municipios)) disabled @endif>
+                            <label for="ciudad" class="block text-sm font-medium text-gray-700 mb-2">Ciudad</label>
+                            <select wire:model.live="ciudadSeleccionada" id="ciudad" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" @if(empty($ciudades)) disabled @endif>
                                 <option value="">Selecciona una ciudad</option>
-                                @foreach ($municipios as $municipio)
-                                <option value="{{ $municipio }}">{{ $municipio }}</option>
+                                @foreach ($ciudades as $ciudad)
+                                <option value="{{ $ciudad }}">{{ $ciudad }}</option>
                                 @endforeach
                             </select>
                             <div wire:loading wire:target="estadoSeleccionado" class="text-sm text-gray-500 mt-1">Cargando ciudades...</div>
                             @error('ciudadSeleccionada') <span class="text-red-500 text-sm mt-1">{{ $message }}</span> @enderror
                         </div>
+
+                        {{-- SELECT DE MUNICIPIO --}}
+                        <div>
+                            <label for="municipio" class="block text-sm font-medium text-gray-700 mb-2">Municipio</label>
+                            <select wire:model="municipioSeleccionado" id="municipio" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" @if(empty($municipios)) disabled @endif>
+                                <option value="">Selecciona un municipio</option>
+                                @foreach ($municipios as $municipio)
+                                <option value="{{ $municipio }}">{{ $municipio }}</option>
+                                @endforeach
+                            </select>
+                            {{-- No necesita un 'wire:loading' propio, depende del de ciudad --}}
+                            @error('municipioSeleccionado') <span class="text-red-500 text-sm mt-1">{{ $message }}</span> @enderror
+                        </div>
                     </div>
+
+                    {{-- Fila 3: Dirección y Código Postal (sin cambios) --}}
                     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 mt-6">
                         {{-- DIRECCIÓN --}}
                         <div>
                             <label for="direccion" class="block text-sm font-medium text-gray-700 mb-2">Dirección</label>
-                            <input type="text" wire:model="direccion" id="direccion" placeholder="Ej. Av. Siempre Viva 123" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors @error('direccion') border-red-500 ring-red-500 @enderror">
+                            <input type="text" wire:model="direccion" id="direccion" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
                             @error('direccion') <span class="text-red-500 text-sm mt-1">{{ $message }}</span> @enderror
                         </div>
                         {{-- CÓDIGO POSTAL --}}
                         <div>
                             <label for="codigo_postal" class="block text-sm font-medium text-gray-700 mb-2">Código Postal</label>
-                            <input type="text" wire:model="codigo_postal" id="codigo_postal" placeholder="Ej. 42227" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors @error('codigo_postal') border-red-500 ring-red-500 @enderror">
+                            <input type="text" wire:model="codigo_postal" id="codigo_postal" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
                             @error('codigo_postal') <span class="text-red-500 text-sm mt-1">{{ $message }}</span> @enderror
                         </div>
                     </div>

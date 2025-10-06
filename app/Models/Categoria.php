@@ -6,9 +6,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class CategoriaCompetencia extends Model
+class Categoria extends Model
 {
-    use HasFactory;
+     use HasFactory;
 
     /**
      * La tabla asociada con el modelo.
@@ -42,4 +42,5 @@ class CategoriaCompetencia extends Model
         // El segundo es la clave foránea en la tabla 'competencias'.
         return $this->hasMany(Competencia::class, 'categoria_id_competencia');
     }
+
 }

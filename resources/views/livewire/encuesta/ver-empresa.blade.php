@@ -85,10 +85,15 @@
                                     <dd class="mt-1 text-sm text-gray-900">{{ $empresa->estado }}</dd>
                                 </div>
                                 <div class="sm:col-span-1">
-                                    <dt class="text-sm font-medium text-gray-500">Ciudad / Municipio</dt>
+                                    <dt class="text-sm font-medium text-gray-500">Ciudad</dt>
                                     <dd class="mt-1 text-sm text-gray-900">{{ $empresa->ciudad }}</dd>
                                 </div>
-                                <div class="sm:col-span-2">
+                                <div class="sm:col-span-1">
+                                    <dt class="text-sm font-medium text-gray-500">Municipio</dt>
+                                    {{-- Mostramos el municipio. Si está vacío, mostramos un guion para indicar que no hay dato. --}}
+                                    <dd class="mt-1 text-sm text-gray-900">{{ $empresa->municipio ?? '-' }}</dd>
+                                </div>
+                                <div class="sm:col-span-3">
                                     <dt class="text-sm font-medium text-gray-500">Dirección</dt>
                                     <dd class="mt-1 text-sm text-gray-900">{{ $empresa->direccion }}, C.P. {{ $empresa->codigo_postal }}</dd>
                                 </div>

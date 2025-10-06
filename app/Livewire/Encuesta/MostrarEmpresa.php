@@ -56,52 +56,7 @@ class MostrarEmpresa extends Component
         }
     }
 
-    //  public function deleteEmpresa(int $id): void
-    // {
-    //     try {
-    //         // 1. Buscamos la empresa por su ID.
-    //         $empresa = Empresa::findOrFail($id);
-
-    //         // 2. (Opcional pero recomendado) Si tienes un logo, bórralo del almacenamiento
-    //         //    para no dejar archivos huérfanos.
-    //         if ($empresa->logo) {
-    //             \Illuminate\Support\Facades\Storage::disk('public')->delete($empresa->logo);
-    //         }
-
-    //         // 3. Eliminamos el registro de la base de datos.
-    //         $empresa->delete();
-
-    //         // 4. (Opcional) Puedes mostrar un mensaje de éxito si lo deseas.
-    //         //    Para esto, necesitarías añadir el bloque de mensajes en tu vista `mostrar-empresa`.
-    //         session()->flash('message', 'Empresa eliminada exitosamente.');
-
-    //         // 5. Forzamos la re-renderización del componente para que la empresa desaparezca de la tabla.
-    //         //    Aunque Livewire suele hacerlo automáticamente, a veces es bueno ser explícito.
-    //         $this->resetPage(); // Vuelve a la primera página si la página actual queda vacía.
-
-    //     } catch (\Exception $e) {
-    //         // En caso de error, mostramos un mensaje.
-    //         session()->flash('error', 'Error al eliminar la empresa: ' . $e->getMessage());
-    //     }
-    // }
-
-    // public function deleteEmpresa(int $id): void
-    // {
-    //     try {
-    //         $empresa = Empresa::findOrFail($id);
-    //         if ($empresa->image) {
-    //             Storage::disk('public')->delete($empresa->image);
-    //         }
-    //         $empresa->delete();
-
-    //         // Volvemos a usar session()->flash()
-    //         session()->flash('message', 'Empresa eliminada exitosamente.');
-
-    //         $this->resetPage();
-    //     } catch (\Exception $e) {
-    //         session()->flash('error', 'Error al eliminar la empresa: ' . $e->getMessage());
-    //     }
-    // }
+    
 
     #[On('confirm-delete')]
     public function showDeleteConfirmation(int $id): void

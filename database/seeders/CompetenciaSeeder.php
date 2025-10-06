@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Categoria;
 use App\Models\CategoriaCompetencia;
 use App\Models\Competencia;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -15,9 +16,9 @@ class CompetenciaSeeder extends Seeder
     public function run(): void
     {
            // Buscamos las categorías por su nombre para asignar las competencias
-        $catGeneral = CategoriaCompetencia::where('categoria', 'Generales / Organizacionales')->first();
-        $catCardinales = CategoriaCompetencia::where('categoria', 'Cardinales / Esenciales')->first();
-        $catGerencial = CategoriaCompetencia::where('categoria', 'Gerenciales / Liderazgo')->first();
+        $catGeneral = Categoria::where('categoria', 'Generales / Organizacionales')->first();
+        $catCardinales = Categoria::where('categoria', 'Cardinales / Esenciales')->first();
+        $catGerencial = Categoria::where('categoria', 'Gerenciales / Liderazgo')->first();
 
         // --- Competencia 1: Liderazgo ---
         if ($catGerencial) {

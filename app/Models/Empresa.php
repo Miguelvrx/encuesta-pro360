@@ -31,6 +31,7 @@ class Empresa extends Model
         'estado',
         'ciudad',
         'direccion',
+        'municipio', // <-- AÑADIR ESTA LÍNEA
         'codigo_postal',
         //Opcional 
         'contacto_nombre',

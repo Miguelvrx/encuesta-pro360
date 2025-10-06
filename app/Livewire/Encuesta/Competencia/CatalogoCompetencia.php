@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Encuesta\Competencia;
 
+use App\Models\Categoria;
 use App\Models\CategoriaCompetencia;
 use App\Models\Competencia;
 use Illuminate\Database\Eloquent\Collection;
@@ -23,7 +24,7 @@ class CatalogoCompetencia extends Component
     public function mount(): void
     {
         // Cargar todas las categorías y inicializar la lista de competencias
-        $this->categorias = CategoriaCompetencia::orderBy('categoria')->get();
+        $this->categorias = Categoria::orderBy('categoria')->get();
         $this->competenciasFiltradas = new Collection(); // Empezar con una colección vacía
     }
 

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class NivelCompetencia extends Model
+class Nivel extends Model
 {
      use HasFactory;
 
@@ -42,4 +42,5 @@ class NivelCompetencia extends Model
     {
         return $this->belongsTo(Competencia::class, 'competencia_id');
     }
+
 }
