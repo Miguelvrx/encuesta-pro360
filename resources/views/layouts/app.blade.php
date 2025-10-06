@@ -51,6 +51,8 @@
 
     @livewireScripts
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> {{-- 2. Cargar SweetAlert --}}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.2/color-thief.umd.js"></script>
+
      
 
     @stack('scripts' )

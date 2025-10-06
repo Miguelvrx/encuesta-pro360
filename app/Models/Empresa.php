@@ -23,7 +23,7 @@ class Empresa extends Model
         'ano_mercado',
         'tipo_organizacion',
         //Opcional 
-        'image',
+       'logo',
 
         //Campos Obligatorios En formulario
         'rfc',

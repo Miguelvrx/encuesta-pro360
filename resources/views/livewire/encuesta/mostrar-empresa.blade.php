@@ -104,16 +104,19 @@
                                 {{-- Celda 1: Nombre Comercial --}}
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center">
-                                        @if ($empresa->image)
-                                        <img class="h-10 w-10 rounded-full object-cover flex-shrink-0" src="{{ asset('storage/' . $empresa->image) }}" alt="Logo">
+                                        @if ($empresa->logo)
+                                        <img src="{{ asset('storage/' . $empresa->logo) }}" alt="Logo de {{ $empresa->nombre_comercial }}" class="h-10 w-10 rounded-full object-cover flex-shrink-0">
                                         @else
                                         <span class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold flex-shrink-0">
                                             {{ strtoupper(substr($empresa->nombre_comercial, 0, 2)) }}
                                         </span>
                                         @endif
-                                        <div class="ml-4 text-sm font-medium text-gray-900">{{ $empresa->nombre_comercial }}</div>
+                                        <div class="ml-4 text-sm font-medium text-gray-900">
+                                            {{ $empresa->nombre_comercial }}
+                                        </div>
                                     </div>
                                 </td>
+
 
                                 {{-- Celda 2: RFC --}}
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
@@ -224,6 +227,32 @@
                 }
             });
         });
+    });
+</script>
+@endpush
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const img = document.getElementById('preview-logo');
+        const colorContainer = document.getElementById('color-preview');
+
+        if (img && colorContainer) {
+            img.addEventListener('load', () => {
+                const colorThief = new ColorThief();
+                const palette = colorThief.getPalette(img, 5); // Extrae 5 colores
+
+                palette.forEach(color => {
+                    const colorBox = document.createElement('div');
+                    colorBox.style.width = '30px';
+                    colorBox.style.height = '30px';
+                    colorBox.style.borderRadius = '50%';
+                    colorBox.style.backgroundColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+                    colorBox.title = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+                    colorContainer.appendChild(colorBox);
+                });
+            });
+        }
     });
 </script>
 @endpush

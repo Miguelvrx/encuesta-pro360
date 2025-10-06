@@ -113,8 +113,29 @@
                             </div>
                             <div>
                                 <label for="escolaridad" class="block text-sm font-medium text-gray-700">Nivel de Escolaridad</label>
-                                <input type="text" wire:model="escolaridad" id="escolaridad" placeholder="Ej. Licenciatura, Maestría" class="mt-1 w-full input-style">
+                                <select wire:model="escolaridad" id="escolaridad" class="mt-1 w-full input-style">
+                                    <option value="">Selecciona nivel de escolaridad</option>
+
+                                    <optgroup label="Educación Básica">
+                                        <option value="Preescolar">Preescolar</option>
+                                        <option value="Primaria">Primaria</option>
+                                        <option value="Secundaria">Secundaria</option>
+                                    </optgroup>
+
+                                    <optgroup label="Educación Media">
+                                        <option value="Bachillerato">Bachillerato</option>
+                                        <option value="Preparatoria">Preparatoria</option>
+                                    </optgroup>
+
+                                    <optgroup label="Educación Superior">
+                                        <option value="Licenciatura">Licenciatura</option>
+                                        <option value="Ingeniería">Ingeniería</option>
+                                        <option value="Maestría">Maestría</option>
+                                        <option value="Doctorado">Doctorado</option>
+                                    </optgroup>
+                                </select>
                             </div>
+
                         </div>
                     </div>
                 </div>

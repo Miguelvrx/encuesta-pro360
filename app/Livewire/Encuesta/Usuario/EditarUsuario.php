@@ -4,40 +4,60 @@ namespace App\Livewire\Encuesta\Usuario;
 
 use App\Models\Departamento;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
 
-class EditarUsuario extends CrearUsuario
+class EditarUsuario extends Component
 {
-  
-     // 2. Propiedad para guardar la instancia del usuario
-    public ?User $user = null;
+
+    // Propiedad para el modelo que estamos editando
+    public User $user;
+
+    // --- PROPIEDADES DEL FORMULARIO (copiadas de CrearUsuario) ---
+    public string $name = '';
+    public ?string $primer_apellido = null;
+    public ?string $segundo_apellido = null;
+    public ?string $telefono = null;
+    public string $email = '';
+    public string $password = '';
+    public string $password_confirmation = '';
+    public int $rol = 1;
+    public ?int $departamento_id = null;
+    public ?string $puesto = null;
+    public string $estado = 'activo';
+    public ?string $genero = null;
+    public ?string $escolaridad = null;
+
+    public $departamentos = [];
 
     /**
-     * 3. El mount del HIJO. Su trabajo es recibir el usuario y llenar el formulario.
+     * El método mount carga los datos del usuario existente.
      */
-    public function mount(?User $user = null): void
+    public function mount(User $user): void
     {
-        // Si no se pasa un usuario, redirigir.
-        if (is_null($user)) {
-            $this->redirect(route('mostrar-usuario'));
-            return;
-        }
-
         $this->user = $user;
 
-        // Llama al mount del PADRE para que haga su trabajo (cargar departamentos).
-        parent::mount($user);
+        // Cargamos la lista de departamentos para el selector
+        $this->departamentos = Departamento::orderBy('nombre_departamento')->get(['id_departamento', 'nombre_departamento']);
 
-        // Llena las propiedades (que fueron heredadas) con los datos del usuario.
-        $this->fill($user->toArray());
-        
-        // Asigna manualmente las que no coinciden o necesitan formato.
+        // Llenamos el formulario con los datos del usuario
+        $this->name = $user->name;
+        $this->primer_apellido = $user->primer_apellido;
+        $this->segundo_apellido = $user->segundo_apellido;
+        $this->telefono = $user->telefono;
+        $this->email = $user->email;
+        $this->rol = $user->rol;
         $this->departamento_id = $user->departamento_id;
+        $this->puesto = $user->puesto;
+        $this->estado = $user->estado;
+        $this->genero = $user->genero;
+        $this->escolaridad = $user->escolaridad;
+        // La contraseña se deja vacía a propósito
     }
 
     /**
-     * 4. Sobrescribe las reglas de validación para la edición.
+     * Reglas de validación para la edición.
      */
     protected function rules(): array
     {
@@ -46,7 +66,9 @@ class EditarUsuario extends CrearUsuario
             'primer_apellido' => 'required|string|max:100',
             'segundo_apellido' => 'nullable|string|max:100',
             'telefono' => 'required|string|max:20',
+            // La regla 'unique' se ajusta para ignorar el email del usuario actual
             'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($this->user->id)],
+            // La contraseña es opcional en la edición
             'password' => 'nullable|string|min:8|confirmed',
             'rol' => 'required|integer',
             'departamento_id' => 'required|integer|exists:departamentos,id_departamento',
@@ -57,27 +79,44 @@ class EditarUsuario extends CrearUsuario
         ];
     }
 
+    protected $validationAttributes = [
+        'name' => 'nombre',
+        'primer_apellido' => 'primer apellido',
+        'password' => 'contraseña',
+        'departamento_id' => 'departamento',
+    ];
+
     /**
-     * 5. Sobrescribe el método save() para que ACTUALICE.
+     * Método para ACTUALIZAR el usuario.
      */
-    public function save(): void
+    public function update(): void
     {
         $validatedData = $this->validate();
 
+        // Preparamos los datos para la actualización
+        $updateData = [
+            'name' => $validatedData['name'],
+            'primer_apellido' => $validatedData['primer_apellido'],
+            'segundo_apellido' => $validatedData['segundo_apellido'],
+            'telefono' => $validatedData['telefono'],
+            'email' => $validatedData['email'],
+            'rol' => $validatedData['rol'],
+            'puesto' => $validatedData['puesto'],
+            'estado' => $validatedData['estado'],
+            'genero' => $validatedData['genero'],
+            'escolaridad' => $validatedData['escolaridad'],
+            'departamento_id' => $validatedData['departamento_id'],
+        ];
+
+        // Solo actualizamos la contraseña si el usuario ha escrito una nueva.
+        if (!empty($validatedData['password'])) {
+            $updateData['password'] = Hash::make($validatedData['password']);
+        }
+
         try {
-            // Si se proporcionó una nueva contraseña, la actualizamos.
-            if (!empty($validatedData['password'])) {
-                $this->user->password = $validatedData['password'];
-            }
-            
-            // Actualizamos el resto de los datos.
-            $this->user->fill($validatedData);
-            $this->user->departamento_id = $validatedData['departamento_id'];
-            $this->user->save();
-
+            $this->user->update($updateData);
             session()->flash('message', '¡Usuario actualizado exitosamente!');
-            $this->redirect(route('mostrar-usuario'), navigate: true);
-
+            $this->redirect(route('mostrar-usuario'), navigate: true); // Asumiendo que tienes esta ruta
         } catch (\Exception $e) {
             session()->flash('error', 'Error al actualizar el usuario: ' . $e->getMessage());
         }

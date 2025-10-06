@@ -5,13 +5,14 @@ namespace App\Livewire\Encuesta;
 use App\Models\Empresa;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
 class EditarEmpresa extends Component
 {
-    
-     use WithFileUploads; // Necesitamos esto para manejar la subida de archivos
+
+    use WithFileUploads; // Necesitamos esto para manejar la subida de archivos
 
     // Propiedad para la empresa que estamos editando
     public Empresa $empresa;
@@ -28,7 +29,8 @@ class EditarEmpresa extends Component
     public $rfc = '';
     public $direccion = '';
     public $codigo_postal = '';
-    public $image; // Para el nuevo logo
+    #[Validate('nullable|image|mimes:png,jpg,jpeg|max:5120')]
+    public $logo; // Para el nuevo logo
     public $logoExistente; // Para mostrar/borrar el logo antiguo
     public $contacto_nombre = '';
     public $contacto_puesto = '';
@@ -60,7 +62,7 @@ class EditarEmpresa extends Component
     public function mount(Empresa $empresa): void
     {
         $this->empresa = $empresa;
-        $this->logoExistente = $empresa->image;
+        $this->logoExistente = $empresa->logo;
 
         // 1. Llenamos los campos del formulario desde el modelo
         $this->fill($empresa);
@@ -76,7 +78,7 @@ class EditarEmpresa extends Component
         $listaCiudades = $this->obtenerCiudadesMunicipios($this->paisSeleccionado, $this->estadoSeleccionado);
         $this->ciudades = $listaCiudades;
         $this->municipios = $listaCiudades;
-        
+
         $this->ciudadSeleccionada = $empresa->ciudad;
         $this->municipioSeleccionado = $empresa->municipio;
     }
@@ -113,7 +115,7 @@ class EditarEmpresa extends Component
             'rfc' => 'required|string|max:20|unique:empresas,rfc,' . $this->empresa->id_empresa . ',id_empresa',
             'direccion' => 'required|string|max:255',
             'codigo_postal' => 'required|string|max:10',
-            'image' => 'nullable|image|max:5120',
+            'logo' => 'nullable|image|mimes:png,jpg,jpeg|max:5120',
             'contacto_nombre' => 'nullable|string|max:255',
             'contacto_puesto' => 'nullable|string|max:100',
             'contacto_telefono' => 'nullable|string|max:20',
@@ -134,12 +136,13 @@ class EditarEmpresa extends Component
         $validatedData['ciudad'] = $this->ciudadSeleccionada;
         $validatedData['municipio'] = $this->municipioSeleccionado;
 
-        if ($this->image) {
-            $validatedData['image'] = $this->image->store('logos', 'public');
+        if ($this->logo) {
+            $validatedData['logo'] = $this->logo->store('logos', 'public');
             if ($this->logoExistente) {
                 Storage::disk('public')->delete($this->logoExistente);
             }
         }
+
 
         $this->empresa->update($validatedData);
         session()->flash('message', '¡Empresa actualizada exitosamente!');
@@ -147,16 +150,19 @@ class EditarEmpresa extends Component
     }
 
     // --- Métodos API (copiados de CrearEmpresa) ---
-    private function obtenerPaises(): array {
-        $response = Http::get('https://countriesnow.space/api/v0.1/countries/positions' );
+    private function obtenerPaises(): array
+    {
+        $response = Http::get('https://countriesnow.space/api/v0.1/countries/positions');
         return $response->successful() ? collect($response->json()['data'])->sortBy('name')->all() : [];
     }
-    private function obtenerEstados($pais): array {
-        $response = Http::post('https://countriesnow.space/api/v0.1/countries/states', ['country' => $pais] );
+    private function obtenerEstados($pais): array
+    {
+        $response = Http::post('https://countriesnow.space/api/v0.1/countries/states', ['country' => $pais]);
         return ($response->successful() && isset($response->json()['data']['states'])) ? $response->json()['data']['states'] : [];
     }
-    private function obtenerCiudadesMunicipios($pais, $estado): array {
-        $response = Http::post('https://countriesnow.space/api/v0.1/countries/state/cities', ['country' => $pais, 'state' => $estado] );
+    private function obtenerCiudadesMunicipios($pais, $estado): array
+    {
+        $response = Http::post('https://countriesnow.space/api/v0.1/countries/state/cities', ['country' => $pais, 'state' => $estado]);
         return ($response->successful() && !empty($response->json()['data'])) ? collect($response->json()['data'])->sort()->all() : [];
     }
 

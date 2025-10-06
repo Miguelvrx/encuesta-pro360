@@ -46,29 +46,42 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th scope="col" wire:click="ordenar('nombre_departamento')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer">Departamento @if ($ordenarPor === 'nombre_departamento')<span>{{ $direccionOrden === 'asc' ? '▲' : '▼' }}</span>@endif</th>
+                            <th scope="col" wire:click="ordenar('nombre_departamento')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer">
+                                Departamento @if ($ordenarPor === 'nombre_departamento')<span>{{ $direccionOrden === 'asc' ? '▲' : '▼' }}</span>@endif
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descripción</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Empresa</th>
-                            <th scope="col" wire:click="ordenar('puesto')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer">Puesto Principal @if ($ordenarPor === 'puesto')<span>{{ $direccionOrden === 'asc' ? '▲' : '▼' }}</span>@endif</th>
-                            <th scope="col" wire:click="ordenar('estado')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer">Estado @if ($ordenarPor === 'estado')<span>{{ $direccionOrden === 'asc' ? '▲' : '▼' }}</span>@endif</th>
+                            <th scope="col" wire:click="ordenar('puesto')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer">
+                                Puesto Principal @if ($ordenarPor === 'puesto')<span>{{ $direccionOrden === 'asc' ? '▲' : '▼' }}</span>@endif
+                            </th>
+                            <th scope="col" wire:click="ordenar('estado')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer">
+                                Estado @if ($ordenarPor === 'estado')<span>{{ $direccionOrden === 'asc' ? '▲' : '▼' }}</span>@endif
+                            </th>
                             <th scope="col" class="relative px-6 py-3"><span class="sr-only">Acciones</span></th>
                         </tr>
                     </thead>
+
                     <tbody class="bg-white divide-y divide-gray-200">
                         @forelse ($departamentos as $departamento)
                         <tr wire:key="{{ $departamento->id_departamento }}" class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">{{ $departamento->nombre_departamento }}</div>
-                                <div class="text-sm text-gray-500 truncate max-w-xs">{{ $departamento->descripcion }}</div>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                {{ $departamento->nombre_departamento }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $departamento->empresa->nombre_comercial ?? 'N/A' }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $departamento->puesto }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate">
+                                {{ $departamento->descripcion }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ $departamento->empresa->nombre_comercial ?? 'N/A' }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ $departamento->puesto }}
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $departamento->estado == 'activo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                                     {{ ucfirst($departamento->estado) }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                {{-- NOTA: Las rutas 'ver-departamento' y 'editar-departamento' aún no existen. Las crearemos después. --}}
                                 <a href="{{ route('ver-departamento', $departamento) }}" wire:navigate class="text-blue-600 hover:text-blue-900">Ver</a>
                                 <a href="{{ route('editar-departamento', $departamento) }}" wire:navigate class="ml-4 text-indigo-600 hover:text-indigo-900">Editar</a>
                                 <button x-data @click="$dispatch('confirm-delete', { id: {{ $departamento->id_departamento }} })" class="ml-4 text-red-600 hover:text-red-900 font-medium">
@@ -78,10 +91,10 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-12 text-center">
+                            <td colspan="6" class="px-6 py-12 text-center">
                                 <div class="text-center">
                                     <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2z" />
                                     </svg>
                                     <h3 class="mt-2 text-sm font-medium text-gray-900">No se encontraron departamentos</h3>
                                     <p class="mt-1 text-sm text-gray-500">Intenta ajustar tu búsqueda o crea un nuevo departamento.</p>
@@ -90,6 +103,7 @@
                         </tr>
                         @endforelse
                     </tbody>
+
                 </table>
             </div>
         </div>

@@ -110,7 +110,7 @@
                         <!-- Año en el mercado -->
                         <div>
                             <label for="ano_mercado" class="block text-sm font-medium text-gray-700 mb-2">Año en el mercado</label>
-                            <input type="number" wire:model="ano_mercado" id="ano_mercado" placeholder="Ej. 15" min="0" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors @error('ano_mercado') border-red-500 ring-red-500 @enderror">
+                            <input type="number" wire:model="ano_mercado" id="ano_mercado" placeholder="Ej. 1987" min="0" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors @error('ano_mercado') border-red-500 ring-red-500 @enderror">
                             @error('ano_mercado') <span class="text-red-500 text-sm mt-1">{{ $message }}</span> @enderror
                         </div>
 
@@ -245,13 +245,13 @@
                         {{-- DIRECCIÓN --}}
                         <div>
                             <label for="direccion" class="block text-sm font-medium text-gray-700 mb-2">Dirección</label>
-                            <input type="text" wire:model="direccion" id="direccion" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                            <input type="text" wire:model="direccion" id="direccion" placeholder="Ej. Calle 123, Col. Centro, Puebla, Pue." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
                             @error('direccion') <span class="text-red-500 text-sm mt-1">{{ $message }}</span> @enderror
                         </div>
                         {{-- CÓDIGO POSTAL --}}
                         <div>
                             <label for="codigo_postal" class="block text-sm font-medium text-gray-700 mb-2">Código Postal</label>
-                            <input type="text" wire:model="codigo_postal" id="codigo_postal" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                            <input type="text" wire:model="codigo_postal" id="codigo_postal" placeholder="Ej. 72228" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
                             @error('codigo_postal') <span class="text-red-500 text-sm mt-1">{{ $message }}</span> @enderror
                         </div>
                     </div>

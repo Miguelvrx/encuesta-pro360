@@ -105,27 +105,31 @@
                             @error('tipo_organizacion') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                         </div>
                     </div>
+
                     <!-- Logo de la Empresa -->
                     <div class="mt-6">
-                        <label for="image" class="block text-sm font-medium text-gray-700">Logo de la Empresa (Opcional)</label>
-                        <input type="file" wire:model="image" id="image" class="mt-1">
-                        @error('image') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        <label for="logo" class="block text-sm font-medium text-gray-700">Logo de la Empresa (Opcional)</label>
+                        <input type="file" wire:model="logo" id="logo" class="mt-1">
+                        @error('logo') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
 
-                        <div class="mt-4 flex items-center space-x-4">
-                            @if ($image)
-                            <div>
-                                <p class="text-sm font-medium text-gray-700">Previsualización Nuevo Logo:</p>
-                                <img src="{{ $image->temporaryUrl() }}" class="w-24 h-24 object-cover rounded-lg shadow-md">
+                        <div class="mt-4 flex flex-wrap items-start gap-6">
+                            @if ($logo instanceof \Livewire\TemporaryUploadedFile)
+                            <div class="transition-opacity duration-500 ease-in-out opacity-0 animate-fade-in">
+                                <p class="text-sm font-medium text-gray-700 mb-2">Previsualización Nuevo Logo:</p>
+                                <img id="preview-logo" src="{{ $logo->temporaryUrl() }}" alt="Nuevo Logo" class="w-24 h-24 object-cover rounded-lg shadow-md">
+                                <div id="color-preview" class="flex gap-2 mt-2"></div>
                             </div>
                             @endif
+
                             @if ($logoExistente)
-                            <div>
-                                <p class="text-sm font-medium text-gray-700">Logo Actual:</p>
-                                <img src="{{ asset('storage/' . $logoExistente) }}" class="w-24 h-24 object-cover rounded-lg shadow-md">
+                            <div class="transition-opacity duration-500 ease-in-out opacity-0 animate-fade-in">
+                                <p class="text-sm font-medium text-gray-700 mb-2">Logo Actual:</p>
+                                <img src="{{ asset('storage/' . $logoExistente) }}" alt="Logo Actual" class="w-24 h-24 object-cover rounded-lg shadow-md">
                             </div>
                             @endif
                         </div>
                     </div>
+
                 </div>
             </div>
 
@@ -237,3 +241,30 @@
         </form>
     </div>
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.2/color-thief.umd.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const img = document.getElementById('preview-logo');
+        const colorContainer = document.getElementById('color-preview');
+
+        if (img && colorContainer) {
+            img.addEventListener('load', () => {
+                const colorThief = new ColorThief();
+                const palette = colorThief.getPalette(img, 5);
+
+                colorContainer.innerHTML = ''; // Limpia antes de pintar
+                palette.forEach(color => {
+                    const colorBox = document.createElement('div');
+                    colorBox.style.width = '24px';
+                    colorBox.style.height = '24px';
+                    colorBox.style.borderRadius = '50%';
+                    colorBox.style.backgroundColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+                    colorBox.title = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+                    colorBox.style.boxShadow = '0 0 2px rgba(0,0,0,0.3)';
+                    colorContainer.appendChild(colorBox);
+                });
+            });
+        }
+    });
+</script>
