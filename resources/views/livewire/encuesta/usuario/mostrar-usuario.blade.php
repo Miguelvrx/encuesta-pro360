@@ -169,41 +169,80 @@
             </div>
         </div>
 
+        <!-- 4. Acciones Post-Tabla y Paginación -->
+        <div class="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
 
-        <!-- Paginación -->
-        <div class="mt-6">
-            {{ $usuarios->links() }}
+            {{-- Grupo de botones de exportación --}}
+            <div class="flex items-center gap-2">
+                <span class="text-sm font-medium text-gray-600">Exportar vista actual:</span>
+
+                {{-- Botón Principal: Descargar todo en ZIP --}}
+                <button
+                    wire:click="exportarZip"
+                    wire:loading.attr="disabled" wire:target="exportarZip"
+                    title="Descargar todo en un archivo ZIP"
+                    class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white font-semibold text-sm rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 ease-in-out transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i class="fas fa-file-archive mr-2"></i>
+                    <span wire:loading.remove wire:target="exportarZip">Descargar Todo (.zip)</span>
+                    <span wire:loading wire:target="exportarZip">Generando...</span>
+                </button>
+
+                {{-- Botones individuales --}}
+                <div class="border-l pl-3 ml-1 flex items-center gap-3">
+                    <button
+                        wire:click="exportarExcel"
+                        wire:loading.attr="disabled" wire:target="exportarExcel"
+                        title="Exportar solo a Excel"
+                        class="inline-flex items-center justify-center p-2 bg-green-600 text-white rounded-lg shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200 ease-in-out transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fas fa-file-archive mr-2"></i>
+                        <span wire:loading.remove wire:target="exportarExcel">Exportar Excel</span>
+                    </button>
+                    <button
+                        wire:click="exportarPdf"
+                        wire:loading.attr="disabled" wire:target="exportarPdf"
+                        title="Exportar solo a PDF"
+                        class="inline-flex items-center justify-center p-2 bg-red-600 text-white rounded-lg shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200 ease-in-out transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fas fa-file-archive mr-2"></i>
+                        <span wire:loading.remove wire:target="exportarPdf">Exportar PDF</span>
+                    </button>
+                </div>
+            </div>
+
+
+            <!-- Paginación -->
+            <div class="mt-6">
+                {{ $usuarios->links() }}
+            </div>
         </div>
     </div>
-</div>
 
 
-@push('scripts')
-<script>
-    // Nos aseguramos de que este script se ejecute después de que Livewire se haya inicializado.
-    document.addEventListener('livewire:init', () => {
+    @push('scripts')
+    <script>
+        // Nos aseguramos de que este script se ejecute después de que Livewire se haya inicializado.
+        document.addEventListener('livewire:init', () => {
 
-        // Listener para el modal de confirmación de eliminación
-        Livewire.on('show-swal-delete', (event) => {
-            const data = event[0];
-            Swal.fire({
-                title: data.title,
-                text: data.text,
-                icon: data.icon,
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Sí, ¡eliminar!',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Si se confirma, despachamos el evento final que el backend escuchará.
-                    Livewire.dispatch('delete-confirmed', {
-                        id: data.id
-                    });
-                }
+            // Listener para el modal de confirmación de eliminación
+            Livewire.on('show-swal-delete', (event) => {
+                const data = event[0];
+                Swal.fire({
+                    title: data.title,
+                    text: data.text,
+                    icon: data.icon,
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Sí, ¡eliminar!',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Si se confirma, despachamos el evento final que el backend escuchará.
+                        Livewire.dispatch('delete-confirmed', {
+                            id: data.id
+                        });
+                    }
+                });
             });
         });
-    });
-</script>
-@endpush
+    </script>
+    @endpush
