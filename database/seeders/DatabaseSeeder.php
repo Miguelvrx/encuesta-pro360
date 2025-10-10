@@ -22,7 +22,6 @@ class DatabaseSeeder extends Seeder
 
           $this->call([
             CategoriaCompetenciaSeeder::class,
-              CompetenciaSeeder::class,
             // ... tus otros seeders
         ]);
     }

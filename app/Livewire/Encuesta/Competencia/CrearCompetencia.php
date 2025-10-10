@@ -16,32 +16,42 @@ class CrearCompetencia extends Component
     public string $definicion_competencia = '';
     public ?int $categoria_id_competencia = null;
 
-    // Array para manejar dinámicamente los niveles
+    // --- INICIO DE LA SOLUCIÓN ---
+
+    // 1. Array para manejar los 5 niveles fijos
     public array $niveles = [];
+
+    // Definimos la nueva escala completa, con número y descripción corta.
+    //    Usamos el número como clave para facilitar el acceso.
+    public array $escalaDeNiveles = [
+        5 => ['nombre' => 'Excepcional', 'tagline' => 'Modelo a seguir con impacto sostenido'],
+        4 => ['nombre' => 'Supera las Expectativas', 'tagline' => 'Desempeño consistentemente superior'],
+        3 => ['nombre' => 'Competente', 'tagline' => 'Cumple de forma confiable lo esperado'],
+        2 => ['nombre' => 'En Desarrollo', 'tagline' => 'Avanza con áreas por fortalecer'],
+        1 => ['nombre' => 'Requiere Apoyo', 'tagline' => 'Necesita acompañamiento para el estándar'],
+    ];
+
 
     // Propiedades para las listas de los selectores
     public $categorias = [];
 
     public function mount(): void
     {
-        // Cargar las categorías para el selector
         $this->categorias = Categoria::orderBy('categoria')->get();
-        // Inicializar con un nivel vacío para que el usuario empiece
-        $this->añadirNivel();
+
+        // 2. Inicializamos los 5 niveles usando la nueva escala.
+        //    Iteramos en orden descendente para que aparezcan del 5 al 1 en el formulario.
+        foreach (array_reverse($this->escalaDeNiveles, true) as $numero => $data) {
+            $this->niveles[] = [
+                'numero' => $numero,
+                'nombre_nivel' => $data['nombre'],
+                'tagline' => $data['tagline'],
+                'descripcion_nivel' => ''
+            ];
+        }
     }
 
-    // Función para añadir un nuevo bloque de nivel al formulario
-    public function añadirNivel(): void
-    {
-        $this->niveles[] = ['nombre_nivel' => '', 'descripcion_nivel' => ''];
-    }
-
-    // Función para eliminar un bloque de nivel del formulario
-    public function eliminarNivel(int $index): void
-    {
-        unset($this->niveles[$index]);
-        $this->niveles = array_values($this->niveles); // Re-indexar el array
-    }
+    // 4. Ya no necesitamos añadirNivel() ni eliminarNivel(), por lo que se eliminan.
 
     protected function rules(): array
     {
@@ -49,7 +59,6 @@ class CrearCompetencia extends Component
             'nombre_competencia' => 'required|string|max:255',
             'definicion_competencia' => 'required|string',
             'categoria_id_competencia' => 'required|integer|exists:categoria_competencias,id_categoria_competencia',
-            // Validar cada uno de los niveles en el array
             'niveles.*.nombre_nivel' => 'required|string|max:255',
             'niveles.*.descripcion_nivel' => 'required|string',
         ];
@@ -67,26 +76,25 @@ class CrearCompetencia extends Component
     {
         $this->validate();
 
-        // Usamos una transacción para asegurar que todo se guarde correctamente
         DB::transaction(function () {
-            // 1. Crear la competencia principal
             $competencia = Competencia::create([
                 'nombre_competencia' => $this->nombre_competencia,
                 'definicion_competencia' => $this->definicion_competencia,
                 'categoria_id_competencia' => $this->categoria_id_competencia,
             ]);
 
-            // 2. Crear cada uno de los niveles y asociarlos a la competencia
             foreach ($this->niveles as $nivel) {
                 $competencia->niveles()->create([
                     'nombre_nivel' => $nivel['nombre_nivel'],
                     'descripcion_nivel' => $nivel['descripcion_nivel'],
+                    // Opcional: Si tienes una columna para el número/valor, la guardarías aquí.
+                    // 'valor' => $nivel['numero'],
                 ]);
             }
         });
 
         session()->flash('message', '¡Competencia creada exitosamente!');
-        $this->redirect(route('crear-competencia'), navigate: true);
+        $this->redirect(route('revisar-competencia'), navigate: true);
     }
 
 

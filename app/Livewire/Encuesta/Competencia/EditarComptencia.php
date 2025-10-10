@@ -16,54 +16,60 @@ class EditarComptencia extends Component
      // Propiedad para almacenar la competencia que estamos editando
     public Competencia $competencia;
 
-    // Propiedades para los campos del formulario (igual que en Crear)
+    // Propiedades para los campos del formulario
     public string $nombre_competencia = '';
     public string $definicion_competencia = '';
     public ?int $categoria_id_competencia = null;
     public array $niveles = [];
 
-    // Propiedad para la lista de categorías
     public $categorias = [];
 
-    // El método mount recibe la competencia gracias al Route Model Binding de Laravel
+    // --- INICIO DE LA SOLUCIÓN ---
+
+    // 1. Definimos la escala de niveles, igual que en CrearCompetencia
+    public array $escalaDeNiveles = [
+        5 => ['nombre' => 'Excepcional', 'tagline' => 'Modelo a seguir con impacto sostenido'],
+        4 => ['nombre' => 'Supera las Expectativas', 'tagline' => 'Desempeño consistentemente superior'],
+        3 => ['nombre' => 'Competente', 'tagline' => 'Cumple de forma confiable lo esperado'],
+        2 => ['nombre' => 'En Desarrollo', 'tagline' => 'Avanza con áreas por fortalecer'],
+        1 => ['nombre' => 'Requiere Apoyo', 'tagline' => 'Necesita acompañamiento para el estándar'],
+    ];
+
     public function mount(Competencia $competencia): void
     {
         $this->competencia = $competencia;
-        $this->categorias = Categoria::orderBy('categoria')->get();
+        $this->categorias = Categoria::orderBy('categoria')->get(); // Corregido
 
-        // Cargar los datos existentes en el formulario
+        // Cargar los datos de la competencia principal
         $this->nombre_competencia = $competencia->nombre_competencia;
         $this->definicion_competencia = $competencia->definicion_competencia;
         $this->categoria_id_competencia = $competencia->categoria_id_competencia;
 
-        // Cargar los niveles existentes. Usamos toArray() para convertir la colección a un array simple
-        $this->niveles = $competencia->niveles->toArray();
-    }
+        // 2. Cargar los niveles existentes y mapearlos a nuestra estructura
+        $nivelesExistentes = $competencia->niveles()->orderBy('id_nivel', 'desc')->get();
 
-    // Los métodos para añadir/eliminar niveles son idénticos a los de CrearCompetencia
-    public function añadirNivel(): void
-    {
-        $this->niveles[] = ['nombre_nivel' => '', 'descripcion_nivel' => ''];
-    }
+        foreach (array_reverse($this->escalaDeNiveles, true) as $numero => $data) {
+            // Buscamos el nivel existente que coincida con el nombre estándar
+            $nivelGuardado = $nivelesExistentes->firstWhere('nombre_nivel', $data['nombre']);
 
-    public function eliminarNivel(int $index): void
-    {
-        // Si el nivel tiene un 'id', significa que existe en la BD y debemos eliminarlo
-        if (isset($this->niveles[$index]['id_nivel'])) {
-            Nivel::find($this->niveles[$index]['id_nivel'])->delete();
+            $this->niveles[] = [
+                'id_nivel' => $nivelGuardado->id_nivel ?? null, // Guardamos el ID para la actualización
+                'numero' => $numero,
+                'nombre_nivel' => $data['nombre'],
+                'tagline' => $data['tagline'],
+                'descripcion_nivel' => $nivelGuardado->descripcion_nivel ?? '' // Usamos la descripción guardada
+            ];
         }
-        unset($this->niveles[$index]);
-        $this->niveles = array_values($this->niveles);
     }
 
-    // Las reglas de validación también son idénticas
+    // 3. Ya no se necesitan los métodos añadirNivel() ni eliminarNivel()
+
     protected function rules(): array
     {
         return [
             'nombre_competencia' => 'required|string|max:255',
             'definicion_competencia' => 'required|string',
             'categoria_id_competencia' => 'required|integer|exists:categoria_competencias,id_categoria_competencia',
-            'niveles.*.nombre_nivel' => 'required|string|max:255',
             'niveles.*.descripcion_nivel' => 'required|string',
         ];
     }
@@ -72,7 +78,6 @@ class EditarComptencia extends Component
         'nombre_competencia' => 'nombre de la competencia',
         'definicion_competencia' => 'definición de la competencia',
         'categoria_id_competencia' => 'categoría',
-        'niveles.*.nombre_nivel' => 'nombre del nivel',
         'niveles.*.descripcion_nivel' => 'descripción del nivel',
     ];
 
@@ -88,11 +93,13 @@ class EditarComptencia extends Component
                 'categoria_id_competencia' => $this->categoria_id_competencia,
             ]);
 
-            // 2. Sincronizar los niveles (actualizar existentes, crear nuevos)
+            // 2. Sincronizar los 5 niveles fijos
             foreach ($this->niveles as $nivelData) {
+                // Usamos updateOrCreate para manejar el caso (improbable) de que un nivel no exista.
+                // La condición de búsqueda es el ID del nivel.
                 $this->competencia->niveles()->updateOrCreate(
-                    ['id_nivel' => $nivelData['id_nivel'] ?? null], // Condición de búsqueda
-                    [                                             // Datos para actualizar o crear
+                    ['id_nivel' => $nivelData['id_nivel']],
+                    [
                         'nombre_nivel' => $nivelData['nombre_nivel'],
                         'descripcion_nivel' => $nivelData['descripcion_nivel'],
                     ]
@@ -101,10 +108,9 @@ class EditarComptencia extends Component
         });
 
         session()->flash('message', '¡Competencia actualizada exitosamente!');
-        // Redirigimos a la página de revisar para ver los cambios
         $this->redirect(route('revisar-competencia'), navigate: true);
     }
-
+    // --- FIN DE LA SOLUCIÓN ---
 
     public function render()
     {

@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Competencia extends Model
 {
-   use HasFactory;
+    use HasFactory;
 
     protected $primaryKey = 'id_competencia';
 
@@ -23,15 +23,20 @@ class Competencia extends Model
     // Nueva relación: Una competencia tiene muchos niveles
     public function niveles(): HasMany
     {
-        return $this->hasMany(NivelCompetencia::class, 'competencia_id');
+        return $this->hasMany(Nivel::class, 'competencia_id');
     }
 
-   
     public function categoria(): BelongsTo
     {
-        return $this->belongsTo(CategoriaCompetencia::class, 'categoria_id_competencia');
+        return $this->belongsTo(Categoria::class, 'categoria_id_competencia');
     }
-    
+
+
+    // public function categoria(): BelongsTo
+    // {
+    //     return $this->belongsTo(Competencia::class, 'categoria_id_competencia');
+    // }
+
     // La relación con Preguntas se queda igual, ¡está perfecta!
     public function preguntas(): HasMany
     {

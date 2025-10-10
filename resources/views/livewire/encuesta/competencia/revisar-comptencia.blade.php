@@ -59,29 +59,54 @@
                     <div class="mt-6 pt-6 border-t border-gray-200">
                         <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest">Niveles de Comportamiento</h4>
 
-                        {{-- Listado de niveles --}}
+                        {{-- --- INICIO DE LA SOLUCIÓN (VISTA MEJORADA) --- --}}
+                        {{-- Listado de niveles con alineación profesional --}}
                         <div class="mt-6 space-y-6">
-                            @forelse ($competencia->niveles as $index => $nivel)
-                            <div class="grid grid-cols-12 gap-x-4 sm:gap-x-6">
-                                {{-- Columna 1: Número --}}
-                                <div class="col-span-1 text-center">
-                                    <span class="text-lg font-bold text-gray-400">{{ $index + 1 }}</span>
-                                </div>
+                            @php
+                            // Definimos la escala aquí para poder acceder a ella fácilmente
+                            $escalaDeNiveles = [
+                            'Excepcional' => ['numero' => 5, 'tagline' => 'Modelo a seguir con impacto sostenido'],
+                            'Supera las Expectativas' => ['numero' => 4, 'tagline' => 'Desempeño consistentemente superior'],
+                            'Competente' => ['numero' => 3, 'tagline' => 'Cumple de forma confiable lo esperado'],
+                            'En Desarrollo' => ['numero' => 2, 'tagline' => 'Avanza con áreas por fortalecer'],
+                            'Requiere Apoyo' => ['numero' => 1, 'tagline' => 'Necesita acompañamiento para el estándar'],
+                            ];
+                            @endphp
 
-                                {{-- Columna 2: Nombre del Nivel --}}
-                                <div class="col-span-11 sm:col-span-4 md:col-span-3">
+                            @forelse ($competencia->niveles as $nivel)
+                            @php
+                            // Buscamos los datos del nivel actual en nuestra escala
+                            $datosNivel = $escalaDeNiveles[$nivel->nombre_nivel] ?? null;
+                            @endphp
+
+                            {{-- 1. Usamos un grid de 12 columnas para un control total --}}
+                            <div class="grid grid-cols-12 gap-x-6 items-start">
+
+                                {{-- 2. Columna Izquierda: Ocupa 5 de las 12 columnas --}}
+                                <div class="col-span-12 md:col-span-5">
+                                    @if ($datosNivel)
+                                    <div class="flex items-baseline gap-3">
+                                        <span class="text-3xl font-bold text-blue-600 w-5 text-center">{{ $datosNivel['numero'] }}</span>
+                                        <div>
+                                            <p class="text-base font-semibold text-gray-800">{{ $nivel->nombre_nivel }}</p>
+                                            <p class="text-xs text-gray-500 italic">"{{ $datosNivel['tagline'] }}"</p>
+                                        </div>
+                                    </div>
+                                    @else
                                     <p class="font-semibold text-gray-900">{{ $nivel->nombre_nivel }}</p>
+                                    @endif
                                 </div>
 
-                                {{-- Columna 3: Descripción --}}
-                                <div class="col-span-12 sm:col-span-7 md:col-span-8 sm:col-start-6 md:col-start-5 mt-1 sm:mt-0">
-                                    <p class="text-gray-600">{{ $nivel->descripcion_nivel }}</p>
+                                {{-- 3. Columna Derecha: Ocupa las 7 columnas restantes --}}
+                                <div class="col-span-12 md:col-span-7 mt-2 md:mt-0">
+                                    <p class="text-gray-600 leading-relaxed">{{ $nivel->descripcion_nivel }}</p>
                                 </div>
                             </div>
                             @empty
                             <p class="text-gray-500 italic">Esta competencia aún no tiene niveles definidos.</p>
                             @endforelse
                         </div>
+                        {{-- --- FIN DE LA SOLUCIÓN --- --}}
                     </div>
                 </div>
             </div>

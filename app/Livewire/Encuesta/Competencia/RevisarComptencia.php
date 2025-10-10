@@ -12,28 +12,23 @@ use Livewire\WithPagination;
 class RevisarComptencia extends Component
 {
 
-      use WithPagination;
+    use WithPagination;
 
-    // Propiedades para los filtros, con el atributo #[Url] para que se reflejen en la URL
     #[Url(as: 'q', keep: true)]
     public string $busqueda = '';
 
     #[Url(keep: true)]
     public ?int $categoriaFiltro = null;
 
-    // Propiedad para cargar la lista de categorías en el filtro
     public $categorias;
 
     public function mount(): void
     {
-        // Cargar las categorías una sola vez al iniciar el componente
-        $this->categorias = Categoria::orderBy('categoria')->get();
+        $this->categorias = Categoria::orderBy('categoria')->get(); // Corregido
     }
 
-    // Este método se ejecuta automáticamente cuando cambia la propiedad 'busqueda' o 'categoriaFiltro'
     public function updating($property, $value): void
     {
-        // Si se modifica un filtro, reseteamos la paginación a la página 1
         if ($property === 'busqueda' || $property === 'categoriaFiltro') {
             $this->resetPage();
         }
@@ -41,23 +36,23 @@ class RevisarComptencia extends Component
 
     public function render()
     {
-        // Empezamos la consulta de competencias con sus relaciones para optimizar
+        // --- INICIO DE LA SOLUCIÓN ---
+        // 1. Modificamos la consulta para ordenar los niveles en orden descendente.
+        //    Esto asume que los niveles se guardan en orden ascendente de importancia (1 a 5).
         $query = Competencia::with(['categoria', 'niveles' => function ($query) {
-            $query->orderBy('id_nivel'); // Opcional: ordenar niveles
+            $query->orderBy('id_nivel', 'desc'); // Ordenar de mayor a menor
         }]);
+        // --- FIN DE LA SOLUCIÓN ---
 
-        // Aplicar filtro de búsqueda si no está vacío
         if (!empty($this->busqueda)) {
             $query->where('nombre_competencia', 'like', '%' . $this->busqueda . '%');
         }
 
-        // Aplicar filtro de categoría si se ha seleccionado una
         if (!is_null($this->categoriaFiltro)) {
             $query->where('categoria_id_competencia', $this->categoriaFiltro);
         }
 
-        // Obtener los resultados paginados
-        $competencias = $query->orderBy('nombre_competencia')->paginate(5); // 5 por página para que no sea muy largo
+        $competencias = $query->orderBy('nombre_competencia')->paginate(5);
 
         return view('livewire.encuesta.competencia.revisar-comptencia', [
             'competencias' => $competencias,
