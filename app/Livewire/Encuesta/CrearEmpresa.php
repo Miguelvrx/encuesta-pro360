@@ -4,6 +4,7 @@ namespace App\Livewire\Encuesta;
 
 use App\Models\Empresa;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Livewire\WithFileUploads;
