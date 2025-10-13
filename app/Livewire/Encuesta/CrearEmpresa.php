@@ -10,187 +10,189 @@ use Livewire\WithFileUploads;
 
 class CrearEmpresa extends Component
 {
-    // use WithFileUploads;
     use WithFileUploads;
 
+    // --- PROPIEDADES DEL FORMULARIO ---
+    public $nombre_comercial = "";
+    public $razon_social = "";
+    public $sector = "";
+    public $estado_inicial = "";
+    public $numero_empleados = "";
+    public $fecha_registro = "";
+    public $ano_mercado = "";
+    public $tipo_organizacion = "";
+    public $rfc = "";
+    public $direccion = "";
+    public $codigo_postal = "";
+    public $contacto_nombre = "";
+    public $contacto_puesto = "";
+    public $contacto_telefono = "";
+    public $contacto_correo = "";
 
-    // --- PROPIEDADES DEL MODELO EMPRESA ---
-    public $nombre_comercial = '';
-    public $razon_social = '';
-    public $sector = '';
-    public $estado_inicial = '';
-    public $numero_empleados = '';
-    public $fecha_registro = '';
-    public $ano_mercado = '';
-    public $tipo_organizacion = '';
-    public $rfc = '';
-    public $direccion = '';
-    public $codigo_postal = '';
-    // #[On('upload:finished')]
-    // public $logo;
-    #[Validate('nullable|image|mimes:png,jpg,jpeg|max:5120')]
-    public $image;
-    public $contacto_nombre = '';
-    public $contacto_puesto = '';
-    public $contacto_telefono = '';
-    public $contacto_correo = '';
+    // --- PROPIEDADES DEL LOGO ---
+    #[Validate("nullable|image|mimes:png,jpg,jpeg|max:5120|dimensions:min_width=100,min_height=100")]
+    public $logo; // Para el logo que se sube
 
-    // --- PROPIEDADES PARA LOS SELECTORES DEPENDIENTES ---
+    // --- PROPIEDADES DE UBICACIÓN ---
+    public $pais = "";
+    public $estado = "";
+    public $ciudad = "";
+    public $municipio = "";
+    public $countries = [];
+    public $states = [];
+    public $cities = [];
 
-    // 2. Propiedades para almacenar los listados que vienen de la API
-    public array $paises = [];
-    public array $estados = [];
-    public array $ciudades = []; // NUEVO: Para el selector de Ciudad
-    public array $municipios = []; // Ya lo tenías, lo usaremos para el selector de Municipio
-
-    // 3. Renombramos las propiedades que guardan la selección para evitar conflictos.
-    //    Usaremos 'paisSeleccionado', 'estadoSeleccionado', 'ciudadSeleccionada'.
-    //    Las propiedades originales 'pais', 'estado', 'ciudad' se llenarán antes de guardar.
-    public $paisSeleccionado = null;
-    public $estadoSeleccionado = null;
-    public $ciudadSeleccionada = null; // NUEVO: Para la selección de Ciudad
-    public $municipioSeleccionado = null; // NUEVO: Para la selección de Municipio
-
-    // 4. Mapeamos las propiedades del selector a las del modelo para la validación.
-    //    Esto es clave para que las reglas de validación funcionen correctamente.
-    protected $validationAttributes = [
-        'paisSeleccionado' => 'país',
-        'estadoSeleccionado' => 'estado',
-        'ciudadSeleccionada' => 'ciudad',
-        'municipioSeleccionado' => 'municipio', // NUEVO
-    ];
-
-    // 5. El método mount se ejecuta al iniciar el componente.
-    // En CrearEmpresa.php
     public function mount(): void
     {
-        $this->paises = $this->obtenerPaises();
-    }
+        // Inicializar la lista de países
+        $this->getCountries();
 
-
-    // 6. Hook que se dispara cuando el usuario selecciona un país.
-    public function updatedPaisSeleccionado($pais): void
-    {
-       $this->estados = !is_null($pais) ? $this->obtenerEstados($pais) : [];
-        // Reseteamos todos los niveles inferiores
-        $this->reset('estadoSeleccionado', 'ciudadSeleccionada', 'municipioSeleccionado');
-        $this->ciudades = [];
-        $this->municipios = [];
-    }
-
-    // 7. Hook que se dispara cuando el usuario selecciona un estado.
-    public function updatedEstadoSeleccionado($estado): void
-    {
-      // La API nos da una lista de "ciudades" que usaremos para ambos selectores
-        $listaCiudadesMunicipios = !is_null($estado) ? $this->obtenerCiudadesMunicipios($this->paisSeleccionado, $estado) : [];
-        
-        $this->ciudades = $listaCiudadesMunicipios;
-        $this->municipios = $listaCiudadesMunicipios; // Usamos la misma lista
-
-        // Reseteamos los niveles inferiores
-        $this->reset('ciudadSeleccionada', 'municipioSeleccionado');
+        \Illuminate\Support\Facades\Log::info('Componente CrearEmpresa montado. Propiedad logo definida: ' . (isset($this->logo) ? 'Sí' : 'No'));
     }
 
     protected function rules()
     {
         return [
-            'nombre_comercial' => 'required|string|max:255',
-            'razon_social' => 'required|string|max:255',
-            'sector' => 'required|string|max:100',
-            'estado_inicial' => 'required|string|max:100',
-            'numero_empleados' => 'required|string|in:1-10,11-50,51-100,101-500,500+',
-            'fecha_registro' => 'required|date',
-            'ano_mercado' => 'required|integer|min:1900|max:' . date('Y'),
-            'tipo_organizacion' => 'required|string|max:100',
-            'rfc' => 'required|string|max:20|unique:empresas,rfc',
-            'direccion' => 'required|string|max:255',
-            'codigo_postal' => 'required|string|max:10',
-            'image' => 'nullable|image|max:5120',
-            'contacto_nombre' => 'nullable|string|max:255',
-            'contacto_puesto' => 'nullable|string|max:100',
-            'contacto_telefono' => 'nullable|string|max:20',
-            'contacto_correo' => 'nullable|email|max:255',
-
-            // 8. Actualizamos las reglas para validar las nuevas propiedades.
-            'paisSeleccionado' => 'required|string|max:100',
-            'estadoSeleccionado' => 'required|string|max:100',
-            'ciudadSeleccionada' => 'required|string|max:100',
-            'municipioSeleccionado' => 'required|string|max:100', // NUEVO  
+            "nombre_comercial" => "required|string|max:255",
+            "razon_social" => "required|string|max:255",
+            "sector" => "required|string|max:100",
+            "estado_inicial" => "required|string|max:100",
+            "numero_empleados" => "required|string|in:1-10,11-50,51-100,101-500,500+",
+            "fecha_registro" => "required|date",
+            "ano_mercado" => "required|integer|min:1900|max:" . date("Y"),
+            "tipo_organizacion" => "required|string|max:100",
+            "rfc" => "required|string|max:20|unique:empresas,rfc",
+            "direccion" => "required|string|max:255",
+            "codigo_postal" => "required|string|max:10",
+            "logo" => "nullable|image|mimes:png,jpg,jpeg|max:5120|dimensions:min_width=100,min_height=100",
+            "contacto_nombre" => "nullable|string|max:255",
+            "contacto_puesto" => "nullable|string|max:100",
+            "contacto_telefono" => "nullable|string|max:20",
+            "contacto_correo" => "nullable|email|max:255",
+            "pais" => "required|string|max:100",
+            "estado" => "required|string|max:100",
+            "ciudad" => "required|string|max:100",
+            "municipio" => "required|string|max:100",
         ];
     }
 
-    // En app/Livewire/Encuesta/CrearEmpresa.php
+    protected $messages = [
+        "logo.image" => "El archivo debe ser una imagen válida.",
+        "logo.mimes" => "El logo debe estar en formato PNG, JPG o JPEG.",
+        "logo.max" => "El logo no debe exceder los 5 MB.",
+        "logo.dimensions" => "El logo debe tener al menos 100x100 píxeles.",
+    ];
+
+    public function updatedLogo()
+    {
+        \Illuminate\Support\Facades\Log::info('Propiedad logo actualizada. Tipo: ' . (is_object($this->logo) ? get_class($this->logo) : 'No es objeto'));
+    }
+
+    public function getCountries()
+    {
+        try {
+            $response = Http::get("https://countriesnow.space/api/v0.1/countries/positions");
+            if ($response->successful()) {
+                $this->countries = collect($response->json()["data"])->pluck("name")->sort()->toArray();
+                \Illuminate\Support\Facades\Log::info('Países cargados exitosamente: ' . count($this->countries));
+            } else {
+                $this->countries = [];
+                \Illuminate\Support\Facades\Log::error('Error al cargar países. Código: ' . $response->status() . ', Respuesta: ' . $response->body());
+                session()->flash("error", "No se pudieron cargar los países. Código: " . $response->status());
+            }
+        } catch (\Exception $e) {
+            $this->countries = [];
+            \Illuminate\Support\Facades\Log::error('Excepción al cargar países: ' . $e->getMessage());
+            session()->flash("error", "No se pudieron cargar los países: " . $e->getMessage());
+        }
+    }
+
+    public function updatedPais($value)
+    {
+        $this->estado = "";
+        $this->ciudad = "";
+        $this->states = [];
+        $this->cities = [];
+        if ($value) {
+            $this->getStates();
+        }
+    }
+
+    public function getStates()
+    {
+        if (empty($this->pais)) return;
+        try {
+            $response = Http::post("https://countriesnow.space/api/v0.1/countries/states", [
+                "country" => $this->pais
+            ]);
+            if ($response->successful()) {
+                $this->states = collect($response->json()["data"]["states"])->pluck("name")->sort()->toArray();
+                \Illuminate\Support\Facades\Log::info('Estados cargados para ' . $this->pais . ': ' . count($this->states));
+            } else {
+                $this->states = [];
+                \Illuminate\Support\Facades\Log::error('Error al cargar estados para ' . $this->pais . '. Código: ' . $response->status() . ', Respuesta: ' . $response->body());
+                session()->flash("error", "No se pudieron cargar los estados para " . $this->pais . ".");
+            }
+        } catch (\Exception $e) {
+            $this->states = [];
+            \Illuminate\Support\Facades\Log::error('Excepción al cargar estados: ' . $e->getMessage());
+            session()->flash("error", "No se pudieron cargar los estados: " . $e->getMessage());
+        }
+    }
+
+    public function updatedEstado($value)
+    {
+        $this->ciudad = "";
+        $this->cities = [];
+        if ($value) {
+            $this->getCities();
+        }
+    }
+
+    public function getCities()
+    {
+        if (empty($this->pais) || empty($this->estado)) return;
+        try {
+            $response = Http::post("https://countriesnow.space/api/v0.1/countries/state/cities", [
+                "country" => $this->pais,
+                "state" => $this->estado
+            ]);
+            if ($response->successful()) {
+                $this->cities = collect($response->json()["data"])->sort()->toArray();
+                \Illuminate\Support\Facades\Log::info('Ciudades cargadas para ' . $this->estado . ': ' . count($this->cities));
+            } else {
+                $this->cities = [];
+                \Illuminate\Support\Facades\Log::error('Error al cargar ciudades para ' . $this->estado . '. Código: ' . $response->status() . ', Respuesta: ' . $response->body());
+                session()->flash("error", "No se pudieron cargar las ciudades para " . $this->estado . ".");
+            }
+        } catch (\Exception $e) {
+            $this->cities = [];
+            \Illuminate\Support\Facades\Log::error('Excepción al cargar ciudades: ' . $e->getMessage());
+            session()->flash("error", "No se pudieron cargar las ciudades: " . $e->getMessage());
+        }
+    }
 
     public function save()
     {
-        // 1. Validamos los datos del formulario usando las reglas definidas.
-        $validatedData = $this->validate($this->rules());
+        $validatedData = $this->validate();
 
-        // 2. Añadimos los datos de los selectores dependientes al array validado.
-        $validatedData['pais'] = $this->paisSeleccionado;
-        $validatedData['estado'] = $this->estadoSeleccionado;
-        $validatedData['ciudad'] = $this->ciudadSeleccionada;
-        $validatedData['municipio'] = $this->municipioSeleccionado; // NUEVO
-
-        // 3. Manejamos la subida de la imagen (logo).
-        //    Cambiamos 'image' por 'logo' para que coincida con el nombre de la columna en la BD.
-        if ($this->image) {
-            // La columna en tu BD se llama 'logo', no 'image'.
-            $validatedData['logo'] = $this->image->store('logos', 'public');
-        }
-
-        // 4. Intentamos crear el registro en la base de datos.
         try {
+            if ($this->logo) {
+                \Illuminate\Support\Facades\Log::info('Intentando almacenar imagen en storage/app/public/logos');
+                \Illuminate\Support\Facades\Storage::disk('public')->makeDirectory('logos');
+                $validatedData["logo"] = $this->logo->store('logos', 'public');
+                \Illuminate\Support\Facades\Log::info('Imagen almacenada en: ' . $validatedData["logo"]);
+            } else {
+                $validatedData["logo"] = null;
+            }
+
             Empresa::create($validatedData);
-
-            // Usamos session()->flash() para el mensaje de éxito.
-            session()->flash('message', '¡Empresa creada exitosamente!');
-
-            // Redirigimos al listado de empresas.
-            $this->redirect(route('mostrar-empresa'), navigate: true);
+            session()->flash("message", "¡Empresa creada exitosamente!");
+            $this->redirect(route("mostrar-empresa"), navigate: true);
         } catch (\Exception $e) {
-            // Si algo falla, guardamos el error en la sesión y permanecemos en la página.
-            session()->flash('error', 'Error al crear la empresa: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error("Error al crear empresa: " . $e->getMessage());
+            session()->flash("error", "Error al crear la empresa: " . $e->getMessage());
         }
-    }
-
-
-    // --- 10. MÉTODOS PARA OBTENER DATOS DE LA API ---
-
-    private function obtenerPaises(): array
-    {
-        $response = Http::get('https://countriesnow.space/api/v0.1/countries/positions');
-        if ($response->successful()) {
-            return collect($response->json()['data'])->sortBy('name')->all();
-        }
-        return [];
-    }
-
-    private function obtenerEstados($pais): array
-    {
-        $response = Http::post('https://countriesnow.space/api/v0.1/countries/states', ['country' => $pais]);
-        if ($response->successful() && isset($response->json()['data']['states'])) {
-            return $response->json()['data']['states'];
-        }
-        return [];
-    }
-
-    private function obtenerMunicipios($pais, $estado): array
-    {
-        $response = Http::post('https://countriesnow.space/api/v0.1/countries/state/cities', ['country' => $pais, 'state' => $estado]);
-        if ($response->successful() && !empty($response->json()['data'])) {
-            return collect($response->json()['data'])->sort()->all();
-        }
-        return [];
-    }
-
-    private function obtenerCiudadesMunicipios($pais, $estado): array
-    {
-        $response = Http::post('https://countriesnow.space/api/v0.1/countries/state/cities', ['country' => $pais, 'state' => $estado] );
-        if ($response->successful() && !empty($response->json()['data'])) {
-            return collect($response->json()['data'])->sort()->all();
-        }
-        return [];
     }
 
     public function render()

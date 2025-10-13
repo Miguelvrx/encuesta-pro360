@@ -21,7 +21,7 @@
             <!-- 2. Barra de Filtros, Búsqueda y Acciones -->
             <div class="mb-6 flex flex-col sm:flex-row items-center gap-4">
 
-                {{-- Campo de Búsqueda (ocupa el espacio principal) --}}
+                
                 <div class="relative flex-grow w-full sm:w-auto">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -31,23 +31,23 @@
                     <input type="search" id="busqueda" wire:model.live.debounce.300ms="busqueda" placeholder="Buscar por nombre, razón social o RFC..." class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
 
-                {{-- Contenedor para los filtros y el botón de exportar --}}
+                
                 <div class="flex items-center gap-4 w-full sm:w-auto">
 
-                    {{-- Filtro de Sector --}}
+                    
                     <select id="filtroSector" wire:model.live="filtroSector" class="w-full sm:w-48 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         <option value="">Todos los Sectores</option>
-                        @foreach ($sectores as $sector )
-                        <option value="{{ $sector }}">{{ $sector }}</option>
-                        @endforeach
+                        <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $sectores; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $sector): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <option value="<?php echo e($sector); ?>"><?php echo e($sector); ?></option>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                     </select>
 
-                    {{-- Filtro de Estado --}}
+                    
                     <select id="filtroEstado" wire:model.live="filtroEstado" class="w-full sm:w-48 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         <option value="">Todos los Estados</option>
-                        @foreach ($estados as $estado)
-                        <option value="{{ $estado }}">{{ $estado }}</option>
-                        @endforeach
+                        <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $estados; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $estado): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <option value="<?php echo e($estado); ?>"><?php echo e($estado); ?></option>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                     </select>
                 </div>
             </div>
@@ -59,135 +59,143 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            {{-- Columna 1: Nombre Comercial --}}
+                            
                             <th scope="col" wire:click="ordenar('nombre_comercial')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer">
                                 Nombre Comercial
-                                @if ($ordenarPor === 'nombre_comercial') <span>{{ $direccionOrden === 'asc' ? '▲' : '▼' }}</span> @endif
+                                <!--[if BLOCK]><![endif]--><?php if($ordenarPor === 'nombre_comercial'): ?> <span><?php echo e($direccionOrden === 'asc' ? '▲' : '▼'); ?></span> <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                             </th>
 
-                            {{-- Columna 2: RFC --}}
+                            
                             <th scope="col" wire:click="ordenar('rfc')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer">
                                 RFC
-                                @if ($ordenarPor === 'rfc') <span>{{ $direccionOrden === 'asc' ? '▲' : '▼' }}</span> @endif
+                                <!--[if BLOCK]><![endif]--><?php if($ordenarPor === 'rfc'): ?> <span><?php echo e($direccionOrden === 'asc' ? '▲' : '▼'); ?></span> <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                             </th>
 
-                            {{-- Columna 3: Sector --}}
+                            
                             <th scope="col" wire:click="ordenar('sector')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer">
                                 Sector
-                                @if ($ordenarPor === 'sector') <span>{{ $direccionOrden === 'asc' ? '▲' : '▼' }}</span> @endif
+                                <!--[if BLOCK]><![endif]--><?php if($ordenarPor === 'sector'): ?> <span><?php echo e($direccionOrden === 'asc' ? '▲' : '▼'); ?></span> <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                             </th>
 
-                            {{-- NUEVA Columna 4: País --}}
+                            
                             <th scope="col" wire:click="ordenar('pais')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer">
                                 País
-                                @if ($ordenarPor === 'pais') <span>{{ $direccionOrden === 'asc' ? '▲' : '▼' }}</span> @endif
+                                <!--[if BLOCK]><![endif]--><?php if($ordenarPor === 'pais'): ?> <span><?php echo e($direccionOrden === 'asc' ? '▲' : '▼'); ?></span> <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                             </th>
 
-                            {{-- Columna 5: Ubicación (Ciudad/Estado) --}}
+                            
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Ubicación
                             </th>
 
-                            {{-- Columna 6: Fecha de Registro --}}
+                            
                             <th scope="col" wire:click="ordenar('fecha_registro')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer">
                                 Fecha de Registro
-                                @if ($ordenarPor === 'fecha_registro') <span>{{ $direccionOrden === 'asc' ? '▲' : '▼' }}</span> @endif
+                                <!--[if BLOCK]><![endif]--><?php if($ordenarPor === 'fecha_registro'): ?> <span><?php echo e($direccionOrden === 'asc' ? '▲' : '▼'); ?></span> <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                             </th>
 
-                            {{-- Columna 7: Estado --}}
+                            
                             <th scope="col" wire:click="ordenar('estado_inicial')" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer">
                                 Estado
-                                @if ($ordenarPor === 'estado_inicial') <span>{{ $direccionOrden === 'asc' ? '▲' : '▼' }}</span> @endif
+                                <!--[if BLOCK]><![endif]--><?php if($ordenarPor === 'estado_inicial'): ?> <span><?php echo e($direccionOrden === 'asc' ? '▲' : '▼'); ?></span> <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                             </th>
 
-                            {{-- Columna 8: Acciones --}}
+                            
                             <th scope="col" class="relative px-6 py-3">
                                 <span class="sr-only">Acciones</span>
                             </th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        @forelse ($empresas as $empresa)
-                        <tr wire:key="{{ $empresa->id_empresa }}" class="hover:bg-gray-50 transition-colors duration-150">
+                        <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $empresas; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $empresa): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                        <tr wire:key="<?php echo e($empresa->id_empresa); ?>" class="hover:bg-gray-50 transition-colors duration-150">
 
-                            {{-- Celda 1: Nombre Comercial --}}
+                            
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
-                                    @if ($empresa->logo)
-                                    {{-- CONTENEDOR del logo con tamaño fijo --}}
+                                    <!--[if BLOCK]><![endif]--><?php if($empresa->logo): ?>
+                                    
                                     <div class="h-12 w-12 rounded-lg bg-white border border-gray-200 flex items-center justify-center p-1.5 flex-shrink-0 shadow-sm">
                                         <img
-                                            src="{{ asset('storage/' . $empresa->logo) }}"
-                                            alt="Logo de {{ $empresa->nombre_comercial }}"
+                                            src="<?php echo e(asset('storage/' . $empresa->logo)); ?>"
+                                            alt="Logo de <?php echo e($empresa->nombre_comercial); ?>"
                                             class="max-h-full max-w-full object-contain">
                                     </div>
-                                    @else
-                                    {{-- Placeholder cuando no hay logo --}}
+                                    <?php else: ?>
+                                    
                                     <span class="h-12 w-12 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-600 font-bold flex-shrink-0 text-sm border border-gray-200">
-                                        {{ strtoupper(substr($empresa->nombre_comercial, 0, 2)) }}
+                                        <?php echo e(strtoupper(substr($empresa->nombre_comercial, 0, 2))); ?>
+
                                     </span>
-                                    @endif
+                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                     <div class="ml-4">
                                         <div class="text-sm font-medium text-gray-900">
-                                            {{ $empresa->nombre_comercial }}
+                                            <?php echo e($empresa->nombre_comercial); ?>
+
                                         </div>
                                     </div>
                                 </div>
                             </td>
 
 
-                            {{-- Celda 2: RFC --}}
+                            
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
-                                {{ $empresa->rfc }}
+                                <?php echo e($empresa->rfc); ?>
+
                             </td>
 
-                            {{-- Celda 3: Sector --}}
+                            
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ $empresa->sector }}
+                                <?php echo e($empresa->sector); ?>
+
                             </td>
 
-                            {{-- NUEVA Celda 4: País --}}
+                            
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ $empresa->pais }}
+                                <?php echo e($empresa->pais); ?>
+
                             </td>
 
-                            {{-- Celda 5: Ubicación (Ciudad/Estado) --}}
+                            
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ $empresa->municipio ?? $empresa->ciudad }}, {{ $empresa->estado }}
+                                <?php echo e($empresa->municipio ?? $empresa->ciudad); ?>, <?php echo e($empresa->estado); ?>
+
                             </td>
 
-                            {{-- Celda 6: Fecha de Registro --}}
+                            
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ $empresa->fecha_registro->format('d/m/Y') }}
+                                <?php echo e($empresa->fecha_registro->format('d/m/Y')); ?>
+
                             </td>
 
-                            {{-- Celda 7: Estado --}}
+                            
                             <td class="px-6 py-4 whitespace-nowrap text-center">
                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                            @if($empresa->estado_inicial == 'Activo') bg-green-100 text-green-800 @endif
-                            @if($empresa->estado_inicial == 'Inactivo') bg-red-100 text-red-800 @endif
-                            @if($empresa->estado_inicial == 'En Proceso') bg-yellow-100 text-yellow-800 @endif
-                            @if($empresa->estado_inicial == 'Suspendido') bg-gray-100 text-gray-800 @endif
+                            <?php if($empresa->estado_inicial == 'Activo'): ?> bg-green-100 text-green-800 <?php endif; ?>
+                            <?php if($empresa->estado_inicial == 'Inactivo'): ?> bg-red-100 text-red-800 <?php endif; ?>
+                            <?php if($empresa->estado_inicial == 'En Proceso'): ?> bg-yellow-100 text-yellow-800 <?php endif; ?>
+                            <?php if($empresa->estado_inicial == 'Suspendido'): ?> bg-gray-100 text-gray-800 <?php endif; ?>
                         ">
-                                    {{ $empresa->estado_inicial }}
+                                    <?php echo e($empresa->estado_inicial); ?>
+
                                 </span>
                             </td>
 
-                            {{-- Celda 8: Acciones --}}
+                            
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <a href="{{ route('ver-empresa', $empresa) }}" wire:navigate class="text-blue-600 hover:text-blue-900">Ver</a>
-                                <a href="{{ route('editar-empresa', $empresa) }}" wire:navigate class="ml-4 text-indigo-600 hover:text-indigo-900">Editar</a>
+                                <a href="<?php echo e(route('ver-empresa', $empresa)); ?>" wire:navigate class="text-blue-600 hover:text-blue-900">Ver</a>
+                                <a href="<?php echo e(route('editar-empresa', $empresa)); ?>" wire:navigate class="ml-4 text-indigo-600 hover:text-indigo-900">Editar</a>
                                 <button
                                     x-data
-                                    @click="$dispatch('confirm-delete', { id: {{ $empresa->id_empresa }} })"
+                                    @click="$dispatch('confirm-delete', { id: <?php echo e($empresa->id_empresa); ?> })"
                                     class="ml-4 text-red-600 hover:text-red-900 font-medium">
                                     Eliminar
                                 </button>
                             </td>
                         </tr>
-                        @empty
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <tr>
-                            {{-- Ajustamos el colspan para que coincida con el nuevo número de columnas (8) --}}
+                            
                             <td colspan="8" class="px-6 py-12 text-center">
                                 <div class="text-center">
                                     <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -198,7 +206,7 @@
                                 </div>
                             </td>
                         </tr>
-                        @endforelse
+                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                     </tbody>
                 </table>
             </div>
@@ -206,11 +214,11 @@
         <!-- 4. Acciones Post-Tabla y Paginación -->
         <div class="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
 
-            {{-- Grupo de botones de exportación --}}
+            
             <div class="flex items-center gap-3">
                 <span class="text-sm font-medium text-gray-600">Exportar vista actual:</span>
-                {{-- --- INICIO DE LA SOLUCIÓN (NUEVO BOTÓN) --- --}}
-                {{-- Botón Principal: Descargar todo en ZIP --}}
+                
+                
                 <button
                     wire:click="exportarZip"
                     wire:loading.attr="disabled"
@@ -222,8 +230,8 @@
                     <span wire:loading.remove wire:target="exportarZip">Descargar Todo (.zip)</span>
                     <span wire:loading wire:target="exportarZip">Generando...</span>
                 </button>
-                {{-- --- FIN DE LA SOLUCIÓN --- --}}
-                {{-- Botón de Exportar a Excel --}}
+                
+                
                 <button
                     wire:click="exportarExcel"
                     wire:loading.attr="disabled"
@@ -236,7 +244,7 @@
                     <span wire:loading wire:target="exportarExcel">Exportando...</span>
                 </button>
 
-                {{-- Botón de Exportar a PDF --}}
+                
                 <button
                     wire:click="exportarPdf"
                     wire:loading.attr="disabled"
@@ -250,9 +258,10 @@
                 </button>
             </div>
 
-            {{-- Paginación (ahora a la derecha en pantallas grandes) --}}
+            
             <div class="w-full sm:w-auto">
-                {{ $empresas->links() }}
+                <?php echo e($empresas->links()); ?>
+
             </div>
         </div>
 
@@ -260,11 +269,11 @@
 </div>
 
 
-{{-- Al final de resources/views/livewire/encuesta/mostrar-empresa.blade.php --}}
 
-{{-- ... (código de la tabla y paginación) ... --}}
 
-@push('scripts')
+
+
+<?php $__env->startPush('scripts'); ?>
 <script>
     // Nos aseguramos de que este script se ejecute después de que Livewire se haya inicializado.
     document.addEventListener('livewire:init', () => {
@@ -292,9 +301,9 @@
         });
     });
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const img = document.getElementById('preview-logo');
@@ -318,4 +327,4 @@
         }
     });
 </script>
-@endpush
+<?php $__env->stopPush(); ?><?php /**PATH C:\laragon\www\encuesta-pro360\resources\views/livewire/encuesta/mostrar-empresa.blade.php ENDPATH**/ ?>
