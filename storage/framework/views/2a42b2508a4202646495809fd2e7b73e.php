@@ -1,14 +1,14 @@
 
 <div>
     <div class="max-w-5xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <form wire:submit.prevent="save" class="space-y-8">
+        <form wire:submit.prevent="update" class="space-y-8">
 
             
             <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-                <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
-                    <h1 class="text-2xl font-bold text-white">Crear Nueva Competencia</h1>
-                    <p class="text-sm text-blue-200 mt-1">Selecciona una categoría y competencia, luego define sus 5 niveles de comportamiento.</p>
-                </div>  
+                <div class="bg-gradient-to-r from-indigo-600 to-indigo-700 px-6 py-4">
+                    <h1 class="text-2xl font-bold text-white">Editar Competencia</h1>
+                    <p class="text-sm text-indigo-200 mt-1">Modifica la categoría, competencia y sus niveles de comportamiento.</p>
+                </div>
                 <div class="p-6 space-y-6">
                     
                     
@@ -106,23 +106,23 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                     <h2 class="text-lg font-semibold text-white">Niveles de Comportamiento</h2>
                     <p class="text-sm text-gray-300 mt-1">Describe el comportamiento observable para cada nivel estándar.</p>
                 </div>
-
                 <div class="p-6 space-y-6">
                     <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $niveles; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $nivel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <div wire:key="nivel-<?php echo e($index); ?>" class="p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4 items-start">
-
+                            
                             
                             <div class="md:col-span-1">
                                 <label class="block text-sm font-medium text-gray-700">Nivel</label>
                                 <div class="mt-2 flex items-baseline gap-3">
-                                    <span class="text-3xl font-bold text-blue-600"><?php echo e($nivel['numero']); ?></span>
+                                    <span class="text-3xl font-bold text-indigo-600"><?php echo e($nivel['numero']); ?></span>
                                     <div>
                                         <p class="text-lg font-semibold text-gray-800"><?php echo e($nivel['nombre_nivel']); ?></p>
                                         <p class="text-xs text-gray-500 italic">"<?php echo e($nivel['tagline']); ?>"</p>
                                     </div>
                                 </div>
                                 <input type="hidden" wire:model="niveles.<?php echo e($index); ?>.nombre_nivel">
+                                <input type="hidden" wire:model="niveles.<?php echo e($index); ?>.id_nivel">
                             </div>
 
                             
@@ -155,18 +155,18 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 
             
             <div class="flex justify-center space-x-4 pt-4">
-                <button 
-                    type="button" 
-                    wire:click="$refresh" 
+                <a 
+                    href="<?php echo e(route('revisar-competencia')); ?>" 
+                    wire:navigate 
                     class="px-8 py-3 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition-colors">
                     Cancelar
-                </button>
+                </a>
                 <button 
                     type="submit" 
-                    class="px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all">
-                    Guardar Competencia
+                    class="px-8 py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-medium rounded-lg hover:from-indigo-700 hover:to-indigo-800 transition-all">
+                    Guardar Cambios
                 </button>
             </div>
         </form>
     </div>
-</div><?php /**PATH D:\laragon\www\encuesta-pro360\resources\views/livewire/encuesta/competencia/crear-competencia.blade.php ENDPATH**/ ?>
+</div><?php /**PATH D:\laragon\www\encuesta-pro360\resources\views/livewire/encuesta/competencia/editar-comptencia.blade.php ENDPATH**/ ?>

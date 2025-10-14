@@ -233,11 +233,13 @@ class EditarEmpresa extends Component
             }
 
             $this->empresa->update($validatedData);
-            session()->flash("message", "¡Empresa actualizada exitosamente!");
+            // session()->flash("message", "¡Empresa actualizada exitosamente!");
+             $this->dispatch('toastr-success', message: '¡Empresa actualizada exitosamente!');
             $this->redirect(route("mostrar-empresa"), navigate: true);
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error("Error al actualizar empresa: " . $e->getMessage());
-            session()->flash("error", "Error al actualizar la empresa: " . $e->getMessage());
+            // session()->flash("error", "Error al actualizar la empresa: " . $e->getMessage());
+             $this->dispatch('toastr-error', message: 'Error al actualizar la empresa: ' . $e->getMessage());
         }
     }
     

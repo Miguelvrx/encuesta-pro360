@@ -11,7 +11,9 @@ use App\Livewire\Encuesta\Departamento\ManualUsuarioDepModal;
 use App\Livewire\Encuesta\Departamento\MostrarDepartamento;
 use App\Livewire\Encuesta\Departamento\VerDepartamento;
 use App\Livewire\Encuesta\EditarEmpresa;
+use App\Livewire\Encuesta\Evaluacion\CrearEvaluacion;
 use App\Livewire\Encuesta\MostrarEmpresa;
+use App\Livewire\Encuesta\PapeleraEmpresas;
 use App\Livewire\Encuesta\Usuario\CrearUsuario;
 use App\Livewire\Encuesta\Usuario\EditarUsuario;
 use App\Livewire\Encuesta\Usuario\MostrarUsuario;
@@ -53,4 +55,7 @@ Route::get('/competencias/crear', CrearCompetencia::class)->name('crear-competen
 Route::get('/competencias/revisar', RevisarComptencia::class)->name('revisar-competencia');
 Route::get('/competencias/{competencia}/editar', EditarComptencia::class)->name('editar-competencia');
 Route::get('/competencias/catalogo', CatalogoCompetencia::class )->name('catalogo-competencia');
-// Route::get('/select2-example', Select2Example::class)->name('select2-example');
+Route::get('/papelera-empresas', PapeleraEmpresas::class)->name('papelera-empresas');
+Route::get('/papelera-empresas', PapeleraEmpresas::class)->name('papelera-empresas');
+Route::get('/crear-evaluacion', CrearEvaluacion::class)->name('crear-evaluacion');
+//crear-evaluacion  Route::get('/select2-example', Select2Example::class)->name('select2-example');

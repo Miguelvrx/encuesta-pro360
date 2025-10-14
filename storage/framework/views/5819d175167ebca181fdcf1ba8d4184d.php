@@ -2,18 +2,7 @@
     <div class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-white py-8 px-4 sm:px-6 lg:px-8">
         <form wire:submit.prevent="save" class="space-y-8 max-w-5xl mx-auto">
             
-            <!--[if BLOCK]><![endif]--><?php if(session()->has("message")): ?>
-            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg mb-6" role="alert">
-                <p class="font-bold">¡Éxito!</p>
-                <p><?php echo e(session("message")); ?></p>
-            </div>
-            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
-            <?php if(session()->has("error")): ?>
-            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg mb-6" role="alert">
-                <p class="font-bold">¡Error!</p>
-                <p><?php echo e(session("error")); ?></p>
-            </div>
-            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+            
 
             <!-- SECCIÓN 1: Información Básica -->
             <div class="bg-white rounded-xl shadow-lg overflow-hidden">

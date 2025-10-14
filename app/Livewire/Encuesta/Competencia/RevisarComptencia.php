@@ -12,7 +12,7 @@ use Livewire\WithPagination;
 class RevisarComptencia extends Component
 {
 
-    use WithPagination;
+     use WithPagination;
 
     #[Url(as: 'q', keep: true)]
     public string $busqueda = '';
@@ -24,7 +24,8 @@ class RevisarComptencia extends Component
 
     public function mount(): void
     {
-        $this->categorias = Categoria::orderBy('categoria')->get(); // Corregido
+        // Cambiado de Categoria a CategoriaCompetencia
+        $this->categorias = Categoria::orderBy('categoria')->get();
     }
 
     public function updating($property, $value): void
@@ -36,13 +37,12 @@ class RevisarComptencia extends Component
 
     public function render()
     {
-        // --- INICIO DE LA SOLUCIÓN ---
-        // 1. Modificamos la consulta para ordenar los niveles en orden descendente.
-        //    Esto asume que los niveles se guardan en orden ascendente de importancia (1 a 5).
+        // Query con ordenamiento de niveles descendente
         $query = Competencia::with(['categoria', 'niveles' => function ($query) {
-            $query->orderBy('id_nivel', 'desc'); // Ordenar de mayor a menor
+            // Asumiendo que tienes una columna 'numero_nivel' o 'valor' que guarda el nivel numérico
+            // Si no la tienes, ordena por id_nivel desc
+            $query->orderBy('id_nivel', 'desc');
         }]);
-        // --- FIN DE LA SOLUCIÓN ---
 
         if (!empty($this->busqueda)) {
             $query->where('nombre_competencia', 'like', '%' . $this->busqueda . '%');

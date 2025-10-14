@@ -24,8 +24,9 @@ class MostrarEmpresa extends Component
     public string $busqueda = '';
     public string $filtroSector = '';
     public string $filtroEstado = '';
-    public string $ordenarPor = 'created_at';
+    // public string $ordenarPor = 'created_at';
     public string $direccionOrden = 'desc';
+    public string $ordenarPor = 'id_empresa'; // Cambiado a id_empresa por defecto
 
     // 4. Atributo para mantener la URL limpia y amigable
     //    Esto hace que los filtros y la búsqueda se reflejen en la URL
@@ -41,6 +42,12 @@ class MostrarEmpresa extends Component
      * Resetea la paginación para que el usuario siempre vaya a la primera página
      * de los nuevos resultados filtrados.
      */
+    // public function updating($property): void
+    // {
+    //     if (in_array($property, ['busqueda', 'filtroSector', 'filtroEstado'])) {
+    //         $this->resetPage();
+    //     }
+    // }
     public function updating($property): void
     {
         if (in_array($property, ['busqueda', 'filtroSector', 'filtroEstado'])) {
@@ -51,6 +58,16 @@ class MostrarEmpresa extends Component
     /**
      * Método para cambiar la columna de ordenación y la dirección.
      */
+    // public function ordenar($columna): void
+    // {
+    //     if ($this->ordenarPor === $columna) {
+    //         $this->direccionOrden = $this->direccionOrden === 'asc' ? 'desc' : 'asc';
+    //     } else {
+    //         $this->ordenarPor = $columna;
+    //         $this->direccionOrden = 'asc';
+    //     }
+    // }
+
     public function ordenar($columna): void
     {
         if ($this->ordenarPor === $columna) {
@@ -77,25 +94,62 @@ class MostrarEmpresa extends Component
     /**
      * 4. Escucha el evento final 'delete-confirmed' desde SweetAlert y elimina la empresa.
      */
+    // #[On('delete-confirmed')]
+    // public function deleteEmpresa(int $id): void
+    // {
+    //     try {
+    //         $empresa = Empresa::findOrFail($id);
+
+    //         // Si la empresa tiene un logo, lo borramos del almacenamiento.
+    //         if ($empresa->logo) { // <-- Corregido de 'image' a 'logo' para coincidir con la BD
+    //             Storage::disk('public')->delete($empresa->logo);
+    //         }
+
+    //         $empresa->delete();
+
+    //         // Usamos session()->flash() para el mensaje de éxito.
+    //         session()->flash('message', 'Empresa eliminada exitosamente.');
+
+    //         $this->resetPage();
+    //     } catch (\Exception $e) {
+    //         session()->flash('error', 'Error al eliminar la empresa: ' . $e->getMessage());
+    //     }
+    // }
+    // #[On('delete-confirmed')]
+    // public function deleteEmpresa(int $id): void
+    // {
+    //     try {
+    //         $empresa = Empresa::findOrFail($id);
+
+    //         if ($empresa->logo) {
+    //             Storage::disk('public')->delete($empresa->logo);
+    //         }
+
+    //         $empresa->delete();
+
+    //         // Cambia session()->flash() por dispatch para Toastr
+    //         $this->dispatch('toastr-success', message: 'Empresa eliminada exitosamente.');
+
+    //         $this->resetPage();
+    //     } catch (\Exception $e) {
+    //         $this->dispatch('toastr-error', message: 'Error al eliminar la empresa: ' . $e->getMessage());
+    //     }
+    // }
+
     #[On('delete-confirmed')]
     public function deleteEmpresa(int $id): void
     {
         try {
             $empresa = Empresa::findOrFail($id);
 
-            // Si la empresa tiene un logo, lo borramos del almacenamiento.
-            if ($empresa->logo) { // <-- Corregido de 'image' a 'logo' para coincidir con la BD
-                Storage::disk('public')->delete($empresa->logo);
-            }
-
+            // En lugar de eliminar permanentemente, usamos soft delete
             $empresa->delete();
 
-            // Usamos session()->flash() para el mensaje de éxito.
-            session()->flash('message', 'Empresa eliminada exitosamente.');
+            $this->dispatch('toastr-success', message: 'Empresa movida a la papelera exitosamente.');
 
             $this->resetPage();
         } catch (\Exception $e) {
-            session()->flash('error', 'Error al eliminar la empresa: ' . $e->getMessage());
+            $this->dispatch('toastr-error', message: 'Error al eliminar la empresa: ' . $e->getMessage());
         }
     }
 
@@ -219,46 +273,80 @@ class MostrarEmpresa extends Component
 
 
 
+    // public function render()
+    // {
+    //     // 1. Construir la consulta a la base de datos con los filtros
+    //     $empresasQuery = Empresa::query();
+
+    //     // Aplicar filtro de búsqueda
+    //     if ($this->busqueda) {
+    //         $empresasQuery->where(function ($query) {
+    //             $query->where('nombre_comercial', 'like', '%' . $this->busqueda . '%')
+    //                 ->orWhere('razon_social', 'like', '%' . $this->busqueda . '%')
+    //                 ->orWhere('rfc', 'like', '%' . $this->busqueda . '%');
+    //         });
+    //     }
+
+    //     // Aplicar filtro por sector
+    //     if ($this->filtroSector) {
+    //         $empresasQuery->where('sector', $this->filtroSector);
+    //     }
+
+    //     // Aplicar filtro por estado inicial
+    //     if ($this->filtroEstado) {
+    //         $empresasQuery->where('estado_inicial', $this->filtroEstado);
+    //     }
+
+    //     // --- INICIO DE LA CORRECCIÓN ---
+
+    //     // 2. OBTENER DATOS PARA LOS FILTROS (ANTES DE ORDENAR)
+    //     //    Clonamos la consulta con los `where` pero sin el `orderBy`.
+    //     $sectores = (clone $empresasQuery)->distinct()->pluck('sector')->sort();
+    //     $estados = (clone $empresasQuery)->distinct()->pluck('estado_inicial')->sort();
+
+    //     // 3. AHORA SÍ, APLICAR LA ORDENACIÓN a la consulta principal
+    //     $empresasQuery->orderBy($this->ordenarPor, $this->direccionOrden);
+
+    //     // 4. Obtener los datos paginados
+    //     $empresas = $empresasQuery->paginate(10);
+
+    //     // --- FIN DE LA CORRECCIÓN ---
+
+    //     // 5. Pasar todos los datos a la vista
+    //     return view('livewire.encuesta.mostrar-empresa', [
+    //         'empresas' => $empresas,
+    //         'sectores' => $sectores,
+    //         'estados' => $estados,
+    //     ])->layout('layouts.app');
+    // }
+
     public function render()
     {
-        // 1. Construir la consulta a la base de datos con los filtros
         $empresasQuery = Empresa::query();
 
-        // Aplicar filtro de búsqueda
         if ($this->busqueda) {
             $empresasQuery->where(function ($query) {
                 $query->where('nombre_comercial', 'like', '%' . $this->busqueda . '%')
                     ->orWhere('razon_social', 'like', '%' . $this->busqueda . '%')
-                    ->orWhere('rfc', 'like', '%' . $this->busqueda . '%');
+                    ->orWhere('rfc', 'like', '%' . $this->busqueda . '%')
+                    ->orWhere('id_empresa', 'like', '%' . $this->busqueda . '%'); // Agregar búsqueda por ID
             });
         }
 
-        // Aplicar filtro por sector
         if ($this->filtroSector) {
             $empresasQuery->where('sector', $this->filtroSector);
         }
 
-        // Aplicar filtro por estado inicial
         if ($this->filtroEstado) {
             $empresasQuery->where('estado_inicial', $this->filtroEstado);
         }
 
-        // --- INICIO DE LA CORRECCIÓN ---
-
-        // 2. OBTENER DATOS PARA LOS FILTROS (ANTES DE ORDENAR)
-        //    Clonamos la consulta con los `where` pero sin el `orderBy`.
         $sectores = (clone $empresasQuery)->distinct()->pluck('sector')->sort();
         $estados = (clone $empresasQuery)->distinct()->pluck('estado_inicial')->sort();
 
-        // 3. AHORA SÍ, APLICAR LA ORDENACIÓN a la consulta principal
         $empresasQuery->orderBy($this->ordenarPor, $this->direccionOrden);
-
-        // 4. Obtener los datos paginados
         $empresas = $empresasQuery->paginate(10);
 
-        // --- FIN DE LA CORRECCIÓN ---
-
-        // 5. Pasar todos los datos a la vista
         return view('livewire.encuesta.mostrar-empresa', [
             'empresas' => $empresas,
             'sectores' => $sectores,

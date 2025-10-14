@@ -99,12 +99,14 @@ class CrearEmpresa extends Component
             } else {
                 $this->countries = [];
                 \Illuminate\Support\Facades\Log::error('Error al cargar países. Código: ' . $response->status() . ', Respuesta: ' . $response->body());
-                session()->flash("error", "No se pudieron cargar los países. Código: " . $response->status());
+                // Usa dispatch en lugar de session()->flash()
+                $this->dispatch('toastr-error', message: "No se pudieron cargar los países. Código: " . $response->status());
             }
         } catch (\Exception $e) {
             $this->countries = [];
             \Illuminate\Support\Facades\Log::error('Excepción al cargar países: ' . $e->getMessage());
-            session()->flash("error", "No se pudieron cargar los países: " . $e->getMessage());
+            // Usa dispatch en lugar de session()->flash()
+            $this->dispatch('toastr-error', message: "No se pudieron cargar los países: " . $e->getMessage());
         }
     }
 
@@ -173,6 +175,30 @@ class CrearEmpresa extends Component
         }
     }
 
+    // public function save()
+    // {
+    //     $validatedData = $this->validate();
+
+    //     try {
+    //         if ($this->logo) {
+    //             \Illuminate\Support\Facades\Log::info('Intentando almacenar imagen en storage/app/public/logos');
+    //             \Illuminate\Support\Facades\Storage::disk('public')->makeDirectory('logos');
+    //             $validatedData["logo"] = $this->logo->store('logos', 'public');
+    //             \Illuminate\Support\Facades\Log::info('Imagen almacenada en: ' . $validatedData["logo"]);
+    //         } else {
+    //             $validatedData["logo"] = null;
+    //         }
+
+    //         Empresa::create($validatedData);
+    //         session()->flash("message", "¡Empresa creada exitosamente!");
+    //         $this->redirect(route("mostrar-empresa"), navigate: true);
+    //     } catch (\Exception $e) {
+    //         \Illuminate\Support\Facades\Log::error("Error al crear empresa: " . $e->getMessage());
+    //         session()->flash("error", "Error al crear la empresa: " . $e->getMessage());
+    //     }
+    // }
+    
+
     public function save()
     {
         $validatedData = $this->validate();
@@ -188,11 +214,16 @@ class CrearEmpresa extends Component
             }
 
             Empresa::create($validatedData);
-            session()->flash("message", "¡Empresa creada exitosamente!");
+
+            // En lugar de session()->flash(), usa dispatch para Toastr
+            $this->dispatch('toastr-success', message: '¡Empresa creada exitosamente!');
+
             $this->redirect(route("mostrar-empresa"), navigate: true);
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error("Error al crear empresa: " . $e->getMessage());
-            session()->flash("error", "Error al crear la empresa: " . $e->getMessage());
+
+            // En lugar de session()->flash(), usa dispatch para Toastr
+            $this->dispatch('toastr-error', message: 'Error al crear la empresa: ' . $e->getMessage());
         }
     }
 

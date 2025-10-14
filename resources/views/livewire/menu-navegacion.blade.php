@@ -304,6 +304,34 @@
                                 <span class="text-sm">Catalogo Competencia</span>
                             </a>
                     </div>
+                      <div class="mt-3">
+                        <button wire:click="toggleMenu('evaluaciones')" class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg group transition-all duration-200 ease-in-out 
+                        {{ $this->isActiveRouteGroup(['crear-evaluacion']) ? 'bg-blue-50 text-blue-600 shadow-sm' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50 hover:shadow-md' }}">
+                            <div class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 transition-colors duration-200 
+                                {{ $this->isActiveRouteGroup(['crear-evaluacion']) ? 'text-blue-500' : 'text-gray-400 group-hover:text-blue-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                </svg>
+                                <span class="text-sm font-medium">Evaluación</span>
+                            </div>
+                            <svg class="w-4 h-4 transition-all duration-300 ease-in-out 
+                            {{ $this->isActiveRouteGroup(['crear-evaluacion']) ? 'text-blue-400' : 'text-gray-400' }} 
+                            {{ $this->isMenuOpen('evaluaciones') ? 'rotate-180' : 'rotate-0' }}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <div class="overflow-hidden transition-all duration-300 ease-in-out 
+                        {{ $this->isMenuOpen('evaluaciones') ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0' }} mt-1 ml-4 space-y-1">
+                            <a href="{{ route('crear-evaluacion') }}"
+                                wire:click="closeMenus"
+                                class="flex items-center px-3 py-2.5 rounded-lg group transition-all duration-200 ease-in-out 
+                            {{ $this->isActiveRoute('crear-evaluacion') ? 'bg-blue-50 text-blue-600 border-r-4 border-blue-600 shadow-sm' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50 hover:shadow-md' }}">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 transition-colors duration-200 
+                                {{ $this->isActiveRoute('crear-evaluacion') ? 'text-blue-500' : 'text-gray-400 group-hover:text-blue-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                </svg>
+                                <span class="text-sm">Crear Evaluacion</span>
+                            </a>
                 </div>
             </div> <!-- Resto del código del sidebar (agrega secciones similares con las mismas mejoras) -->
         </nav>

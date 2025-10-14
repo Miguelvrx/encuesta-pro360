@@ -26,6 +26,7 @@ class MenuNavegacion extends Component
         'crear-competencia' => 'competencias',
         'revisar-competencia' => 'competencias',
         'catalogo-competencia' => 'competencias',
+        'crear-evaluacion' => 'evaluaciones',
 
 
         // 'index' => 'usuarios',

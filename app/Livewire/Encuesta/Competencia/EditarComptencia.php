@@ -13,20 +13,16 @@ use Livewire\Component;
 class EditarComptencia extends Component
 {
 
-     // Propiedad para almacenar la competencia que estamos editando
+    // Propiedad para almacenar la competencia que estamos editando
     public Competencia $competencia;
 
     // Propiedades para los campos del formulario
+    public ?int $categoria_id_competencia = null;
     public string $nombre_competencia = '';
     public string $definicion_competencia = '';
-    public ?int $categoria_id_competencia = null;
     public array $niveles = [];
 
-    public $categorias = [];
-
-    // --- INICIO DE LA SOLUCIÓN ---
-
-    // 1. Definimos la escala de niveles, igual que en CrearCompetencia
+    // Escala de niveles
     public array $escalaDeNiveles = [
         5 => ['nombre' => 'Excepcional', 'tagline' => 'Modelo a seguir con impacto sostenido'],
         4 => ['nombre' => 'Supera las Expectativas', 'tagline' => 'Desempeño consistentemente superior'],
@@ -35,49 +31,143 @@ class EditarComptencia extends Component
         1 => ['nombre' => 'Requiere Apoyo', 'tagline' => 'Necesita acompañamiento para el estándar'],
     ];
 
+    // Catálogo de competencias por categoría
+    public array $catalogoCompetencias = [
+        'Generales / Organizacionales' => [
+            'Comunicación efectiva' => 'Capacidad para transmitir información de manera clara, oportuna y efectiva, adaptándose al contexto y al interlocutor.',
+            'Trabajo en equipo' => 'Habilidad para colaborar con otros, compartir conocimientos y contribuir al logro de objetivos comunes.',
+            'Respeto' => 'Valoración y consideración hacia las personas, sus opiniones y diferencias, promoviendo un ambiente de convivencia positivo.',
+            'Ética' => 'Actuar con integridad, honestidad y transparencia, alineado a los valores y principios organizacionales.',
+            'Compromiso' => 'Dedicación y responsabilidad con las tareas asignadas, demostrando lealtad y pertenencia a la organización.',
+            'Adaptabilidad' => 'Capacidad para ajustarse a cambios, nuevas situaciones y desafíos con flexibilidad y resiliencia.',
+        ],
+        'Cardinales / Esenciales' => [
+            'Liderazgo' => 'Capacidad para inspirar, guiar y movilizar a otros hacia el logro de objetivos, generando confianza y compromiso.',
+            'Orientación a resultados' => 'Enfoque en el cumplimiento de metas y objetivos con eficiencia, calidad y en los plazos establecidos.',
+            'Toma de decisiones' => 'Habilidad para analizar información, evaluar alternativas y elegir la mejor opción en situaciones diversas.',
+            'Pensamiento estratégico' => 'Capacidad para visualizar el panorama general, anticipar escenarios y planificar acciones a largo plazo.',
+        ],
+        'Gerenciales / Liderazgo' => [
+            'Desarrollo de personas' => 'Compromiso con el crecimiento profesional del equipo, brindando retroalimentación, coaching y oportunidades de aprendizaje.',
+            'Influencia' => 'Capacidad para persuadir y generar impacto positivo en otros, logrando apoyo y colaboración.',
+            'Gestión del cambio' => 'Habilidad para conducir procesos de transformación, minimizando resistencias y facilitando la adaptación.',
+            'Liderar con el ejemplo' => 'Modelar comportamientos deseados, siendo coherente entre lo que se dice y se hace, inspirando a otros.',
+        ],
+        'Por Área / Específicas' => [
+            'Dominio técnico (TI, Ventas, Finanzas)' => 'Conocimiento especializado y aplicación efectiva de herramientas, metodologías y prácticas del área.',
+            'Solución de problemas' => 'Capacidad para identificar, analizar y resolver situaciones complejas de manera efectiva y creativa.',
+            'Innovación' => 'Habilidad para proponer y implementar ideas nuevas que generen valor y mejoras en procesos, productos o servicios.',
+            'Calidad' => 'Compromiso con la excelencia, asegurando que los entregables cumplan o superen los estándares establecidos.',
+        ],
+        'Educación / Formación' => [
+            'Autoconocimiento' => 'Capacidad para reconocer fortalezas, áreas de oportunidad, emociones y su impacto en el desempeño.',
+            'Empatía' => 'Habilidad para comprender y conectar con las emociones y perspectivas de otros, generando relaciones significativas.',
+            'Facilitación del aprendizaje' => 'Capacidad para diseñar y conducir experiencias de aprendizaje efectivas, adaptadas a las necesidades del grupo.',
+            'Evaluación pedagógica' => 'Habilidad para diseñar, aplicar y analizar instrumentos de evaluación que midan el logro de objetivos de aprendizaje.',
+        ],
+    ];
+
+    public $categorias = [];
+    public $competenciasDisponibles = [];
+    public $nombre_competencia_original = ''; // Para validar duplicados
+
     public function mount(Competencia $competencia): void
     {
         $this->competencia = $competencia;
-        $this->categorias = Categoria::orderBy('categoria')->get(); // Corregido
+        $this->categorias = Categoria::orderBy('categoria')->get();
 
         // Cargar los datos de la competencia principal
-        $this->nombre_competencia = $competencia->nombre_competencia;
-        $this->definicion_competencia = $competencia->definicion_competencia;
         $this->categoria_id_competencia = $competencia->categoria_id_competencia;
+        $this->nombre_competencia = $competencia->nombre_competencia;
+        $this->nombre_competencia_original = $competencia->nombre_competencia;
+        $this->definicion_competencia = $competencia->definicion_competencia;
 
-        // 2. Cargar los niveles existentes y mapearlos a nuestra estructura
+        // Cargar competencias disponibles para la categoría actual
+        $this->cargarCompetenciasDisponibles();
+
+        // Cargar los niveles existentes
         $nivelesExistentes = $competencia->niveles()->orderBy('id_nivel', 'desc')->get();
 
         foreach (array_reverse($this->escalaDeNiveles, true) as $numero => $data) {
-            // Buscamos el nivel existente que coincida con el nombre estándar
             $nivelGuardado = $nivelesExistentes->firstWhere('nombre_nivel', $data['nombre']);
 
             $this->niveles[] = [
-                'id_nivel' => $nivelGuardado->id_nivel ?? null, // Guardamos el ID para la actualización
+                'id_nivel' => $nivelGuardado->id_nivel ?? null,
                 'numero' => $numero,
                 'nombre_nivel' => $data['nombre'],
                 'tagline' => $data['tagline'],
-                'descripcion_nivel' => $nivelGuardado->descripcion_nivel ?? '' // Usamos la descripción guardada
+                'descripcion_nivel' => $nivelGuardado->descripcion_nivel ?? ''
             ];
         }
     }
 
-    // 3. Ya no se necesitan los métodos añadirNivel() ni eliminarNivel()
+    // Cargar competencias disponibles según la categoría
+    private function cargarCompetenciasDisponibles(): void
+    {
+        $this->competenciasDisponibles = [];
+        
+        if ($this->categoria_id_competencia) {
+            $categoria = Categoria::find($this->categoria_id_competencia);
+            if ($categoria && isset($this->catalogoCompetencias[$categoria->categoria])) {
+                $this->competenciasDisponibles = array_keys($this->catalogoCompetencias[$categoria->categoria]);
+            }
+        }
+    }
+
+    // Actualizar competencias disponibles cuando cambia la categoría
+    public function updatedCategoriaIdCompetencia($value): void
+    {
+        $this->nombre_competencia = '';
+        $this->definicion_competencia = '';
+        $this->cargarCompetenciasDisponibles();
+    }
+
+    // Autocompletar definición cuando se selecciona una competencia
+    public function updatedNombreCompetencia($value): void
+    {
+        if ($value && $this->categoria_id_competencia) {
+            $categoria = Categoria::find($this->categoria_id_competencia);
+            if ($categoria && isset($this->catalogoCompetencias[$categoria->categoria][$value])) {
+                $this->definicion_competencia = $this->catalogoCompetencias[$categoria->categoria][$value];
+            }
+        }
+    }
 
     protected function rules(): array
     {
         return [
-            'nombre_competencia' => 'required|string|max:255',
-            'definicion_competencia' => 'required|string',
             'categoria_id_competencia' => 'required|integer|exists:categoria_competencias,id_categoria_competencia',
+            'nombre_competencia' => [
+                'required',
+                'string',
+                'max:255',
+                // Validación de duplicados (excluye la competencia actual)
+                function ($attribute, $value, $fail) {
+                    // Solo validar si cambió el nombre o la categoría
+                    $cambioNombre = $value !== $this->nombre_competencia_original;
+                    $cambioCategoria = $this->categoria_id_competencia !== $this->competencia->categoria_id_competencia;
+                    
+                    if ($cambioNombre || $cambioCategoria) {
+                        $existe = Competencia::where('nombre_competencia', $value)
+                            ->where('categoria_id_competencia', $this->categoria_id_competencia)
+                            ->where('id_competencia', '!=', $this->competencia->id_competencia)
+                            ->exists();
+                        
+                        if ($existe) {
+                            $fail('Esta competencia ya existe en la categoría seleccionada.');
+                        }
+                    }
+                },
+            ],
+            'definicion_competencia' => 'required|string',
             'niveles.*.descripcion_nivel' => 'required|string',
         ];
     }
 
     protected $validationAttributes = [
+        'categoria_id_competencia' => 'categoría',
         'nombre_competencia' => 'nombre de la competencia',
         'definicion_competencia' => 'definición de la competencia',
-        'categoria_id_competencia' => 'categoría',
         'niveles.*.descripcion_nivel' => 'descripción del nivel',
     ];
 
@@ -86,17 +176,15 @@ class EditarComptencia extends Component
         $this->validate();
 
         DB::transaction(function () {
-            // 1. Actualizar la competencia principal
+            // Actualizar la competencia principal
             $this->competencia->update([
                 'nombre_competencia' => $this->nombre_competencia,
                 'definicion_competencia' => $this->definicion_competencia,
                 'categoria_id_competencia' => $this->categoria_id_competencia,
             ]);
 
-            // 2. Sincronizar los 5 niveles fijos
+            // Sincronizar los 5 niveles fijos
             foreach ($this->niveles as $nivelData) {
-                // Usamos updateOrCreate para manejar el caso (improbable) de que un nivel no exista.
-                // La condición de búsqueda es el ID del nivel.
                 $this->competencia->niveles()->updateOrCreate(
                     ['id_nivel' => $nivelData['id_nivel']],
                     [
@@ -110,7 +198,6 @@ class EditarComptencia extends Component
         session()->flash('message', '¡Competencia actualizada exitosamente!');
         $this->redirect(route('revisar-competencia'), navigate: true);
     }
-    // --- FIN DE LA SOLUCIÓN ---
 
     public function render()
     {

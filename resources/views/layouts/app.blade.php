@@ -16,6 +16,9 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
+     <!-- Toastr CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -59,6 +62,42 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.2/color-thief.umd.js"></script>
+
+     <!-- jQuery (requerido por Toastr) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Toastr JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <!-- Script para manejar notificaciones Toastr -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configuración de Toastr
+            toastr.options = {
+                "progressBar": true,
+                "positionClass": "toast-top-right",
+                "closeButton": true,
+                "timeOut": 4000,
+                "extendedTimeOut": 4000,
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            };
+
+            // Escuchar eventos de Livewire para mostrar notificaciones
+            Livewire.on('toastr-success', (event) => {
+                toastr.success(event.message);
+            });
+
+            Livewire.on('toastr-error', (event) => {
+                toastr.error(event.message);
+            });
+
+            Livewire.on('toastr-warning', (event) => {
+                toastr.warning(event.message);
+            });
+        });
+    </script>
+
+  
 
     @stack('scripts')
     <livewire:encuesta.departamento.manual-usuario-dep-modal />
