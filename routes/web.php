@@ -14,6 +14,7 @@ use App\Livewire\Encuesta\EditarEmpresa;
 use App\Livewire\Encuesta\Evaluacion\CrearEvaluacion;
 use App\Livewire\Encuesta\MostrarEmpresa;
 use App\Livewire\Encuesta\PapeleraEmpresas;
+use App\Livewire\Encuesta\Pregunta\GestionarPregunta;
 use App\Livewire\Encuesta\Usuario\CrearUsuario;
 use App\Livewire\Encuesta\Usuario\EditarUsuario;
 use App\Livewire\Encuesta\Usuario\MostrarUsuario;
@@ -57,5 +58,7 @@ Route::get('/competencias/{competencia}/editar', EditarComptencia::class)->name(
 Route::get('/competencias/catalogo', CatalogoCompetencia::class )->name('catalogo-competencia');
 Route::get('/papelera-empresas', PapeleraEmpresas::class)->name('papelera-empresas');
 Route::get('/papelera-empresas', PapeleraEmpresas::class)->name('papelera-empresas');
+Route::get('/gestionar-pregunta', GestionarPregunta::class)->name('gestionar-pregunta');
 Route::get('/crear-evaluacion', CrearEvaluacion::class)->name('crear-evaluacion');
+Route::get('/editar-evaluacion/{id}', CrearEvaluacion::class)->name('editar-evaluacion');
 //crear-evaluacion  Route::get('/select2-example', Select2Example::class)->name('select2-example');

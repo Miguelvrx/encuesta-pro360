@@ -18,6 +18,13 @@ return new class extends Migration
             $table->date('fecha_cierre');
             $table->text('descripcion_evaluacion');
             $table->string('uuid_encuesta', 36)->unique();
+
+             // Campos para control de flujo y guardado automático
+            $table->json('configuracion_data')->nullable(); // Competencias y preguntas seleccionadas
+            $table->json('encuestados_data')->nullable();   // Personas evaluadas
+            $table->json('calificadores_data')->nullable(); // Calificadores asignados
+            $table->enum('estado', ['borrador', 'revision', 'completada'])->default('borrador');
+            $table->integer('paso_actual')->default(1);
             $table->timestamps();
         });
     }

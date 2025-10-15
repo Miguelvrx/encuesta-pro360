@@ -20,11 +20,19 @@ class Evaluacion extends Model
         'fecha_cierre',
         'descripcion_evaluacion',
         'uuid_encuesta',
+        'configuracion_data', // JSON con configuración
+        'encuestados_data',   // JSON con encuestados
+        'calificadores_data', // JSON con calificadores
+        'estado', // 'borrador', 'revision', 'completada'
+        'paso_actual' // 1, 2, 3, 4, 5, 6
     ];
 
     protected function casts(): array
     {
         return [
+            'configuracion_data' => 'array',
+            'encuestados_data' => 'array',
+            'calificadores_data' => 'array',
             'fecha_inicio' => 'date',
             'fecha_cierre' => 'date',
         ];
