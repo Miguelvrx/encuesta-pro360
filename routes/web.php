@@ -12,6 +12,9 @@ use App\Livewire\Encuesta\Departamento\MostrarDepartamento;
 use App\Livewire\Encuesta\Departamento\VerDepartamento;
 use App\Livewire\Encuesta\EditarEmpresa;
 use App\Livewire\Encuesta\Evaluacion\CrearEvaluacion;
+use App\Livewire\Encuesta\Evaluacion\MostrarEvaluacion;
+use App\Livewire\Encuesta\Evaluacion\RealizarEvaluacion;
+use App\Livewire\Encuesta\Evaluacion\VerEvaluacion;
 use App\Livewire\Encuesta\MostrarEmpresa;
 use App\Livewire\Encuesta\PapeleraEmpresas;
 use App\Livewire\Encuesta\Pregunta\GestionarPregunta;
@@ -61,4 +64,7 @@ Route::get('/papelera-empresas', PapeleraEmpresas::class)->name('papelera-empres
 Route::get('/gestionar-pregunta', GestionarPregunta::class)->name('gestionar-pregunta');
 Route::get('/crear-evaluacion', CrearEvaluacion::class)->name('crear-evaluacion');
 Route::get('/editar-evaluacion/{id}', CrearEvaluacion::class)->name('editar-evaluacion');
+Route::get('/evaluaciones', MostrarEvaluacion::class)->name('mostrar-evaluaciones');
+Route::get('/evaluaciones/{id}', VerEvaluacion::class)->name('ver-evaluacion');
+Route::get('/evaluacion/{uuid}', RealizarEvaluacion::class)->name('realizar-evaluacion');
 //crear-evaluacion  Route::get('/select2-example', Select2Example::class)->name('select2-example');

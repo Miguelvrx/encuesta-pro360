@@ -1,3 +1,4 @@
+
 {{-- resources/views/livewire/encuesta/evaluacion/crear-evaluacion.blade.php --}}
 <div class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-8 px-4 sm:px-6 lg:px-8">
     <div class="max-w-7xl mx-auto">
@@ -10,7 +11,7 @@
                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                 </svg>
                 <p class="ml-3 text-sm text-green-700 font-medium">{{ session('message') }}</p>
-            </div>  
+            </div>
         </div>
         @endif
 
@@ -25,53 +26,53 @@
         </div>
         @endif
 
-     {{-- Indicador de Pasos - Versión Compacta --}}
-<div class="bg-white rounded-xl shadow-lg p-4 mb-8">
-    <nav aria-label="Progress">
-        <ol class="flex items-center justify-between">
-            @php
-            $pasos = [
-                1 => 'INFO. BÁSICA',
-                2 => 'CONFIG.',
-                3 => 'ENCUESTADO', 
-                4 => 'CALIF.',
-                5 => 'ENVÍO'
-            ];
-            @endphp
+        {{-- Indicador de Pasos - Versión Compacta --}}
+        <div class="bg-white rounded-xl shadow-lg p-4 mb-8">
+            <nav aria-label="Progress">
+                <ol class="flex items-center justify-between">
+                    @php
+                    $pasos = [
+                    1 => 'INFO. BÁSICA',
+                    2 => 'CONFIG.',
+                    3 => 'ENCUESTADO',
+                    4 => 'CALIF.',
+                    5 => 'ENVÍO'
+                    ];
+                    @endphp
 
-            @foreach($pasos as $num => $nombre)
-            <li class="relative flex-1">
-                @if($num > 1)
-                <div class="absolute left-0 right-0 top-4 h-0.5 -translate-y-1/2 
+                    @foreach($pasos as $num => $nombre)
+                    <li class="relative flex-1">
+                        @if($num > 1)
+                        <div class="absolute left-0 right-0 top-4 h-0.5 -translate-y-1/2 
                     {{ $paso_actual >= $num ? 'bg-green-500' : 'bg-gray-300' }}">
-                </div>
-                @endif
+                        </div>
+                        @endif
 
-                <div class="relative flex flex-col items-center">
-                    <div class="flex items-center justify-center w-8 h-8 rounded-full border-2 transition-all duration-300 mb-2
+                        <div class="relative flex flex-col items-center">
+                            <div class="flex items-center justify-center w-8 h-8 rounded-full border-2 transition-all duration-300 mb-2
                         {{ $paso_actual > $num ? 'bg-green-500 border-green-500' : 
                            ($paso_actual == $num ? 'bg-blue-600 border-blue-600' : 'bg-gray-200 border-gray-300') }}">
-                        @if($paso_actual > $num)
-                        <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                        </svg>
-                        @else
-                        <span class="text-xs font-bold {{ $paso_actual == $num ? 'text-white' : 'text-gray-600' }}">
-                            {{ $num }}
-                        </span>
-                        @endif
-                    </div>
-                    
-                    <span class="text-xs font-medium text-center leading-tight
+                                @if($paso_actual > $num)
+                                <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                </svg>
+                                @else
+                                <span class="text-xs font-bold {{ $paso_actual == $num ? 'text-white' : 'text-gray-600' }}">
+                                    {{ $num }}
+                                </span>
+                                @endif
+                            </div>
+
+                            <span class="text-xs font-medium text-center leading-tight
                         {{ $paso_actual >= $num ? 'text-blue-600' : 'text-gray-500' }}">
-                        {{ $nombre }}
-                    </span>
-                </div>
-            </li>
-            @endforeach
-        </ol>
-    </nav>
-</div>
+                                {{ $nombre }}
+                            </span>
+                        </div>
+                    </li>
+                    @endforeach
+                </ol>
+            </nav>
+        </div>
 
         {{-- PASO 1: Información Básica --}}
         @if($paso_actual == 1)
@@ -228,30 +229,95 @@
 
             <div class="p-6 space-y-6">
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Colaborador a Evaluar</label>
-                    <p class="text-xs text-gray-500 mb-3">Areas de colaboradores</p>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Selecciona al Colaborador a Evaluar</label>
+                    <p class="text-xs text-gray-500 mb-3">Filtra por empresa y departamento para encontrar al colaborador</p>
 
-                    <div class="flex gap-3">
-                        <select wire:model="encuestadoSeleccionado" class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                            <option value="">Seleccionar...</option>
-                            @foreach($usuarios as $usuario)
-                            <option value="{{ $usuario->id }}">{{ $usuario->name }} {{ $usuario->primer_apellido }} - {{ $usuario->puesto }}</option>
-                            @endforeach
-                        </select>
-                        <button wire:click="agregarEncuestado" type="button" class="px-6 py-3 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors">
-                            Seleccionar
-                        </button>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <!-- Select para Empresa -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Empresa</label>
+                            <select wire:model.live="empresaSeleccionada" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                <option value="">Todas las Empresas</option>
+                                @foreach($empresas as $empresa)
+                                <option value="{{ $empresa->id_empresa }}">{{ $empresa->nombre_comercial }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Select para Departamento -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Departamento</label>
+                            <select wire:model.live="departamentoSeleccionado" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                <option value="">Todos los Departamentos</option>
+                                @foreach($departamentos as $departamento)
+                                <option value="{{ $departamento->id_departamento }}">{{ $departamento->nombre_departamento }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
-                    @error('encuestados') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
                 </div>
 
-                @if(count($encuestados) > 0)
+                {{-- Grid de Colaboradores --}}
+                @if($usuarios->count() > 0)
                 <div>
-                    <h3 class="text-sm font-semibold text-gray-700 mb-3">Seleccionar colaborador</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <h3 class="text-sm font-semibold text-gray-700 mb-4">Colaboradores Disponibles</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        @foreach($usuarios as $usuario)
+                        <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow bg-white">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <div class="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                            {{ substr($usuario->name, 0, 1) }}{{ substr($usuario->primer_apellido, 0, 1) }}
+                                        </div>
+                                        <div>
+                                            <h4 class="font-bold text-gray-900">{{ $usuario->name }} {{ $usuario->primer_apellido }} {{ $usuario->segundo_apellido ?? '' }}</h4>
+                                            <p class="text-sm text-gray-600">{{ $usuario->email }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="space-y-1 text-xs">
+                                        <p class="font-semibold text-gray-700">PUESTO: {{ $usuario->puesto ?? 'N/A' }}</p>
+                                        <p class="text-gray-600">EMPRESA: {{ $usuario->departamento->empresa->nombre_comercial ?? 'N/A' }}</p>
+                                        <p class="text-gray-600">DEPTO: {{ $usuario->departamento->nombre_departamento ?? 'N/A' }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @if(collect($encuestados)->contains('id', $usuario->id))
+                            <button class="w-full py-2 bg-green-500 text-white font-semibold rounded-lg cursor-default">
+                                ✅ Seleccionado
+                            </button>
+                            @else
+                            <button
+                                wire:click="seleccionarEncuestado({{ $usuario->id }})"
+                                class="w-full py-2 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors">
+                                Seleccionar
+                            </button>
+                            @endif
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                @else
+                <div class="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    <p class="mt-2 text-sm text-gray-500">No hay colaboradores disponibles con los filtros seleccionados</p>
+                </div>
+                @endif
+
+                {{-- Colaborador Seleccionado --}}
+                @if(count($encuestados) > 0)
+                <div class="mt-8">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Colaborador Seleccionado</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         @foreach($encuestados as $index => $encuestado)
                         <div class="relative bg-gradient-to-br from-green-400 to-green-500 rounded-lg p-4 text-white shadow-lg">
-                            <button wire:click="eliminarEncuestado({{ $index }})" type="button" class="absolute top-2 right-2 bg-white text-red-500 rounded-full p-1 hover:bg-red-50">
+                            <button
+                                wire:click="eliminarEncuestado({{ $index }})"
+                                type="button"
+                                class="absolute top-2 right-2 bg-white text-red-500 rounded-full p-1 hover:bg-red-50 transition-colors">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                 </svg>
@@ -265,23 +331,28 @@
                                 <h4 class="font-bold text-sm">{{ $encuestado['nombre'] }}</h4>
                                 <p class="text-xs opacity-90 mt-1">{{ $encuestado['email'] }}</p>
                                 <p class="text-xs font-semibold mt-2 bg-white/20 px-2 py-1 rounded">PUESTO: {{ $encuestado['puesto'] ?? 'N/A' }}</p>
+                                @if(isset($encuestado['empresa']))
+                                <p class="text-xs font-semibold mt-1 bg-white/20 px-2 py-1 rounded">EMPRESA: {{ $encuestado['empresa'] }}</p>
+                                @endif
+                                @if(isset($encuestado['departamento']))
+                                <p class="text-xs font-semibold mt-1 bg-white/20 px-2 py-1 rounded">DEPTO: {{ $encuestado['departamento'] }}</p>
+                                @endif
                             </div>
                         </div>
                         @endforeach
                     </div>
                 </div>
                 @else
-                <div class="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                <div class="text-center py-8 bg-yellow-50 rounded-lg border-2 border-dashed border-yellow-300">
+                    <svg class="mx-auto h-12 w-12 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
-                    <p class="mt-2 text-sm text-gray-500">No hay encuestados agregados</p>
+                    <p class="mt-2 text-sm text-yellow-700">Selecciona un colaborador para continuar</p>
                 </div>
                 @endif
             </div>
         </div>
-
-        {{-- PASO 4: Calificadores - COPIA ESTA SECCIÓN COMPLETA --}}
+        {{-- PASO 4: Calificadores --}}
         @elseif($paso_actual == 4)
         <div class="bg-white rounded-xl shadow-lg overflow-hidden">
             <div class="bg-gradient-to-r from-pink-600 to-red-600 px-6 py-4">
@@ -299,45 +370,80 @@
                     <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
-                    <p class="mt-2 text-sm text-gray-500">Primero debes agregar personas evaluadas en el paso anterior</p>
+                    <p class="mt-2 text-sm text-gray-500">Primero debes agregar una persona evaluada en el paso anterior</p>
                 </div>
                 @else
                 <div class="space-y-8">
                     @foreach($encuestados as $indexEnc => $encuestado)
-                    <div class="border-2 border-gray-200 rounded-xl p-6 bg-gray-50">
-                        <div class="flex items-center gap-3 mb-4">
-                            <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <div class="border-2 border-gray-200 rounded-xl p-6 bg-white shadow-sm">
+                        {{-- Encabezado del Evaluado --}}
+                        <div class="flex items-center gap-4 mb-6 pb-4 border-b border-gray-200">
+                            <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                                <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
                                 </svg>
                             </div>
-                            <div>
-                                <h3 class="text-lg font-bold text-gray-900">{{ $encuestado['nombre'] }}</h3>
+                            <div class="flex-1">
+                                <h3 class="text-xl font-bold text-gray-900">{{ $encuestado['nombre'] }}</h3>
                                 <p class="text-sm text-gray-600">{{ $encuestado['puesto'] ?? 'Sin puesto' }}</p>
+                                <p class="text-xs text-gray-500">{{ $encuestado['departamento'] ?? 'Sin departamento' }}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm font-semibold text-gray-700">Evaluación 360°</p>
+                                <p class="text-xs text-gray-500">Se autoevaluará y recibirá evaluaciones de otros</p>
                             </div>
                         </div>
 
-                        <div class="bg-white rounded-lg p-4 mb-4">
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Agregar Calificador</label>
+                        {{-- Autoevaluación (Automática) --}}
+                        <div class="mb-6">
+                            <h4 class="text-lg font-semibold text-gray-800 mb-3">Autoevaluación (Automática)</h4>
+                            <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="font-semibold text-gray-900">{{ $encuestado['nombre'] }}</p>
+                                            <p class="text-sm text-gray-600">{{ $encuestado['email'] }}</p>
+                                        </div>
+                                    </div>
+                                    <span class="px-3 py-1 bg-purple-100 text-purple-700 text-sm font-semibold rounded-full">
+                                        Autoevaluación
+                                    </span>
+                                </div>
+                                <p class="text-xs text-purple-600 mt-2 italic">
+                                    ✅ La autoevaluación se incluye automáticamente en toda evaluación 360°
+                                </p>
+                            </div>
+                        </div>
+
+                        {{-- Agregar Otros Calificadores --}}
+                        <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                            <h4 class="text-lg font-semibold text-gray-800 mb-3">Agregar Otros Evaluadores</h4>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                                 {{-- Select de Persona --}}
                                 <select wire:model="calificadorTempSeleccionado.{{ $indexEnc }}" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
-                                    <option value="">Seleccionar persona...</option>
-                                    @foreach($usuarios as $usuario)
+                                    <option value="">Seleccionar evaluador...</option>
+                                    @foreach($evaluadoresDisponibles as $usuario)
                                     @if($usuario->id != $encuestado['id'])
-                                    <option value="{{ $usuario->id }}">{{ $usuario->name }} {{ $usuario->primer_apellido }}</option>
+                                    <option value="{{ $usuario->id }}">
+                                        {{ $usuario->name }} {{ $usuario->primer_apellido }} - {{ $usuario->puesto }}
+                                        ({{ $usuario->departamento->nombre_departamento ?? 'N/A' }})
+                                    </option>
                                     @endif
                                     @endforeach
                                 </select>
 
                                 {{-- Select de Tipo de Relación --}}
                                 <select wire:model="tipoRolTempSeleccionado.{{ $indexEnc }}" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
-                                    <option value="">Selecciona La Relación</option>
-                                    <option value="Autoevaluación">Autoevaluación</option>
-                                    <option value="Par">Par</option>
+                                    <option value="">Seleccionar relación...</option>
+                                    <option value="Jefe">Jefe Directo</option>
+                                    <option value="Par">Par / Colega</option>
                                     <option value="Colaborador">Colaborador</option>
                                     <option value="Cliente">Cliente</option>
-                                    <option value="Jefe">Jefe</option>
                                 </select>
 
                                 {{-- Botón Agregar --}}
@@ -345,49 +451,70 @@
                                     wire:click="agregarCalificador({{ $indexEnc }})"
                                     type="button"
                                     class="px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                    Agregar
+                                    Agregar Evaluador
                                 </button>
                             </div>
                         </div>
 
                         {{-- Lista de Calificadores Asignados --}}
-                        @if(isset($calificadores[$indexEnc]) && count($calificadores[$indexEnc]) > 0)
-                        <div class="space-y-2">
-                            <h4 class="text-sm font-semibold text-gray-700">Calificadores asignados:</h4>
-                            @foreach($calificadores[$indexEnc] as $indexCal => $calificador)
-                            <div class="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                                        <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                                        </svg>
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-800 mb-3">Evaluadores Asignados</h4>
+
+                            @if(isset($calificadores[$indexEnc]) && count($calificadores[$indexEnc]) > 0)
+                            <div class="space-y-3">
+                                @foreach($calificadores[$indexEnc] as $indexCal => $calificador)
+                                <div class="flex items-center justify-between bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-12 h-12 rounded-full flex items-center justify-center 
+                                    {{ $calificador['tipo_rol'] == 'Jefe' ? 'bg-red-100' : '' }}
+                                    {{ $calificador['tipo_rol'] == 'Par' ? 'bg-blue-100' : '' }}
+                                    {{ $calificador['tipo_rol'] == 'Colaborador' ? 'bg-green-100' : '' }}
+                                    {{ $calificador['tipo_rol'] == 'Cliente' ? 'bg-yellow-100' : '' }}">
+                                            <svg class="w-6 h-6 
+                                        {{ $calificador['tipo_rol'] == 'Jefe' ? 'text-red-600' : '' }}
+                                        {{ $calificador['tipo_rol'] == 'Par' ? 'text-blue-600' : '' }}
+                                        {{ $calificador['tipo_rol'] == 'Colaborador' ? 'text-green-600' : '' }}
+                                        {{ $calificador['tipo_rol'] == 'Cliente' ? 'text-yellow-600' : '' }}"
+                                                fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="font-semibold text-gray-900">{{ $calificador['nombre'] }}</p>
+                                            <p class="text-sm text-gray-600">{{ $calificador['email'] }}</p>
+                                            <p class="text-xs text-gray-500">Se enviará invitación por correo</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p class="text-sm font-semibold text-gray-900">{{ $calificador['nombre'] }}</p>
-                                        <p class="text-xs text-gray-500">{{ $calificador['email'] }}</p>
+                                    <div class="flex items-center gap-3">
+                                        <span class="px-3 py-1 text-xs font-semibold rounded-full 
+                                    {{ $calificador['tipo_rol'] == 'Jefe' ? 'bg-red-100 text-red-700' : '' }}
+                                    {{ $calificador['tipo_rol'] == 'Par' ? 'bg-blue-100 text-blue-700' : '' }}
+                                    {{ $calificador['tipo_rol'] == 'Colaborador' ? 'bg-green-100 text-green-700' : '' }}
+                                    {{ $calificador['tipo_rol'] == 'Cliente' ? 'bg-yellow-100 text-yellow-700' : '' }}">
+                                            {{ $calificador['tipo_rol'] }}
+                                        </span>
+                                        <button
+                                            wire:click="eliminarCalificador({{ $indexEnc }}, {{ $indexCal }})"
+                                            type="button"
+                                            class="text-red-600 hover:text-red-800 transition-colors p-1">
+                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
                                     </div>
                                 </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="px-3 py-1 text-xs font-semibold rounded-full 
-                                {{ $calificador['tipo_rol'] == 'Autoevaluación' ? 'bg-purple-100 text-purple-700' : '' }}
-                                {{ $calificador['tipo_rol'] == 'Jefe' ? 'bg-red-100 text-red-700' : '' }}
-                                {{ $calificador['tipo_rol'] == 'Par' ? 'bg-blue-100 text-blue-700' : '' }}
-                                {{ $calificador['tipo_rol'] == 'Colaborador' ? 'bg-green-100 text-green-700' : '' }}
-                                {{ $calificador['tipo_rol'] == 'Cliente' ? 'bg-yellow-100 text-yellow-700' : '' }}">
-                                        {{ $calificador['tipo_rol'] }}
-                                    </span>
-                                    <button wire:click="eliminarCalificador({{ $indexEnc }}, {{ $indexCal }})" type="button" class="text-red-600 hover:text-red-800 transition-colors">
-                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                    </button>
-                                </div>
+                                @endforeach
                             </div>
-                            @endforeach
+                            @else
+                            <div class="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                                <p class="mt-2 text-sm text-gray-500">No hay otros evaluadores asignados</p>
+                                <p class="text-xs text-gray-400 mt-1">Agrega jefes, pares, colaboradores o clientes</p>
+                            </div>
+                            @endif
                         </div>
-                        @else
-                        <p class="text-sm text-gray-500 italic text-center py-4">No hay calificadores asignados</p>
-                        @endif
                     </div>
                     @endforeach
                 </div>
