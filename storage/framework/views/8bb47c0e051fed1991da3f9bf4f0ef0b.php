@@ -6,15 +6,15 @@
             <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
                 <div class="flex-1">
                     <div class="flex items-center gap-3 mb-4">
-                        <a href="{{ route('mostrar-evaluaciones') }}" wire:navigate 
+                        <a href="<?php echo e(route('mostrar-evaluaciones')); ?>" wire:navigate 
                            class="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
                             <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                             </svg>
                         </a>
                         <div>
-                            <h1 class="text-3xl font-bold text-gray-900">{{ $evaluacion->tipo_evaluacion ?? 'Evaluación' }}</h1>
-                            <p class="text-gray-600 mt-1">{{ $evaluacion->descripcion_evaluacion ?? 'Sin descripción' }}</p>
+                            <h1 class="text-3xl font-bold text-gray-900"><?php echo e($evaluacion->tipo_evaluacion ?? 'Evaluación'); ?></h1>
+                            <p class="text-gray-600 mt-1"><?php echo e($evaluacion->descripcion_evaluacion ?? 'Sin descripción'); ?></p>
                         </div>
                     </div>
 
@@ -26,8 +26,9 @@
                             <div>
                                 <div class="font-semibold">Período</div>
                                 <div>
-                                    {{ \Carbon\Carbon::parse($evaluacion->fecha_inicio)->format('d M Y') }} - 
-                                    {{ \Carbon\Carbon::parse($evaluacion->fecha_cierre)->format('d M Y') }}
+                                    <?php echo e(\Carbon\Carbon::parse($evaluacion->fecha_inicio)->format('d M Y')); ?> - 
+                                    <?php echo e(\Carbon\Carbon::parse($evaluacion->fecha_cierre)->format('d M Y')); ?>
+
                                 </div>
                             </div>
                         </div>
@@ -38,7 +39,7 @@
                             </svg>
                             <div>
                                 <div class="font-semibold">Estado</div>
-                                <div class="capitalize">{{ $evaluacion->estado ?? 'Desconocido' }}</div>
+                                <div class="capitalize"><?php echo e($evaluacion->estado ?? 'Desconocido'); ?></div>
                             </div>
                         </div>
 
@@ -48,7 +49,7 @@
                             </svg>
                             <div>
                                 <div class="font-semibold">Evaluadores</div>
-                                <div>{{ $estadisticas['evaluadores_completados'] ?? 0 }}/{{ $estadisticas['total_evaluadores'] ?? 0 }} completados</div>
+                                <div><?php echo e($estadisticas['evaluadores_completados'] ?? 0); ?>/<?php echo e($estadisticas['total_evaluadores'] ?? 0); ?> completados</div>
                             </div>
                         </div>
                     </div>
@@ -57,7 +58,7 @@
                 <!-- ID de Evaluación -->
                 <div class="bg-gray-50 rounded-lg p-4 min-w-64">
                     <div class="text-sm font-medium text-gray-600 mb-2">ID de Evaluación</div>
-                    <div class="font-mono text-sm text-gray-900 bg-white p-2 rounded border">{{ $evaluacion->uuid_encuesta ?? 'N/A' }}</div>
+                    <div class="font-mono text-sm text-gray-900 bg-white p-2 rounded border"><?php echo e($evaluacion->uuid_encuesta ?? 'N/A'); ?></div>
                 </div>
             </div>
         </div>
@@ -68,7 +69,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-600">Progreso General</p>
-                        <p class="text-2xl font-bold text-gray-900">{{ $estadisticas['progreso'] ?? 0 }}%</p>
+                        <p class="text-2xl font-bold text-gray-900"><?php echo e($estadisticas['progreso'] ?? 0); ?>%</p>
                     </div>
                     <div class="p-3 bg-blue-100 rounded-lg">
                         <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -82,8 +83,8 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-600">Evaluadores</p>
-                        <p class="text-2xl font-bold text-gray-900">{{ $estadisticas['total_evaluadores'] ?? 0 }}</p>
-                        <p class="text-xs text-green-600">{{ $estadisticas['evaluadores_completados'] ?? 0 }} completados</p>
+                        <p class="text-2xl font-bold text-gray-900"><?php echo e($estadisticas['total_evaluadores'] ?? 0); ?></p>
+                        <p class="text-xs text-green-600"><?php echo e($estadisticas['evaluadores_completados'] ?? 0); ?> completados</p>
                     </div>
                     <div class="p-3 bg-green-100 rounded-lg">
                         <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -97,7 +98,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-600">Respuestas</p>
-                        <p class="text-2xl font-bold text-gray-900">{{ $estadisticas['total_respuestas'] ?? 0 }}</p>
+                        <p class="text-2xl font-bold text-gray-900"><?php echo e($estadisticas['total_respuestas'] ?? 0); ?></p>
                     </div>
                     <div class="p-3 bg-purple-100 rounded-lg">
                         <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -112,10 +113,10 @@
                     <div>
                         <p class="text-sm font-medium text-gray-600">Competencias</p>
                         <p class="text-2xl font-bold text-gray-900">
-                            @php
+                            <?php
                                 $competenciaIds = $evaluacion->configuracion_data['competencias'] ?? [];
                                 echo count($competenciaIds);
-                            @endphp
+                            ?>
                         </p>
                     </div>
                     <div class="p-3 bg-orange-100 rounded-lg">
@@ -137,15 +138,15 @@
                     <dl class="space-y-2">
                         <div class="flex justify-between">
                             <dt class="text-gray-600">Fecha de creación:</dt>
-                            <dd class="text-gray-900">{{ \Carbon\Carbon::parse($evaluacion->created_at)->format('d M Y H:i') }}</dd>
+                            <dd class="text-gray-900"><?php echo e(\Carbon\Carbon::parse($evaluacion->created_at)->format('d M Y H:i')); ?></dd>
                         </div>
                         <div class="flex justify-between">
                             <dt class="text-gray-600">Última actualización:</dt>
-                            <dd class="text-gray-900">{{ \Carbon\Carbon::parse($evaluacion->updated_at)->format('d M Y H:i') }}</dd>
+                            <dd class="text-gray-900"><?php echo e(\Carbon\Carbon::parse($evaluacion->updated_at)->format('d M Y H:i')); ?></dd>
                         </div>
                         <div class="flex justify-between">
                             <dt class="text-gray-600">Paso actual:</dt>
-                            <dd class="text-gray-900">{{ $evaluacion->paso_actual ?? 'N/A' }}</dd>
+                            <dd class="text-gray-900"><?php echo e($evaluacion->paso_actual ?? 'N/A'); ?></dd>
                         </div>
                     </dl>
                 </div>
@@ -155,16 +156,17 @@
                     <div class="space-y-3">
                         <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                             <span class="text-gray-700">Evaluadores asignados</span>
-                            <span class="font-semibold text-blue-600">{{ $estadisticas['total_evaluadores'] ?? 0 }}</span>
+                            <span class="font-semibold text-blue-600"><?php echo e($estadisticas['total_evaluadores'] ?? 0); ?></span>
                         </div>
                         <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
                             <span class="text-gray-700">Completados</span>
-                            <span class="font-semibold text-green-600">{{ $estadisticas['evaluadores_completados'] ?? 0 }}</span>
+                            <span class="font-semibold text-green-600"><?php echo e($estadisticas['evaluadores_completados'] ?? 0); ?></span>
                         </div>
                         <div class="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
                             <span class="text-gray-700">Pendientes</span>
                             <span class="font-semibold text-yellow-600">
-                                {{ ($estadisticas['total_evaluadores'] ?? 0) - ($estadisticas['evaluadores_completados'] ?? 0) }}
+                                <?php echo e(($estadisticas['total_evaluadores'] ?? 0) - ($estadisticas['evaluadores_completados'] ?? 0)); ?>
+
                             </span>
                         </div>
                     </div>
@@ -180,10 +182,10 @@
             <button class="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors">
                 Enviar Recordatorios
             </button>
-            <a href="{{ route('mostrar-evaluaciones') }}" wire:navigate
+            <a href="<?php echo e(route('mostrar-evaluaciones')); ?>" wire:navigate
                class="px-6 py-3 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-700 transition-colors">
                 Volver a Evaluaciones
             </a>
         </div>
     </div>
-</div>
+</div><?php /**PATH D:\laragon\www\encuesta-pro360\resources\views/livewire/encuesta/evaluacion/ver-evaluacion.blade.php ENDPATH**/ ?>

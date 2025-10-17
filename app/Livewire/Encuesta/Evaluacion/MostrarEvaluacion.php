@@ -10,7 +10,7 @@ use Livewire\WithPagination;
 class MostrarEvaluacion extends Component
 {
 
-    use WithPagination;
+   use WithPagination;
 
     #[Url(except: '')]
     public string $busqueda = '';
@@ -40,28 +40,51 @@ class MostrarEvaluacion extends Component
 
     public function render()
     {
-        $evaluacionesQuery = Evaluacion::with(['usuarios']);
+        try {
+            $evaluacionesQuery = Evaluacion::with(['usuarios']);
 
-        // Aplicar filtros
-        if ($this->busqueda) {
-            $evaluacionesQuery->where(function ($query) {
-                $query->where('tipo_evaluacion', 'like', '%' . $this->busqueda . '%')
-                    ->orWhere('descripcion_evaluacion', 'like', '%' . $this->busqueda . '%');
-            });
+            // Aplicar filtros
+            if ($this->busqueda) {
+                $evaluacionesQuery->where(function ($query) {
+                    $query->where('tipo_evaluacion', 'like', '%' . $this->busqueda . '%')
+                        ->orWhere('descripcion_evaluacion', 'like', '%' . $this->busqueda . '%');
+                });
+            }
+
+            if ($this->filtroEstado) {
+                $evaluacionesQuery->where('estado', $this->filtroEstado);
+            }
+
+            // Aplicar ordenación
+            $evaluacionesQuery->orderBy($this->ordenarPor, $this->direccionOrden);
+
+            $evaluaciones = $evaluacionesQuery->paginate(10);
+
+            // Calcular estadísticas de forma segura
+            $estadisticas = [
+                'total' => Evaluacion::count(),
+                'completadas' => Evaluacion::where('estado', 'completada')->count(),
+                'en_progreso' => Evaluacion::where('estado', 'en_progreso')->count(),
+                'borradores' => Evaluacion::where('estado', 'borrador')->count(),
+            ];
+
+            return view('livewire.encuesta.evaluacion.mostrar-evaluacion', [
+                'evaluaciones' => $evaluaciones,
+                'estadisticas' => $estadisticas,
+            ])->layout('layouts.app');
+
+        } catch (\Exception $e) {
+            // En caso de error, mostrar vista vacía
+            return view('livewire.encuesta.evaluacion.mostrar-evaluacion', [
+                'evaluaciones' => collect([]),
+                'estadisticas' => [
+                    'total' => 0,
+                    'completadas' => 0,
+                    'en_progreso' => 0,
+                    'borradores' => 0,
+                ],
+            ])->layout('layouts.app');
         }
-
-        if ($this->filtroEstado) {
-            $evaluacionesQuery->where('estado', $this->filtroEstado);
-        }
-
-        // Aplicar ordenación
-        $evaluacionesQuery->orderBy($this->ordenarPor, $this->direccionOrden);
-
-        $evaluaciones = $evaluacionesQuery->paginate(10);
-
-        return view('livewire.encuesta.evaluacion.mostrar-evaluacion', [
-            'evaluaciones' => $evaluaciones,
-        ])->layout('layouts.app');
     }
 
 

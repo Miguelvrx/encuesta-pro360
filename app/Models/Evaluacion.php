@@ -20,11 +20,11 @@ class Evaluacion extends Model
         'fecha_cierre',
         'descripcion_evaluacion',
         'uuid_encuesta',
-        'configuracion_data', // JSON con configuración
-        'encuestados_data',   // JSON con encuestados
-        'calificadores_data', // JSON con calificadores
-        'estado', // 'borrador', 'revision', 'completada'
-        'paso_actual' // 1, 2, 3, 4, 5, 6
+        'configuracion_data',
+        'encuestados_data',
+        'calificadores_data',
+        'estado',
+        'paso_actual'
     ];
 
     protected function casts(): array
@@ -38,12 +38,15 @@ class Evaluacion extends Model
         ];
     }
 
-    // Relaciones
+    // CORRECCIÓN: Relación simplificada y corregida
     public function usuarios(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'evaluacion_usuario', 'evaluacion_id_evaluacion', 'user_id')
-            ->withPivot('usuario_rol', 'tipo_rol', 'fecha_de_asignacion', 'evaluado')
-            ->withTimestamps();
+        return $this->belongsToMany(
+            User::class, 
+            'evaluacion_usuario', 
+            'evaluacion_id_evaluacion', 
+            'user_id'
+        )->withPivot('usuario_rol', 'tipo_rol', 'fecha_de_asignacion', 'evaluado', 'fecha_evaluacion');
     }
 
     public function respuestas(): HasMany

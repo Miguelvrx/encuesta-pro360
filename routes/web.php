@@ -12,6 +12,7 @@ use App\Livewire\Encuesta\Departamento\MostrarDepartamento;
 use App\Livewire\Encuesta\Departamento\VerDepartamento;
 use App\Livewire\Encuesta\EditarEmpresa;
 use App\Livewire\Encuesta\Evaluacion\CrearEvaluacion;
+use App\Livewire\Encuesta\Evaluacion\MisEvaluaciones;
 use App\Livewire\Encuesta\Evaluacion\MostrarEvaluacion;
 use App\Livewire\Encuesta\Evaluacion\RealizarEvaluacion;
 use App\Livewire\Encuesta\Evaluacion\VerEvaluacion;
@@ -67,4 +68,7 @@ Route::get('/editar-evaluacion/{id}', CrearEvaluacion::class)->name('editar-eval
 Route::get('/evaluaciones', MostrarEvaluacion::class)->name('mostrar-evaluaciones');
 Route::get('/evaluaciones/{id}', VerEvaluacion::class)->name('ver-evaluacion');
 Route::get('/evaluacion/{uuid}', RealizarEvaluacion::class)->name('realizar-evaluacion');
+Route::get('/mis-evaluaciones', MisEvaluaciones::class)->name('mis-evaluaciones');
+Route::get('/evaluacion-completada', \App\Livewire\Encuesta\Evaluacion\EvaluacionCompletada::class)->name('evaluacion-completada');
+
 //crear-evaluacion  Route::get('/select2-example', Select2Example::class)->name('select2-example');

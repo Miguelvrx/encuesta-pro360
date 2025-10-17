@@ -2,93 +2,76 @@
 
 namespace App\Livewire\Encuesta\Evaluacion;
 
+use App\Models\Competencia;
 use App\Models\Evaluacion;
 use App\Models\Respuesta;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 
 class VerEvaluacion extends Component
 {
 
-      public $evaluacionId;
+     public $evaluacionId;
     public $evaluacion;
-    public $resultados;
     public $estadisticas;
-    public $evaluadores;
 
     public function mount($id)
     {
-        $this->evaluacionId = $id;
-        $this->evaluacion = Evaluacion::with([
-            'usuarios.departamento.empresa',
-            'competencias.preguntas',
-            'competencias.niveles'
-        ])->findOrFail($id);
-
-        $this->cargarResultados();
-        $this->calcularEstadisticas();
-        $this->cargarEvaluadores();
+        try {
+            $this->evaluacionId = $id;
+            
+            // Cargar evaluación con relaciones básicas - VERIFICAR NOMBRE DE RELACIÓN
+            $this->evaluacion = Evaluacion::with([
+                'usuarios', // Verifica que esta relación exista en el modelo
+                'respuestas' // Agregar esta relación si existe
+            ])->findOrFail($id);
+            
+            $this->calcularEstadisticasBasicas();
+            
+        } catch (\Exception $e) {
+            Log::error('Error en VerEvaluacion mount: ' . $e->getMessage());
+            session()->flash('error', 'No se pudo cargar la evaluación.');
+        }
     }
 
-    protected function cargarResultados()
+    protected function calcularEstadisticasBasicas()
     {
-        $competenciaIds = $this->evaluacion->configuracion_data['competencias'] ?? [];
-        
-        $this->resultados = Respuesta::with(['pregunta.competencia', 'usuario'])
-            ->where('evaluacion_id_evaluacion', $this->evaluacionId)
-            ->whereIn('pregunta_id', function($query) use ($competenciaIds) {
-                $query->select('id_pregunta')
-                    ->from('preguntas')
-                    ->whereIn('competencia_id', $competenciaIds);
-            })
-            ->get()
-            ->groupBy('pregunta.competencia.nombre_competencia');
-    }
+        try {
+            // Verificar si la relación usuarios existe
+            $totalEvaluadores = $this->evaluacion->usuarios ? $this->evaluacion->usuarios->count() : 0;
+            
+            $evaluadoresCompletados = 0;
+            if ($this->evaluacion->usuarios) {
+                $evaluadoresCompletados = $this->evaluacion->usuarios->filter(function($usuario) {
+                    // Verificar la estructura del pivot
+                    return isset($usuario->pivot->evaluado) && $usuario->pivot->evaluado == true;
+                })->count();
+            }
 
-    protected function calcularEstadisticas()
-    {
-        $this->estadisticas = [
-            'total_evaluadores' => $this->evaluacion->usuarios->count(),
-            'evaluadores_completados' => $this->evaluacion->usuarios->where('pivot.evaluado', true)->count(),
-            'total_respuestas' => Respuesta::where('evaluacion_id_evaluacion', $this->evaluacionId)->count(),
-            'progreso' => $this->evaluacion->usuarios->count() > 0 ? 
-                round(($this->evaluacion->usuarios->where('pivot.evaluado', true)->count() / $this->evaluacion->usuarios->count()) * 100) : 0
-        ];
-
-        // Calcular promedios por competencia
-        $this->estadisticas['competencias'] = [];
-        foreach ($this->resultados as $competencia => $respuestas) {
-            $promedio = $respuestas->avg('valor_respuesta');
-            $this->estadisticas['competencias'][$competencia] = [
-                'promedio' => round($promedio, 2),
-                'total_respuestas' => $respuestas->count(),
-                'maximo' => 5, // Asumiendo escala 1-5
-                'porcentaje' => round(($promedio / 5) * 100, 1)
+            $this->estadisticas = [
+                'total_evaluadores' => $totalEvaluadores,
+                'evaluadores_completados' => $evaluadoresCompletados,
+                'total_respuestas' => Respuesta::where('evaluacion_id_evaluacion', $this->evaluacionId)->count(),
+                'progreso' => $totalEvaluadores > 0 ? 
+                    round(($evaluadoresCompletados / $totalEvaluadores) * 100) : 0
+            ];
+            
+        } catch (\Exception $e) {
+            Log::error('Error calculando estadísticas: ' . $e->getMessage());
+            $this->estadisticas = [
+                'total_evaluadores' => 0,
+                'evaluadores_completados' => 0,
+                'total_respuestas' => 0,
+                'progreso' => 0
             ];
         }
     }
 
-    protected function cargarEvaluadores()
-    {
-        $this->evaluadores = $this->evaluacion->usuarios->map(function($usuario) {
-            return [
-                'nombre' => $usuario->name . ' ' . $usuario->primer_apellido,
-                'email' => $usuario->email,
-                'puesto' => $usuario->puesto,
-                'departamento' => $usuario->departamento->nombre_departamento ?? 'N/A',
-                'empresa' => $usuario->departamento->empresa->nombre_comercial ?? 'N/A',
-                'tipo_rol' => $usuario->pivot->tipo_rol,
-                'completado' => $usuario->pivot->evaluado,
-                'fecha_evaluacion' => $usuario->pivot->fecha_evaluacion
-            ];
-        });
-    }
-
     public function render()
     {
-        return view('livewire.encuesta.evaluacion.ver-evaluacion')->layout('layouts.app');
+        return view('livewire.encuesta.evaluacion.ver-evaluacion')
+            ->layout('layouts.app');
     }
-
-
     // public function render()
     // {
     //     return view('livewire.encuesta.evaluacion.ver-evaluacion');

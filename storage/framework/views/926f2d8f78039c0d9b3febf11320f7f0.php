@@ -42,7 +42,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-600">Total</p>
-                        <p class="text-2xl font-bold text-gray-900"><?php echo e(Evaluacion::count()); ?></p>
+                        <p class="text-2xl font-bold text-gray-900"><?php echo e($estadisticas['total']); ?></p>
                     </div>
                     <div class="p-3 bg-blue-100 rounded-lg">
                         <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -56,7 +56,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-600">Completadas</p>
-                        <p class="text-2xl font-bold text-gray-900"><?php echo e(Evaluacion::where('estado', 'completada')->count()); ?></p>
+                        <p class="text-2xl font-bold text-gray-900"><?php echo e($estadisticas['completadas']); ?></p>
                     </div>
                     <div class="p-3 bg-green-100 rounded-lg">
                         <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -70,7 +70,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-600">En Progreso</p>
-                        <p class="text-2xl font-bold text-gray-900"><?php echo e(Evaluacion::where('estado', 'en_progreso')->count()); ?></p>
+                        <p class="text-2xl font-bold text-gray-900"><?php echo e($estadisticas['en_progreso']); ?></p>
                     </div>
                     <div class="p-3 bg-yellow-100 rounded-lg">
                         <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -84,7 +84,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-600">Borradores</p>
-                        <p class="text-2xl font-bold text-gray-900"><?php echo e(Evaluacion::where('estado', 'borrador')->count()); ?></p>
+                        <p class="text-2xl font-bold text-gray-900"><?php echo e($estadisticas['borradores']); ?></p>
                     </div>
                     <div class="p-3 bg-gray-100 rounded-lg">
                         <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

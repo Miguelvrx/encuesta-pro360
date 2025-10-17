@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('evaluacion_usuario', function (Blueprint $table) {
-             $table->id();
+            $table->id();
             $table->unsignedBigInteger('evaluacion_id_evaluacion');
             $table->unsignedBigInteger('user_id');
             $table->integer('usuario_rol');
@@ -31,6 +31,9 @@ return new class extends Migration
                 ->on('users')
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
+
+            // 🔧 MEJORA OPCIONAL: Evita duplicados
+            $table->unique(['evaluacion_id_evaluacion', 'user_id'], 'eval_user_unique');
 
             $table->timestamps();
         });
