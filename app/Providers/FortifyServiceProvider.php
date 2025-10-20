@@ -36,13 +36,34 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::redirectUserForTwoFactorAuthenticationUsing(RedirectIfTwoFactorAuthenticatable::class);
 
         RateLimiter::for('login', function (Request $request) {
-            $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())).'|'.$request->ip());
+            $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())) . '|' . $request->ip());
 
             return Limit::perMinute(5)->by($throttleKey);
         });
 
         RateLimiter::for('two-factor', function (Request $request) {
             return Limit::perMinute(5)->by($request->session()->get('login.id'));
+        });
+
+        // ⭐ AUTENTICACIÓN FLEXIBLE: Email o Username
+        Fortify::authenticateUsing(function (Request $request) {
+            $login = $request->input('email'); // El campo se llama 'email' en el formulario
+            $password = $request->input('password');
+
+            // Determinar si es email o username
+            $fieldType = filter_var($login, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+
+            // Buscar el usuario
+            $user = \App\Models\User::where($fieldType, $login)
+                ->where('estado', 'activo') // Solo usuarios activos
+                ->first();
+
+            // Validar contraseña
+            if ($user && \Illuminate\Support\Facades\Hash::check($password, $user->password)) {
+                return $user;
+            }
+
+            return null;
         });
     }
 }

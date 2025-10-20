@@ -14,12 +14,13 @@ class EditarUsuario extends Component
     // Propiedad para el modelo que estamos editando
     public User $user;
 
-    // --- PROPIEDADES DEL FORMULARIO (copiadas de CrearUsuario) ---
+    // --- PROPIEDADES DEL FORMULARIO ---
     public string $name = '';
     public ?string $primer_apellido = null;
     public ?string $segundo_apellido = null;
     public ?string $telefono = null;
     public string $email = '';
+    public ?string $username = null; // ⭐ NUEVO CAMPO OPCIONAL
     public string $password = '';
     public string $password_confirmation = '';
     public int $rol = 1;
@@ -47,6 +48,7 @@ class EditarUsuario extends Component
         $this->segundo_apellido = $user->segundo_apellido;
         $this->telefono = $user->telefono;
         $this->email = $user->email;
+        $this->username = $user->username; // ⭐ Cargar username si existe
         $this->rol = $user->rol;
         $this->departamento_id = $user->departamento_id;
         $this->puesto = $user->puesto;
@@ -68,6 +70,14 @@ class EditarUsuario extends Component
             'telefono' => 'required|string|max:20',
             // La regla 'unique' se ajusta para ignorar el email del usuario actual
             'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($this->user->id)],
+            // ⭐ Username opcional pero único (ignorando el actual)
+            'username' => [
+                'nullable',
+                'string',
+                'max:100',
+                'alpha_dash',
+                Rule::unique('users')->ignore($this->user->id)
+            ],
             // La contraseña es opcional en la edición
             'password' => 'nullable|string|min:8|confirmed',
             'rol' => 'required|integer',
@@ -82,8 +92,14 @@ class EditarUsuario extends Component
     protected $validationAttributes = [
         'name' => 'nombre',
         'primer_apellido' => 'primer apellido',
+        'username' => 'nombre de usuario',
         'password' => 'contraseña',
         'departamento_id' => 'departamento',
+    ];
+
+    protected $messages = [
+        'username.alpha_dash' => 'El nombre de usuario solo puede contener letras, números, guiones y guiones bajos.',
+        'username.unique' => 'Este nombre de usuario ya está en uso.',
     ];
 
     /**
@@ -100,6 +116,7 @@ class EditarUsuario extends Component
             'segundo_apellido' => $validatedData['segundo_apellido'],
             'telefono' => $validatedData['telefono'],
             'email' => $validatedData['email'],
+            'username' => $validatedData['username'], // ⭐ Actualizar username
             'rol' => $validatedData['rol'],
             'puesto' => $validatedData['puesto'],
             'estado' => $validatedData['estado'],
@@ -116,11 +133,12 @@ class EditarUsuario extends Component
         try {
             $this->user->update($updateData);
             session()->flash('message', '¡Usuario actualizado exitosamente!');
-            $this->redirect(route('mostrar-usuario'), navigate: true); // Asumiendo que tienes esta ruta
+            $this->redirect(route('mostrar-usuario'), navigate: true);
         } catch (\Exception $e) {
             session()->flash('error', 'Error al actualizar el usuario: ' . $e->getMessage());
         }
     }
+
 
     public function render()
     {

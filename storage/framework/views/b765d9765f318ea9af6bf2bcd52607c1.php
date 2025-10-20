@@ -16,7 +16,7 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-     <!-- Toastr CSS -->
+    <!-- Toastr CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
 
     <!-- Scripts -->
@@ -25,6 +25,29 @@
     <!-- Styles -->
     <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::styles(); ?>
 
+    <style>
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .rotating-border {
+            background: conic-gradient(from 0deg,
+                    #3b82f6,
+                    #06b6d4,
+                    #10b981,
+                    #f59e0b,
+                    #ef4444,
+                    #8b5cf6,
+                    #3b82f6);
+            animation: rotate 3s linear infinite;
+        }
+    </style>
 </head>
 
 <body class="font-sans antialiased">
@@ -116,7 +139,7 @@ if (isset($__slots)) unset($__slots);
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.2/color-thief.umd.js"></script>
 
-     <!-- jQuery (requerido por Toastr) -->
+    <!-- jQuery (requerido por Toastr) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Toastr JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
@@ -150,7 +173,7 @@ if (isset($__slots)) unset($__slots);
         });
     </script>
 
-  
+
 
     <?php echo $__env->yieldPushContent('scripts'); ?>
     <?php

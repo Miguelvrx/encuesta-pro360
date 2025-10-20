@@ -16,13 +16,31 @@
             @csrf
 
             <div>
-                <x-label for="email" value="{{ __('Email') }}" />
-                <x-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
+                <x-label for="email" value="Correo Electrónico o Usuario" />
+                <x-input 
+                    id="email" 
+                    class="block mt-1 w-full" 
+                    type="text" 
+                    name="email" 
+                    :value="old('email')" 
+                    required 
+                    autofocus 
+                    autocomplete="username"
+                    placeholder="usuario@correo.com o tu_usuario" 
+                />
+                <p class="mt-1 text-xs text-gray-500">Puedes iniciar sesión con tu correo o nombre de usuario</p>
             </div>
 
             <div class="mt-4">
                 <x-label for="password" value="{{ __('Password') }}" />
-                <x-input id="password" class="block mt-1 w-full" type="password" name="password" required autocomplete="current-password" />
+                <x-input 
+                    id="password" 
+                    class="block mt-1 w-full" 
+                    type="password" 
+                    name="password" 
+                    required 
+                    autocomplete="current-password" 
+                />
             </div>
 
             <div class="block mt-4">

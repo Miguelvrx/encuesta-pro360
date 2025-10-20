@@ -14,6 +14,7 @@ class CrearUsuario extends Component
     public ?string $segundo_apellido = null;
     public ?string $telefono = null;
     public string $email = '';
+    public ?string $username = null; // ⭐ NUEVO CAMPO OPCIONAL
     public string $password = '';
     public string $password_confirmation = '';
     public int $rol = 1;
@@ -45,6 +46,7 @@ class CrearUsuario extends Component
             'segundo_apellido' => 'nullable|string|max:100',
             'telefono' => 'required|string|max:20',
             'email' => 'required|email|max:255|unique:users,email',
+             'username' => 'nullable|string|max:100|unique:users,username|alpha_dash', // ⭐ Opcional pero único
             'password' => 'required|string|min:8|confirmed', // 'confirmed' busca un campo 'password_confirmation'
             'rol' => 'required|integer',
             'departamento_id' => 'required|integer|exists:departamentos,id_departamento',
@@ -58,39 +60,42 @@ class CrearUsuario extends Component
     /**
      * Mapeo para mensajes de validación amigables.
      */
-    protected $validationAttributes = [
+   protected $validationAttributes = [
         'name' => 'nombre',
         'primer_apellido' => 'primer apellido',
+        'username' => 'nombre de usuario',
         'password' => 'contraseña',
         'departamento_id' => 'departamento',
+    ];
+
+    protected $messages = [
+        'username.alpha_dash' => 'El nombre de usuario solo puede contener letras, números, guiones y guiones bajos.',
+        'username.unique' => 'Este nombre de usuario ya está en uso.',
     ];
 
     /**
      * Método para guardar el nuevo usuario.
      */
-    public function save(): void
+     public function save(): void
     {
         $validatedData = $this->validate();
 
         try {
-            // Creamos el usuario en la base de datos.
-            // El 'mutator' en el modelo User se encargará de hashear la contraseña.
             User::create([
                 'name' => $validatedData['name'],
                 'primer_apellido' => $validatedData['primer_apellido'],
                 'segundo_apellido' => $validatedData['segundo_apellido'],
                 'telefono' => $validatedData['telefono'],
                 'email' => $validatedData['email'],
-                'password' => $validatedData['password'], // Laravel lo hashea automáticamente
+                'username' => $validatedData['username'], // ⭐ Se guarda si existe
+                'password' => $validatedData['password'],
                 'rol' => $validatedData['rol'],
                 'puesto' => $validatedData['puesto'],
                 'estado' => $validatedData['estado'],
                 'genero' => $validatedData['genero'],
                 'escolaridad' => $validatedData['escolaridad'],
                 'fecha_registro_usuario' => now(),
-                'departamento_id' => $validatedData['departamento_id'], // <-- AÑADIR ESTA LÍNEA
-                // NOTA: El campo 'departamento_id' no está en el modelo User.
-                // Esto es algo a considerar. Por ahora, lo omitimos del 'create'.
+                'departamento_id' => $validatedData['departamento_id'],
             ]);
 
             session()->flash('message', '¡Usuario creado exitosamente!');

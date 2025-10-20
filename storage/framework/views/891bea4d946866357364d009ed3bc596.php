@@ -10,15 +10,6 @@
                             <h1 class="text-2xl font-bold text-white">Crear Nuevo Usuario</h1>
                             <p class="text-sm text-blue-200 mt-1">Complete la información para registrar un nuevo miembro en el sistema</p>
                         </div>
-                        <button
-                            type="button"
-                            wire:click=""
-                            class="hidden sm:inline-flex items-center px-4 py-2 bg-white/20 text-white font-semibold text-sm rounded-lg shadow-sm hover:bg-white/30 transition-colors">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253z"></path>
-                            </svg>
-                            Manual de Usuario
-                        </button>
                     </div>
                 </div>
 
@@ -95,18 +86,28 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                 <!-- Sección: Seguridad de Acceso -->
                 <div class="bg-white rounded-xl shadow-lg overflow-hidden">
                     <div class="p-6">
-                        <h2 class="text-lg font-semibold text-gray-800 border-b pb-4">Seguridad de Acceso <span class="text-sm font-normal text-gray-500">/ Obligatorio</span></h2>
-                        <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
-                            <div class="sm:col-span-2">
-                                <label for="email" class="block text-sm font-medium text-gray-700">Correo Electrónico / Usuario</label>
-                                <input type="email" wire:model="email" id="email" placeholder="usuario@empresa.com" class="mt-1 w-full input-style <?php $__errorArgs = ['email'];
+                        <h2 class="text-lg font-semibold text-gray-800 border-b pb-4">Seguridad de Acceso</h2>
+                        <div class="mt-6 space-y-6">
+                            <!-- Email - OBLIGATORIO -->
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700">
+                                    Correo Electrónico <span class="text-red-500">*</span>
+                                </label>
+                                <input 
+                                    type="email" 
+                                    wire:model="email" 
+                                    id="email" 
+                                    placeholder="usuario@empresa.com" 
+                                    class="mt-1 w-full input-style <?php $__errorArgs = ['email'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?> input-error <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
-unset($__errorArgs, $__bag); ?>">
+unset($__errorArgs, $__bag); ?>"
+                                >
+                                <p class="mt-1 text-xs text-gray-500">Se utilizará para enviar encuestas y notificaciones</p>
                                 <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['email'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -116,17 +117,28 @@ if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                             </div>
+
+                            <!-- Username - OPCIONAL -->
                             <div>
-                                <label for="password" class="block text-sm font-medium text-gray-700">Contraseña</label>
-                                <input type="password" wire:model="password" id="password" placeholder="Mínimo 8 caracteres" class="mt-1 w-full input-style <?php $__errorArgs = ['password'];
+                                <label for="username" class="block text-sm font-medium text-gray-700">
+                                    Nombre de Usuario <span class="text-gray-400">(Opcional)</span>
+                                </label>
+                                <input 
+                                    type="text" 
+                                    wire:model="username" 
+                                    id="username" 
+                                    placeholder="usuario123" 
+                                    class="mt-1 w-full input-style <?php $__errorArgs = ['username'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?> input-error <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
-unset($__errorArgs, $__bag); ?>">
-                                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['password'];
+unset($__errorArgs, $__bag); ?>"
+                                >
+                                <p class="mt-1 text-xs text-gray-500">Si se proporciona, podrá iniciar sesión con este nombre de usuario o su correo</p>
+                                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['username'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -135,9 +147,32 @@ if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                             </div>
-                            <div>
-                                <label for="password_confirmation" class="block text-sm font-medium text-gray-700">Confirmar Contraseña</label>
-                                <input type="password" wire:model="password_confirmation" id="password_confirmation" placeholder="Repite la contraseña" class="mt-1 w-full input-style">
+
+                            <!-- Contraseñas -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="password" class="block text-sm font-medium text-gray-700">Contraseña</label>
+                                    <input type="password" wire:model="password" id="password" placeholder="Mínimo 8 caracteres" class="mt-1 w-full input-style <?php $__errorArgs = ['password'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> input-error <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>">
+                                    <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['password'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <span class="error-message"><?php echo e($message); ?></span> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
+                                </div>
+                                <div>
+                                    <label for="password_confirmation" class="block text-sm font-medium text-gray-700">Confirmar Contraseña</label>
+                                    <input type="password" wire:model="password_confirmation" id="password_confirmation" placeholder="Repite la contraseña" class="mt-1 w-full input-style">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -213,18 +248,15 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                                 <label for="escolaridad" class="block text-sm font-medium text-gray-700">Nivel de Escolaridad</label>
                                 <select wire:model="escolaridad" id="escolaridad" class="mt-1 w-full input-style">
                                     <option value="">Selecciona nivel de escolaridad</option>
-
                                     <optgroup label="Educación Básica">
                                         <option value="Preescolar">Preescolar</option>
                                         <option value="Primaria">Primaria</option>
                                         <option value="Secundaria">Secundaria</option>
                                     </optgroup>
-
                                     <optgroup label="Educación Media">
                                         <option value="Bachillerato">Bachillerato</option>
                                         <option value="Preparatoria">Preparatoria</option>
                                     </optgroup>
-
                                     <optgroup label="Educación Superior">
                                         <option value="Licenciatura">Licenciatura</option>
                                         <option value="Ingeniería">Ingeniería</option>
@@ -233,11 +265,11 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                                     </optgroup>
                                 </select>
                             </div>
-
                         </div>
                     </div>
                 </div>
             </div>
+
             <!-- Botones de Acción -->
             <div class="flex justify-center space-x-4 pt-6">
                 <button type="button" wire:click="reset" class="px-8 py-3 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 transition-colors">
