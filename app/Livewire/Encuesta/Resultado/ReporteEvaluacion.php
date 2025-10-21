@@ -6,38 +6,30 @@ use App\Models\Competencia;
 use App\Models\Departamento;
 use App\Models\Empresa;
 use App\Models\Evaluacion;
-use App\Models\Respuesta;
 use App\Models\User;
-use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class ReporteEvaluacion extends Component
 {
 
- use WithPagination;
+    use WithPagination;
 
-    // Propiedades para filtros
     public $evaluacionIdSeleccionada = null;
     public $empresaSeleccionada = null;
     public $departamentoSeleccionado = null;
     public $usuarioEvaluadoSeleccionado = null;
+    public $tipoReporte = 'general';
 
-    // Propiedades para el tipo de reporte y visualización
-    public $tipoReporte = 'general'; // 'general', 'por_competencia', 'por_evaluado'
-    public $tipoVisualizacion = 'tabla'; // 'tabla', 'grafico'
-
-    // Datos para selects
     public $evaluaciones;
     public $empresas;
     public $departamentos;
     public $usuariosEvaluados;
-
-    // Resultados procesados
     public $resultadosEvaluacion = [];
-    public $datosGraficos = [];
 
-    // Niveles de evaluación estáticos (copiados de RealizarEvaluacion para consistencia)
     public $nivelesEvaluacion = [
         1 => ['nombre' => 'Requiere Apoyo', 'descripcion' => 'Evita tomar decisiones o delegar responsabilidades'],
         2 => ['nombre' => 'En Desarrollo', 'descripcion' => 'Intenta liderar pero requiere guía para avanzar'],
@@ -69,7 +61,7 @@ class ReporteEvaluacion extends Component
             $this->actualizarUsuariosEvaluados();
             $this->calcularResultados();
         } else {
-            $this->reset(['resultadosEvaluacion', 'datosGraficos']);
+            $this->reset(['resultadosEvaluacion']);
         }
     }
 
@@ -103,11 +95,6 @@ class ReporteEvaluacion extends Component
         $this->calcularResultados();
     }
 
-    public function updatedTipoVisualizacion()
-    {
-        // No es necesario recalcular, la vista maneja el cambio
-    }
-
     protected function actualizarUsuariosEvaluados()
     {
         if (!$this->evaluacionIdSeleccionada) {
@@ -116,17 +103,13 @@ class ReporteEvaluacion extends Component
         }
 
         $evaluacion = Evaluacion::find($this->evaluacionIdSeleccionada);
-        if (!$evaluacion) {
+        if (!$evaluacion || !$evaluacion->encuestados_data) {
             $this->usuariosEvaluados = collect();
             return;
         }
 
-        $query = User::query()
-            ->whereIn('id', function ($subQuery) use ($evaluacion) {
-                $subQuery->select('user_id')
-                    ->from('evaluacion_usuario')
-                    ->where('evaluacion_id_evaluacion', $evaluacion->id_evaluacion);
-            });
+        $idsEncuestados = collect($evaluacion->encuestados_data)->pluck('id')->toArray();
+        $query = User::whereIn('id', $idsEncuestados);
 
         if ($this->empresaSeleccionada) {
             $query->whereHas('departamento', function ($q) {
@@ -144,13 +127,12 @@ class ReporteEvaluacion extends Component
     public function calcularResultados()
     {
         $this->resultadosEvaluacion = [];
-        $this->datosGraficos = [];
 
         if (!$this->evaluacionIdSeleccionada) {
             return;
         }
 
-        $evaluacion = Evaluacion::with(['usuarios', 'respuestas.pregunta.competencia', 'respuestas.usuario'])
+        $evaluacion = Evaluacion::with(['respuestas.pregunta.competencia'])
             ->find($this->evaluacionIdSeleccionada);
 
         if (!$evaluacion) {
@@ -165,26 +147,58 @@ class ReporteEvaluacion extends Component
         $resultadosPorEvaluado = [];
 
         foreach ($usuariosParaReporte as $evaluado) {
+            $indiceEvaluado = collect($evaluacion->encuestados_data)
+                ->search(fn($e) => $e['id'] == $evaluado->id);
 
-            // La estructura de `calificadores_data` es un array de arrays de calificadores.
-            // Cada sub-array corresponde a un encuestado en el mismo orden que `encuestados_data`.
-            // Necesitamos encontrar el índice del evaluado actual en `encuestados_data` para obtener sus calificadores.
-            $indiceEvaluado = collect($evaluacion->encuestados_data)->search(fn($e) => $e['id'] == $evaluado->id);
+            if ($indiceEvaluado === false) {
+                continue;
+            }
+
             $calificadoresDelEvaluado = $evaluacion->calificadores_data[$indiceEvaluado] ?? [];
+
+            if (empty($calificadoresDelEvaluado)) {
+                continue;
+            }
 
             $idsCalificadores = collect($calificadoresDelEvaluado)->pluck('id')->toArray();
 
-            $respuestasParaEvaluado = $evaluacion->respuestas->whereIn('user_id', $idsCalificadores);
+            $registrosEvaluacionUsuario = DB::table('evaluacion_usuario')
+                ->where('evaluacion_id_evaluacion', $evaluacion->id_evaluacion)
+                ->where('user_id', $evaluado->id)
+                ->first();
+
+            if (!$registrosEvaluacionUsuario) {
+                continue;
+            }
+
+            $idEvaluadoEnTabla = $registrosEvaluacionUsuario->evaluado;
+
+            $respuestasParaEvaluado = $evaluacion->respuestas->filter(function ($respuesta) use ($idsCalificadores, $idEvaluadoEnTabla, $evaluacion) {
+                if (!in_array($respuesta->user_id, $idsCalificadores)) {
+                    return false;
+                }
+
+                $esEvaluacionDeEsteUsuario = DB::table('evaluacion_usuario')
+                    ->where('evaluacion_id_evaluacion', $evaluacion->id_evaluacion)
+                    ->where('user_id', $respuesta->user_id)
+                    ->where('evaluado', $idEvaluadoEnTabla)
+                    ->exists();
+
+                return $esEvaluacionDeEsteUsuario;
+            });
 
             $resultadosPorEvaluado[$evaluado->id] = [
                 'id' => $evaluado->id,
                 'nombre' => $evaluado->name . ' ' . $evaluado->primer_apellido,
                 'competencias' => [],
                 'promedio_general' => 0,
+                'calificadores' => $calificadoresDelEvaluado,
             ];
 
             $competenciasIds = $evaluacion->configuracion_data['competencias'] ?? [];
-            $competenciasEvaluacion = Competencia::with('preguntas')->whereIn('id_competencia', $competenciasIds)->get();
+            $competenciasEvaluacion = Competencia::with('preguntas')
+                ->whereIn('id_competencia', $competenciasIds)
+                ->get();
 
             $totalPuntuacionGeneral = 0;
             $totalRespuestasGeneral = 0;
@@ -201,6 +215,9 @@ class ReporteEvaluacion extends Component
 
                     $rol = $this->getRolCalificador($calificadoresDelEvaluado, $respuesta->user_id);
                     if ($rol) {
+                        if (!isset($puntuacionesPorRol[$rol])) {
+                            $puntuacionesPorRol[$rol] = [];
+                        }
                         $puntuacionesPorRol[$rol][] = $respuesta->puntuacion;
                     }
                 }
@@ -219,6 +236,7 @@ class ReporteEvaluacion extends Component
                         'nombre' => $competencia->nombre_competencia,
                         'promedio' => round($promedioCompetencia, 2),
                         'promedios_por_rol' => $promediosPorRol,
+                        'total_respuestas' => count($puntuacionesCompetencia),
                     ];
                 }
             }
@@ -229,7 +247,6 @@ class ReporteEvaluacion extends Component
         }
 
         $this->resultadosEvaluacion = $resultadosPorEvaluado;
-        $this->generarDatosGraficos();
     }
 
     protected function getRolCalificador($calificadores, $calificadorId)
@@ -238,151 +255,15 @@ class ReporteEvaluacion extends Component
         return $calificador['tipo_rol'] ?? 'Desconocido';
     }
 
-    protected function generarDatosGraficos()
-    {
-        $this->datosGraficos = [];
-
-        if (empty($this->resultadosEvaluacion)) {
-            return;
-        }
-
-        // Si hay un solo evaluado seleccionado, o si el tipo de reporte es 'por_evaluado'
-        if ($this->usuarioEvaluadoSeleccionado && isset($this->resultadosEvaluacion[$this->usuarioEvaluadoSeleccionado])) {
-            $evaluado = $this->resultadosEvaluacion[$this->usuarioEvaluadoSeleccionado];
-            $labels = [];
-            $dataPromedios = [];
-
-            foreach ($evaluado['competencias'] as $competencia) {
-                $labels[] = $competencia['nombre'];
-                $dataPromedios[] = $competencia['promedio'];
-            }
-
-            $this->datosGraficos['radar'] = [
-                'labels' => $labels,
-                'datasets' => [
-                    [
-                        'label' => 'Promedio General',
-                        'data' => $dataPromedios,
-                        'backgroundColor' => 'rgba(54, 162, 235, 0.2)',
-                        'borderColor' => 'rgba(54, 162, 235, 1)',
-                        'pointBackgroundColor' => 'rgba(54, 162, 235, 1)',
-                        'pointBorderColor' => '#fff',
-                        'pointHoverBackgroundColor' => '#fff',
-                        'pointHoverBorderColor' => 'rgba(54, 162, 235, 1)'
-                    ]
-                ]
-            ];
-
-            // También podemos generar datos para un gráfico de barras por roles si hay datos
-            $roles = [];
-            foreach ($evaluado['competencias'] as $competencia) {
-                foreach ($competencia['promedios_por_rol'] as $rol => $promedio) {
-                    if (!in_array($rol, $roles)) {
-                        $roles[] = $rol;
-                    }
-                }
-            }
-
-            if (!empty($roles)) {
-                $datasetsPorRol = [];
-                foreach ($roles as $rol) {
-                    $data = [];
-                    foreach ($evaluado['competencias'] as $competencia) {
-                        $data[] = $competencia['promedios_por_rol'][$rol] ?? 0;
-                    }
-                    $datasetsPorRol[] = [
-                        'label' => $rol,
-                        'data' => $data,
-                        'backgroundColor' => 'rgba(' . rand(0, 255) . ',' . rand(0, 255) . ',' . rand(0, 255) . ', 0.6)', // Color aleatorio
-                        'borderColor' => 'rgba(' . rand(0, 255) . ',' . rand(0, 255) . ',' . rand(0, 255) . ', 1)',
-                        'borderWidth' => 1
-                    ];
-                }
-                $this->datosGraficos['barras_roles'] = [
-                    'labels' => $labels,
-                    'datasets' => $datasetsPorRol
-                ];
-            }
-        } else { // Reporte general o por competencia para múltiples evaluados
-            $labels = []; // Nombres de evaluados
-            $datasets = []; // Promedios por competencia para cada evaluado
-
-            $competenciasUnicas = [];
-            foreach ($this->resultadosEvaluacion as $evaluado) {
-                foreach ($evaluado["competencias"] as $competenciaId => $competenciaData) {
-                    $competenciasUnicas[$competenciaId] = $competenciaData["nombre"];
-                }
-            }
-
-            foreach ($this->resultadosEvaluacion as $evaluado) {
-                $labels[] = $evaluado['nombre'];
-                $datasets[] = [
-                    'label' => $evaluado['nombre'],
-                    'data' => array_column($evaluado['competencias'], 'promedio'),
-                    'backgroundColor' => 'rgba(' . rand(0, 255) . ',' . rand(0, 255) . ',' . rand(0, 255) . ', 0.6)',
-                    'borderColor' => 'rgba(' . rand(0, 255) . ',' . rand(0, 255) . ',' . rand(0, 255) . ', 1)',
-                    'borderWidth' => 1
-                ];
-            }
-
-            if ($this->tipoReporte === 'general') {
-                 // Gráfico de barras para promedios generales de evaluados
-                $labelsEvaluados = [];
-                $dataPromediosGenerales = [];
-                foreach ($this->resultadosEvaluacion as $evaluado) {
-                    $labelsEvaluados[] = $evaluado['nombre'];
-                    $dataPromediosGenerales[] = $evaluado['promedio_general'];
-                }
-
-                $this->datosGraficos['barras_generales'] = [
-                    'labels' => $labelsEvaluados,
-                    'datasets' => [
-                        [
-                            'label' => 'Promedio General',
-                            'data' => $dataPromediosGenerales,
-                            'backgroundColor' => 'rgba(75, 192, 192, 0.6)',
-                            'borderColor' => 'rgba(75, 192, 192, 1)',
-                            'borderWidth' => 1
-                        ]
-                    ]
-                ];
-            } elseif ($this->tipoReporte === 'por_competencia' && !empty($competenciasUnicas)) {
-                // Gráfico de barras agrupadas por competencia, mostrando a los evaluados
-                $labelsCompetencias = array_values($competenciasUnicas);
-                $datasetsCompetencias = [];
-
-                foreach ($this->resultadosEvaluacion as $evaluado) {
-                    $data = [];
-                    foreach ($competenciasUnicas as $comp_id => $comp_nombre) {
-                        $promedio = $evaluado["competencias"][$comp_id]["promedio"] ?? 0;
-                        $data[] = $promedio;
-                    }
-                    $datasetsCompetencias[] = [
-                        'label' => $evaluado['nombre'],
-                        'data' => $data,
-                        'backgroundColor' => 'rgba(' . rand(0, 255) . ',' . rand(0, 255) . ',' . rand(0, 255) . ', 0.6)',
-                        'borderColor' => 'rgba(' . rand(0, 255) . ',' . rand(0, 255) . ',' . rand(0, 255) . ', 1)',
-                        'borderWidth' => 1
-                    ];
-                }
-                $this->datosGraficos['barras_competencias'] = [
-                    'labels' => $labelsCompetencias,
-                    'datasets' => $datasetsCompetencias
-                ];
-            }
-        }
-    }
-
     public function render()
     {
         return view('livewire.encuesta.resultado.reporte-evaluacion', [
             'resultados' => $this->resultadosEvaluacion,
-            'graficos' => $this->datosGraficos,
         ])->layout('layouts.app');
     }
-
     // public function render()
     // {
     //     return view('livewire.encuesta.resultado.reporte-evaluacion')->layout('layouts.app');
     // }
+
 }
