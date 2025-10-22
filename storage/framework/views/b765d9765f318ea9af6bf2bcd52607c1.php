@@ -51,6 +51,8 @@
             animation: rotate 3s linear infinite;
         }
     </style>
+
+    
 </head>
 
 <body class="font-sans antialiased">

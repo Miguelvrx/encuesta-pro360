@@ -15,9 +15,6 @@ use Livewire\WithPagination;
 
 class ReporteEvaluacion extends Component
 {
-
-    use WithPagination;
-
     public $evaluacionIdSeleccionada = null;
     public $empresaSeleccionada = null;
     public $departamentoSeleccionado = null;
@@ -31,11 +28,11 @@ class ReporteEvaluacion extends Component
     public $resultadosEvaluacion = [];
 
     public $nivelesEvaluacion = [
-        1 => ['nombre' => 'Requiere Apoyo', 'descripcion' => 'Evita tomar decisiones o delegar responsabilidades'],
-        2 => ['nombre' => 'En Desarrollo', 'descripcion' => 'Intenta liderar pero requiere guía para avanzar'],
-        3 => ['nombre' => 'Competente', 'descripcion' => 'Toma decisiones alineadas con los objetivos'],
-        4 => ['nombre' => 'Supera las Expectativas', 'descripcion' => 'Inspira confianza y compromiso en su equipo'],
-        5 => ['nombre' => 'Excepcional', 'descripcion' => 'Es referente de liderazgo dentro y fuera del equipo']
+        1 => ['nombre' => 'Necesita acompañamiento', 'color' => '#EF4444', 'descripcion' => 'Necesita acompañamiento para el estándar'],
+        2 => ['nombre' => 'Avanza con áreas por fortalecer', 'color' => '#F97316', 'descripcion' => 'Avanza con áreas por fortalecer'],
+        3 => ['nombre' => 'Cumple lo esperado', 'color' => '#8B5CF6', 'descripcion' => 'Cumple de forma confiable lo esperado'],
+        4 => ['nombre' => 'Desempeño superior', 'color' => '#3B82F6', 'descripcion' => 'Desempeño consistentemente superior'],
+        5 => ['nombre' => 'Modelo a seguir', 'color' => '#10B981', 'descripcion' => 'Modelo a seguir con impacto sostenido']
     ];
 
     public function mount()
@@ -187,12 +184,19 @@ class ReporteEvaluacion extends Component
                 return $esEvaluacionDeEsteUsuario;
             });
 
+            // Obtener datos del usuario
+            $datosEvaluado = collect($evaluacion->encuestados_data)->firstWhere('id', $evaluado->id);
+
             $resultadosPorEvaluado[$evaluado->id] = [
                 'id' => $evaluado->id,
                 'nombre' => $evaluado->name . ' ' . $evaluado->primer_apellido,
+                'empresa' => $datosEvaluado['empresa'] ?? 'N/A',
+                'departamento' => $datosEvaluado['departamento'] ?? 'N/A',
+                'puesto' => $datosEvaluado['puesto'] ?? 'N/A',
                 'competencias' => [],
                 'promedio_general' => 0,
                 'calificadores' => $calificadoresDelEvaluado,
+                'total_calificadores' => count($calificadoresDelEvaluado),
             ];
 
             $competenciasIds = $evaluacion->configuracion_data['competencias'] ?? [];
@@ -237,12 +241,15 @@ class ReporteEvaluacion extends Component
                         'promedio' => round($promedioCompetencia, 2),
                         'promedios_por_rol' => $promediosPorRol,
                         'total_respuestas' => count($puntuacionesCompetencia),
+                        'nivel' => $this->obtenerNivel($promedioCompetencia),
                     ];
                 }
             }
 
             if ($totalRespuestasGeneral > 0) {
-                $resultadosPorEvaluado[$evaluado->id]['promedio_general'] = round($totalPuntuacionGeneral / $totalRespuestasGeneral, 2);
+                $promedioGeneral = $totalPuntuacionGeneral / $totalRespuestasGeneral;
+                $resultadosPorEvaluado[$evaluado->id]['promedio_general'] = round($promedioGeneral, 2);
+                $resultadosPorEvaluado[$evaluado->id]['nivel_general'] = $this->obtenerNivel($promedioGeneral);
             }
         }
 
@@ -253,6 +260,239 @@ class ReporteEvaluacion extends Component
     {
         $calificador = collect($calificadores)->firstWhere('id', $calificadorId);
         return $calificador['tipo_rol'] ?? 'Desconocido';
+    }
+
+    protected function obtenerNivel($promedio)
+    {
+        if ($promedio >= 4.5) return 5;
+        if ($promedio >= 3.5) return 4;
+        if ($promedio >= 2.5) return 3;
+        if ($promedio >= 1.5) return 2;
+        return 1;
+    }
+    
+
+    public function generarUrlGraficaRadar($evaluadoId)
+    {
+        if (!isset($this->resultadosEvaluacion[$evaluadoId])) {
+            return '';
+        }
+
+        $resultado = $this->resultadosEvaluacion[$evaluadoId];
+        $competencias = $resultado['competencias'];
+
+        $labels = [];
+        $datos = [];
+
+        foreach ($competencias as $comp) {
+            $labels[] = $comp['nombre'];
+            $datos[] = $comp['promedio'];
+        }
+
+        $chartConfig = [
+            'type' => 'radar',
+            'data' => [
+                'labels' => $labels,
+                'datasets' => [[
+                    'label' => 'Promedio',
+                    'data' => $datos,
+                    'fill' => true,
+                    'backgroundColor' => 'rgba(99, 102, 241, 0.2)',
+                    'borderColor' => 'rgb(99, 102, 241)',
+                    'pointBackgroundColor' => 'rgb(99, 102, 241)',
+                    'pointBorderColor' => '#fff',
+                    'pointHoverBackgroundColor' => '#fff',
+                    'pointHoverBorderColor' => 'rgb(99, 102, 241)'
+                ]]
+            ],
+            'options' => [
+                'elements' => [
+                    'line' => ['borderWidth' => 3]
+                ],
+                'scales' => [
+                    'r' => [
+                        'min' => 0,
+                        'max' => 5,
+                        'ticks' => ['stepSize' => 1]
+                    ]
+                ]
+            ]
+        ];
+
+        return 'https://quickchart.io/chart?width=800&height=300&chart=' . urlencode(json_encode($chartConfig));
+    }
+
+    public function generarUrlGraficaBarrasHorizontal($evaluadoId)
+    {
+        if (!isset($this->resultadosEvaluacion[$evaluadoId])) {
+            return '';
+        }
+
+        $resultado = $this->resultadosEvaluacion[$evaluadoId];
+        $competencias = $resultado['competencias'];
+
+        $labels = [];
+        $datosPromedio = [];
+        $datosAutoevaluacion = [];
+        $coloresPromedio = [];
+
+        foreach ($competencias as $comp) {
+            $labels[] = $comp['nombre'];
+            $datosPromedio[] = $comp['promedio'];
+            
+            // Obtener autoevaluación si existe
+            $autoevaluacion = $comp['promedios_por_rol']['Autoevaluación'] ?? null;
+            $datosAutoevaluacion[] = $autoevaluacion;
+            
+            $nivel = $comp['nivel'];
+            $coloresPromedio[] = $this->nivelesEvaluacion[$nivel]['color'];
+        }
+
+        $chartConfig = [
+            'type' => 'horizontalBar',
+            'data' => [
+                'labels' => $labels,
+                'datasets' => [
+                    [
+                        'label' => 'Promedio',
+                        'data' => $datosPromedio,
+                        'backgroundColor' => $coloresPromedio,
+                        'borderColor' => $coloresPromedio,
+                        'borderWidth' => 1,
+                        'barThickness' => 15,
+                       
+                    ],
+                    [
+                        'label' => 'Autoevaluación',
+                        'data' => $datosAutoevaluacion,
+                        'backgroundColor' => '#8B5CF6',
+                        'borderColor' => '#8B5CF6',
+                        'borderWidth' => 1,
+                        'barThickness' => 15,
+                    ]
+                ]
+            ],
+            'options' => [
+                'indexAxis' => 'y',
+                'scales' => [
+                    'x' => [
+                        'min' => 0,
+                        'max' => 5,
+                        'ticks' => ['stepSize' => 1],
+                            
+                    ]
+                ],
+                'plugins' => [
+                    'datalabels' => [
+                        'anchor' => 'end',
+                        'align' => 'end',
+                        'color' => '#000',
+                        'font' => ['weight' => 'bold', 'size' => 10]
+                    ],
+                    'legend' => [
+                        'display' => true,
+                        'position' => 'top'
+                    ]
+                ]
+            ]
+        ];
+
+        return 'https://quickchart.io/chart?width=800&height=300&chart=' . urlencode(json_encode($chartConfig));
+        
+    }
+
+    // public function generarUrlGraficaBarrasHorizontal($evaluadoId)
+    // {
+    //     if (!isset($this->resultadosEvaluacion[$evaluadoId])) {
+    //         return '';
+    //     }
+
+    //     $resultado = $this->resultadosEvaluacion[$evaluadoId];
+    //     $competencias = $resultado['competencias'];
+
+    //     $labels = [];
+    //     $datos = [];
+    //     $colores = [];
+
+    //     foreach ($competencias as $comp) {
+    //         $labels[] = $comp['nombre'];
+    //         $datos[] = $comp['promedio'];
+    //         $nivel = $comp['nivel'];
+    //         $colores[] = $this->nivelesEvaluacion[$nivel]['color'];
+    //     }
+
+    //     $chartConfig = [
+    //         'type' => 'horizontalBar',
+    //         'data' => [
+    //             'labels' => $labels,
+    //             'datasets' => [[
+    //                 'label' => 'Promedio',
+    //                 'data' => $datos,
+    //                 'backgroundColor' => $colores,
+    //                 'borderColor' => $colores,
+    //                 'borderWidth' => 1,
+    //                 'barThickness' => 20,
+    //             ]]
+    //         ],
+    //         'options' => [
+    //             'indexAxis' => 'y',
+    //             'scales' => [
+    //                 'x' => [
+    //                     'min' => 0,
+    //                     'max' => 5,
+    //                     'ticks' => ['stepSize' => 1]
+    //                 ]
+    //             ],
+    //             'plugins' => [
+    //                 'datalabels' => [
+    //                     'anchor' => 'end',
+    //                     'align' => 'end',
+    //                     'color' => '#000',
+    //                     'font' => ['weight' => 'bold']
+    //                 ]
+    //             ]
+    //         ]
+    //     ];
+
+    //     return 'https://quickchart.io/chart?width=700&height=300&chart=' . urlencode(json_encode($chartConfig));
+    // }
+
+    public function generarUrlGraficaComparativaRoles($evaluadoId, $competenciaId)
+    {
+        if (!isset($this->resultadosEvaluacion[$evaluadoId]['competencias'][$competenciaId])) {
+            return '';
+        }
+
+        $competencia = $this->resultadosEvaluacion[$evaluadoId]['competencias'][$competenciaId];
+        $promediosPorRol = $competencia['promedios_por_rol'];
+
+        $labels = array_keys($promediosPorRol);
+        $datos = array_values($promediosPorRol);
+
+        $chartConfig = [
+            'type' => 'horizontalBar',
+            'data' => [
+                'labels' => $labels,
+                'datasets' => [[
+                    'label' => $competencia['nombre'],
+                    'data' => $datos,
+                    'backgroundColor' => ['#6366F1', '#EC4899', '#10B981', '#F59E0B'],
+                    'barThickness' => 30,
+                ]]
+            ],
+            'options' => [
+                'scales' => [
+                    'y' => [
+                        'min' => 0,
+                        'max' => 5,
+                        'ticks' => ['stepSize' => 1],
+
+                    ]
+                ]
+            ]
+        ];
+
+        return 'https://quickchart.io/chart?width=800&height=300&chart=' . urlencode(json_encode($chartConfig));
     }
 
     public function render()
