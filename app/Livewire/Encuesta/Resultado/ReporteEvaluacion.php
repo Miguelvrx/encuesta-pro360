@@ -270,7 +270,7 @@ class ReporteEvaluacion extends Component
         if ($promedio >= 1.5) return 2;
         return 1;
     }
-    
+
 
     public function generarUrlGraficaRadar($evaluadoId)
     {
@@ -339,17 +339,17 @@ class ReporteEvaluacion extends Component
         foreach ($competencias as $comp) {
             $labels[] = $comp['nombre'];
             $datosPromedio[] = $comp['promedio'];
-            
+
             // Obtener autoevaluación si existe
             $autoevaluacion = $comp['promedios_por_rol']['Autoevaluación'] ?? null;
             $datosAutoevaluacion[] = $autoevaluacion;
-            
+
             $nivel = $comp['nivel'];
             $coloresPromedio[] = $this->nivelesEvaluacion[$nivel]['color'];
         }
 
         $chartConfig = [
-            'type' => 'horizontalBar',
+            'type' => 'bar',
             'data' => [
                 'labels' => $labels,
                 'datasets' => [
@@ -360,47 +360,80 @@ class ReporteEvaluacion extends Component
                         'borderColor' => $coloresPromedio,
                         'borderWidth' => 1,
                         'barThickness' => 15,
-                       
                     ],
                     [
                         'label' => 'Autoevaluación',
                         'data' => $datosAutoevaluacion,
-                        'backgroundColor' => '#8B5CF6',
-                        'borderColor' => '#8B5CF6',
+                        'backgroundColor' => '#f65c5cff',
+                        'borderColor' => '#f65c5cff',
                         'borderWidth' => 1,
                         'barThickness' => 15,
                     ]
                 ]
             ],
             'options' => [
-                'indexAxis' => 'y',
-                'scales' => [
-                    'x' => [
-                        'min' => 0,
-                        'max' => 5,
-                        'ticks' => ['stepSize' => 1],
-                            
+                'indexAxis' => 'y', // Esta es la clave para hacer el gráfico horizontal
+                'responsive' => true,
+                'maintainAspectRatio' => false,
+                'layout' => [
+                    'padding' => [
+                        'right' => 50
                     ]
                 ],
+                'scales' => [
+                    'x' => [
+                        'beginAtZero' => true,
+                        'min' => 0,
+                        'max' => 5,
+                        'ticks' => [
+                            'stepSize' => 0.5,
+                            'color' => 'black',
+                            'font' => [
+                                'size' => 10,
+                            ],
+                        ],
+                        'grid' => [
+                            'color' => 'rgba(0, 0, 0, 0.1)',
+                        ],
+                    ],
+                    'y' => [
+                        'ticks' => [
+                            'color' => 'black',
+                            'font' => [
+                                'size' => 11,
+                            ],
+                        ],
+                        'grid' => [
+                            'display' => false,
+                        ],
+                    ],
+                ],
                 'plugins' => [
+                    'legend' => [
+                        'display' => true,
+                        'position' => 'top',
+                        'labels' => [
+                            'color' => 'black',
+                            'font' => [
+                                'size' => 12
+                            ]
+                        ]
+                    ],
                     'datalabels' => [
                         'anchor' => 'end',
                         'align' => 'end',
                         'color' => '#000',
-                        'font' => ['weight' => 'bold', 'size' => 10]
-                    ],
-                    'legend' => [
-                        'display' => true,
-                        'position' => 'top'
+                        'font' => [
+                            'weight' => 'bold',
+                            'size' => 10
+                        ]
                     ]
                 ]
             ]
         ];
 
-        return 'https://quickchart.io/chart?width=800&height=300&chart=' . urlencode(json_encode($chartConfig));
-        
+        return 'https://quickchart.io/chart?width=1000&height=400&v=' . time() . '&c=' . urlencode(json_encode($chartConfig));
     }
-
     // public function generarUrlGraficaBarrasHorizontal($evaluadoId)
     // {
     //     if (!isset($this->resultadosEvaluacion[$evaluadoId])) {
@@ -457,44 +490,69 @@ class ReporteEvaluacion extends Component
     //     return 'https://quickchart.io/chart?width=700&height=300&chart=' . urlencode(json_encode($chartConfig));
     // }
 
-    public function generarUrlGraficaComparativaRoles($evaluadoId, $competenciaId)
-    {
-        if (!isset($this->resultadosEvaluacion[$evaluadoId]['competencias'][$competenciaId])) {
-            return '';
-        }
-
-        $competencia = $this->resultadosEvaluacion[$evaluadoId]['competencias'][$competenciaId];
-        $promediosPorRol = $competencia['promedios_por_rol'];
-
-        $labels = array_keys($promediosPorRol);
-        $datos = array_values($promediosPorRol);
-
-        $chartConfig = [
-            'type' => 'horizontalBar',
-            'data' => [
-                'labels' => $labels,
-                'datasets' => [[
-                    'label' => $competencia['nombre'],
-                    'data' => $datos,
-                    'backgroundColor' => ['#6366F1', '#EC4899', '#10B981', '#F59E0B'],
-                    'barThickness' => 30,
-                ]]
-            ],
-            'options' => [
-                'scales' => [
-                    'y' => [
-                        'min' => 0,
-                        'max' => 5,
-                        'ticks' => ['stepSize' => 1],
-
-                    ]
-                ]
-            ]
-        ];
-
-        return 'https://quickchart.io/chart?width=800&height=300&chart=' . urlencode(json_encode($chartConfig));
+ public function generarUrlGraficaComparativaRoles($evaluadoId, $competenciaId)
+{
+    if (!isset($this->resultadosEvaluacion[$evaluadoId]['competencias'][$competenciaId])) {
+        return '';
     }
 
+    $competencia = $this->resultadosEvaluacion[$evaluadoId]['competencias'][$competenciaId];
+    $promediosPorRol = $competencia['promedios_por_rol'];
+
+    $labels = array_keys($promediosPorRol);
+    $datos = array_values($promediosPorRol);
+
+    $chartConfig = [
+        'type' => 'horizontalBar', // Usar el tipo antiguo pero compatible
+        'data' => [
+            'labels' => $labels,
+            'datasets' => [[
+                'label' => $competencia['nombre'],
+                'data' => $datos,
+                'backgroundColor' => ['#6366F1', '#EC4899', '#10B981', '#F59E0B'],
+                'barThickness' => 30,
+            ]]
+        ],
+        'options' => [
+            'scales' => [
+                'xAxes' => [[
+                    'ticks' => [
+                        'beginAtZero' => true,
+                        'min' => 0,
+                        'max' => 5,
+                        'stepSize' => 1,
+                        'fontColor' => 'black',
+                        'fontSize' => 10,
+                    ],
+                    'gridLines' => [
+                        'color' => 'rgba(0, 0, 0, 0.1)',
+                        'zeroLineWidth' => 1,
+                        'zeroLineColor' => 'black',
+                    ],
+                ]],
+                'yAxes' => [[
+                    'ticks' => [
+                        'fontColor' => 'black',
+                        'fontSize' => 11,
+                    ],
+                    'gridLines' => [
+                        'display' => false,
+                    ],
+                ]],
+            ],
+            'legend' => [
+                'display' => true,
+                'position' => 'top',
+                'labels' => [
+                    'fontColor' => 'black',
+                    'fontSize' => 12
+                ]
+            ]
+        ]
+    ];
+
+    return 'https://quickchart.io/chart?width=800&height=300&chart=' . urlencode(json_encode($chartConfig));
+}
     public function render()
     {
         return view('livewire.encuesta.resultado.reporte-evaluacion', [

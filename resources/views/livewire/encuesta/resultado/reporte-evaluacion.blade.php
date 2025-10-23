@@ -309,12 +309,13 @@
                     <h3 class="text-lg font-bold text-gray-800 mb-4">📈 Ranking de Competencias</h3>
                     <p class="text-sm text-gray-600 mb-6">Comparación visual del desempeño en cada competencia</p>
                     <div class="flex justify-center">
-                        <img src="{{ $this->generarUrlGraficaBarrasHorizontal($evaluado['id']) }}"
+                        <img src="{{ $this->generarUrlGraficaBarrasHorizontal($evaluado['id']) }}&t={{ now()->timestamp }}"
                             alt="Ranking de competencias"
                             class="max-w-full h-auto rounded-lg shadow-sm">
                     </div>
                 </div>
 
+                <!-- Tabla Detalle por Rol -->
                 <!-- Tabla Detalle por Rol -->
                 <div class="bg-white rounded-xl shadow-lg overflow-hidden">
                     <div class="p-6">
@@ -328,12 +329,18 @@
                                         Competencia
                                     </th>
                                     @php
-                                    $rolesUnicos = [];
+                                    // Definir todos los roles posibles en el orden deseado
+                                    $rolesPosibles = ['Autoevaluación', 'Jefe', 'Par', 'Colaborador', 'Cliente'];
+                                    $rolesPresentes = [];
+
                                     foreach ($evaluado['competencias'] as $comp) {
                                     foreach ($comp['promedios_por_rol'] as $rol => $prom) {
-                                    if (!in_array($rol, $rolesUnicos)) $rolesUnicos[] = $rol;
+                                    if (!in_array($rol, $rolesPresentes)) $rolesPresentes[] = $rol;
                                     }
                                     }
+
+                                    // Ordenar los roles según el orden definido
+                                    $rolesUnicos = array_intersect($rolesPosibles, $rolesPresentes);
                                     @endphp
                                     @foreach($rolesUnicos as $rol)
                                     <th scope="col" class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
@@ -343,11 +350,55 @@
                                     <th scope="col" class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
                                         Promedio
                                     </th>
+                                    <th scope="col" class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                        Diferencia
+                                    </th>
+                                    <th scope="col" class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                        Tendencia
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @foreach($evaluado['competencias'] as $competencia)
-                                <tr class="hover:bg-gray-50 transition-colors">
+                                @php
+                                // Calcular diferencia entre autoevaluación y promedio de otros roles
+                                $autoevaluacion = $competencia['promedios_por_rol']['Autoevaluación'] ?? null;
+
+                                // Calcular promedio de todos los roles excepto autoevaluación
+                                $otrosRoles = array_filter($competencia['promedios_por_rol'], function($rol) {
+                                return $rol !== 'Autoevaluación';
+                                }, ARRAY_FILTER_USE_KEY);
+
+                                $promedioOtrosRoles = null;
+                                $diferencia = null;
+                                $tendencia = null;
+                                $colorTendencia = 'gray';
+
+                                if ($autoevaluacion !== null && count($otrosRoles) > 0) {
+                                $promedioOtrosRoles = round(array_sum($otrosRoles) / count($otrosRoles), 2);
+                                $diferencia = round($autoevaluacion - $promedioOtrosRoles, 2);
+
+                                // Determinar tendencia basada en la diferencia
+                                if ($diferencia > 0.5) {
+                                $tendencia = 'Sobrevalorado';
+                                $colorTendencia = 'yellow';
+                                } elseif ($diferencia < -0.5) {
+                                    $tendencia='Subvalorado' ;
+                                    $colorTendencia='blue' ;
+                                    } else {
+                                    $tendencia='Alineado' ;
+                                    $colorTendencia='green' ;
+                                    }
+                                    }
+
+                                    // También calcular diferencia específica con Jefe si existe
+                                    $diferenciaJefe=null;
+                                    $jefeEvaluacion=$competencia['promedios_por_rol']['Jefe'] ?? null;
+                                    if ($autoevaluacion !==null && $jefeEvaluacion !==null) {
+                                    $diferenciaJefe=round($autoevaluacion - $jefeEvaluacion, 2);
+                                    }
+                                    @endphp
+                                    <tr class="hover:bg-gray-50 transition-colors">
                                     <td class="px-6 py-4 text-sm font-medium text-gray-900">
                                         {{ $competencia['nombre'] }}
                                     </td>
@@ -373,168 +424,227 @@
                                             {{ $competencia['promedio'] }}
                                         </span>
                                     </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                                        @if($diferencia !== null)
+                                        <div class="flex flex-col items-center space-y-1">
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold 
+                                {{ $diferencia > 0 ? 'bg-yellow-100 text-yellow-800' : ($diferencia < 0 ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800') }}">
+                                                {{ $diferencia > 0 ? '+' : '' }}{{ $diferencia }}
+                                            </span>
+                                            @if($diferenciaJefe !== null)
+                                            <span class="text-xs text-gray-500">
+                                                Jefe: {{ $diferenciaJefe > 0 ? '+' : '' }}{{ $diferenciaJefe }}
+                                            </span>
+                                            @endif
+                                        </div>
+                                        @else
+                                        <span class="text-gray-400 text-sm">N/A</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                                        @if($tendencia)
+                                        <div class="flex flex-col items-center space-y-1">
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold
+                                {{ $colorTendencia === 'yellow' ? 'bg-yellow-100 text-yellow-800' : 
+                                   ($colorTendencia === 'blue' ? 'bg-blue-100 text-blue-800' : 
+                                   ($colorTendencia === 'green' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800')) }}">
+                                                @if($tendencia === 'Sobrevalorado')
+                                                ⬆️ {{ $tendencia }}
+                                                @elseif($tendencia === 'Subvalorado')
+                                                ⬇️ {{ $tendencia }}
+                                                @else
+                                                ✅ {{ $tendencia }}
+                                                @endif
+                                            </span>
+                                            @if($promedioOtrosRoles !== null)
+                                            <span class="text-xs text-gray-500">
+                                                vs otros: {{ $promedioOtrosRoles }}
+                                            </span>
+                                            @endif
+                                        </div>
+                                        @else
+                                        <span class="text-gray-400 text-sm">N/A</span>
+                                        @endif
+                                    </td>
+                                    </tr>
+                                    @endforeach
+                            </tbody>
+                        </table>
+
+                        <!-- Leyenda de la tabla -->
+                        <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
+                            <div class="flex flex-wrap items-center justify-center gap-4 text-xs text-gray-600">
+                                <div class="flex items-center space-x-1">
+                                    <span class="w-3 h-3 bg-yellow-100 border border-yellow-300 rounded"></span>
+                                    <span>Sobrevalorado: Autoevaluación > Otros por +0.5</span>
+                                </div>
+                                <div class="flex items-center space-x-1">
+                                    <span class="w-3 h-3 bg-blue-100 border border-blue-300 rounded"></span>
+                                    <span>Subvalorado: Autoevaluación < Otros por -0.5</span>
+                                </div>
+                                <div class="flex items-center space-x-1">
+                                    <span class="w-3 h-3 bg-green-100 border border-green-300 rounded"></span>
+                                    <span>Alineado: Diferencia dentro de ±0.5</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @else
+                <!-- Vista de Tabla Resumen para múltiples evaluados -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="p-6 bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-gray-200">
+                        <h3 class="text-xl font-bold text-gray-800">
+                            @if($tipoReporte === 'general')
+                            📊 Resumen General
+                            @elseif($tipoReporte === 'por_competencia')
+                            🎯 Resultados por Competencia
+                            @else
+                            👥 Resultados por Evaluado
+                            @endif
+                        </h3>
+                        <p class="text-sm text-gray-600 mt-1">
+                            Mostrando {{ count($resultados) }} evaluado(s)
+                        </p>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 z-10">
+                                        Evaluado
+                                    </th>
+                                    @if($tipoReporte === 'general' || $tipoReporte === 'por_evaluado')
+                                    <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Promedio General
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Nivel
+                                    </th>
+                                    @endif
+                                    @if($tipoReporte === 'por_competencia' || $tipoReporte === 'por_evaluado')
+                                    @foreach(head($resultados)['competencias'] ?? [] as $competencia)
+                                    <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        {{ $competencia['nombre'] }}
+                                    </th>
+                                    @endforeach
+                                    @endif
+                                    <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Acción
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @foreach($resultados as $evaluado)
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white">
+                                        <div>
+                                            <p class="font-semibold">{{ $evaluado['nombre'] }}</p>
+                                            <p class="text-xs text-gray-500">{{ $evaluado['puesto'] }}</p>
+                                        </div>
+                                    </td>
+                                    @if($tipoReporte === 'general' || $tipoReporte === 'por_evaluado')
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                                        <span class="text-2xl font-bold text-indigo-600">{{ $evaluado['promedio_general'] }}</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium text-white"
+                                            style="background-color: {{ $nivelesEvaluacion[$evaluado['nivel_general']]['color'] }}">
+                                            Nivel {{ $evaluado['nivel_general'] }}
+                                        </span>
+                                    </td>
+                                    @endif
+                                    @if($tipoReporte === 'por_competencia' || $tipoReporte === 'por_evaluado')
+                                    @foreach($evaluado['competencias'] as $competencia)
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold text-white"
+                                            style="background-color: {{ $nivelesEvaluacion[$competencia['nivel']]['color'] }}">
+                                            {{ $competencia['promedio'] }}
+                                        </span>
+                                    </td>
+                                    @endforeach
+                                    @endif
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                                        <button wire:click="$set('usuarioEvaluadoSeleccionado', {{ $evaluado['id'] }})"
+                                            onclick="$wire.set('tipoReporte', 'por_evaluado')"
+                                            class="text-indigo-600 hover:text-indigo-900 font-medium text-sm">
+                                            Ver Detalle →
+                                        </button>
+                                    </td>
                                 </tr>
                                 @endforeach
                             </tbody>
                         </table>
                     </div>
                 </div>
-            </div>
 
-            @else
-            <!-- Vista de Tabla Resumen para múltiples evaluados -->
-            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-                <div class="p-6 bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-gray-200">
-                    <h3 class="text-xl font-bold text-gray-800">
-                        @if($tipoReporte === 'general')
-                        📊 Resumen General
-                        @elseif($tipoReporte === 'por_competencia')
-                        🎯 Resultados por Competencia
-                        @else
-                        👥 Resultados por Evaluado
-                        @endif
-                    </h3>
-                    <p class="text-sm text-gray-600 mt-1">
-                        Mostrando {{ count($resultados) }} evaluado(s)
-                    </p>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 z-10">
-                                    Evaluado
-                                </th>
-                                @if($tipoReporte === 'general' || $tipoReporte === 'por_evaluado')
-                                <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Promedio General
-                                </th>
-                                <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Nivel
-                                </th>
-                                @endif
-                                @if($tipoReporte === 'por_competencia' || $tipoReporte === 'por_evaluado')
-                                @foreach(head($resultados)['competencias'] ?? [] as $competencia)
-                                <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    {{ $competencia['nombre'] }}
-                                </th>
-                                @endforeach
-                                @endif
-                                <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Acción
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            @foreach($resultados as $evaluado)
-                            <tr class="hover:bg-gray-50 transition-colors">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white">
-                                    <div>
-                                        <p class="font-semibold">{{ $evaluado['nombre'] }}</p>
-                                        <p class="text-xs text-gray-500">{{ $evaluado['puesto'] }}</p>
-                                    </div>
-                                </td>
-                                @if($tipoReporte === 'general' || $tipoReporte === 'por_evaluado')
-                                <td class="px-6 py-4 whitespace-nowrap text-center">
-                                    <span class="text-2xl font-bold text-indigo-600">{{ $evaluado['promedio_general'] }}</span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-center">
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium text-white"
-                                        style="background-color: {{ $nivelesEvaluacion[$evaluado['nivel_general']]['color'] }}">
-                                        Nivel {{ $evaluado['nivel_general'] }}
-                                    </span>
-                                </td>
-                                @endif
-                                @if($tipoReporte === 'por_competencia' || $tipoReporte === 'por_evaluado')
-                                @foreach($evaluado['competencias'] as $competencia)
-                                <td class="px-6 py-4 whitespace-nowrap text-center">
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold text-white"
-                                        style="background-color: {{ $nivelesEvaluacion[$competencia['nivel']]['color'] }}">
-                                        {{ $competencia['promedio'] }}
-                                    </span>
-                                </td>
-                                @endforeach
-                                @endif
-                                <td class="px-6 py-4 whitespace-nowrap text-center">
-                                    <button wire:click="$set('usuarioEvaluadoSeleccionado', {{ $evaluado['id'] }})"
-                                        onclick="$wire.set('tipoReporte', 'por_evaluado')"
-                                        class="text-indigo-600 hover:text-indigo-900 font-medium text-sm">
-                                        Ver Detalle →
-                                    </button>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            
 
-            <!-- Gráfica comparativa general (solo para múltiples evaluados) -->
-            @if(count($resultados) > 1 && $tipoReporte === 'general')
-            <div class="bg-white rounded-xl shadow-lg p-6 mt-6">
-                <h3 class="text-lg font-bold text-gray-800 mb-4">📊 Comparativa General</h3>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div>
-                        <p class="text-sm text-gray-600 mb-4">Distribución de Niveles de Desempeño</p>
-                        @php
-                        $distribucionNiveles = array_count_values(array_column($resultados, 'nivel_general'));
-                        @endphp
-                        <div class="space-y-3">
-                            @foreach($nivelesEvaluacion as $nivel => $info)
+                <!-- Gráfica comparativa general (solo para múltiples evaluados) -->
+                @if(count($resultados) > 1 && $tipoReporte === 'general')
+                <div class="bg-white rounded-xl shadow-lg p-6 mt-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">📊 Comparativa General</h3>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                            <p class="text-sm text-gray-600 mb-4">Distribución de Niveles de Desempeño</p>
                             @php
-                            $cantidad = $distribucionNiveles[$nivel] ?? 0;
-                            $porcentaje = count($resultados) > 0 ? ($cantidad / count($resultados)) * 100 : 0;
+                            $distribucionNiveles = array_count_values(array_column($resultados, 'nivel_general'));
                             @endphp
-                            <div>
-                                <div class="flex justify-between text-sm mb-1">
-                                    <span class="font-medium">Nivel {{ $nivel }}: {{ $info['nombre'] }}</span>
-                                    <span class="text-gray-600">{{ $cantidad }} ({{ number_format($porcentaje, 1) }}%)</span>
-                                </div>
-                                <div class="w-full bg-gray-200 rounded-full h-2.5">
-                                    <div class="h-2.5 rounded-full"
-                                        style="width: {{ $porcentaje }}%; background-color: {{ $info['color'] }}">
+                            <div class="space-y-3">
+                                @foreach($nivelesEvaluacion as $nivel => $info)
+                                @php
+                                $cantidad = $distribucionNiveles[$nivel] ?? 0;
+                                $porcentaje = count($resultados) > 0 ? ($cantidad / count($resultados)) * 100 : 0;
+                                @endphp
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span class="font-medium">Nivel {{ $nivel }}: {{ $info['nombre'] }}</span>
+                                        <span class="text-gray-600">{{ $cantidad }} ({{ number_format($porcentaje, 1) }}%)</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                        <div class="h-2.5 rounded-full"
+                                            style="width: {{ $porcentaje }}%; background-color: {{ $info['color'] }}">
+                                        </div>
                                     </div>
                                 </div>
+                                @endforeach
                             </div>
-                            @endforeach
                         </div>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-600 mb-4">Estadísticas Generales</p>
-                        @php
-                        $promedios = array_column($resultados, 'promedio_general');
-                        $promedioGlobal = count($promedios) > 0 ? array_sum($promedios) / count($promedios) : 0;
-                        $maximo = count($promedios) > 0 ? max($promedios) : 0;
-                        $minimo = count($promedios) > 0 ? min($promedios) : 0;
-                        @endphp
-                        <div class="grid grid-cols-3 gap-4">
-                            <div class="bg-indigo-50 rounded-lg p-4 text-center">
-                                <p class="text-xs text-gray-600 mb-1">Promedio</p>
-                                <p class="text-2xl font-bold text-indigo-600">{{ number_format($promedioGlobal, 2) }}</p>
-                            </div>
-                            <div class="bg-green-50 rounded-lg p-4 text-center">
-                                <p class="text-xs text-gray-600 mb-1">Máximo</p>
-                                <p class="text-2xl font-bold text-green-600">{{ number_format($maximo, 2) }}</p>
-                            </div>
-                            <div class="bg-red-50 rounded-lg p-4 text-center">
-                                <p class="text-xs text-gray-600 mb-1">Mínimo</p>
-                                <p class="text-2xl font-bold text-red-600">{{ number_format($minimo, 2) }}</p>
+                        <div>
+                            <p class="text-sm text-gray-600 mb-4">Estadísticas Generales</p>
+                            @php
+                            $promedios = array_column($resultados, 'promedio_general');
+                            $promedioGlobal = count($promedios) > 0 ? array_sum($promedios) / count($promedios) : 0;
+                            $maximo = count($promedios) > 0 ? max($promedios) : 0;
+                            $minimo = count($promedios) > 0 ? min($promedios) : 0;
+                            @endphp
+                            <div class="grid grid-cols-3 gap-4">
+                                <div class="bg-indigo-50 rounded-lg p-4 text-center">
+                                    <p class="text-xs text-gray-600 mb-1">Promedio</p>
+                                    <p class="text-2xl font-bold text-indigo-600">{{ number_format($promedioGlobal, 2) }}</p>
+                                </div>
+                                <div class="bg-green-50 rounded-lg p-4 text-center">
+                                    <p class="text-xs text-gray-600 mb-1">Máximo</p>
+                                    <p class="text-2xl font-bold text-green-600">{{ number_format($maximo, 2) }}</p>
+                                </div>
+                                <div class="bg-red-50 rounded-lg p-4 text-center">
+                                    <p class="text-xs text-gray-600 mb-1">Mínimo</p>
+                                    <p class="text-2xl font-bold text-red-600">{{ number_format($minimo, 2) }}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            @endif
-            @endif
-            @endif
+                @endif
+                @endif
+                @endif
 
-            <!-- Footer del Reporte -->
-            <footer class="mt-8 bg-white rounded-xl shadow-lg p-6 text-center text-gray-500 text-sm">
-                <p class="font-semibold text-gray-700">E360 Pro - Sistema de Evaluación 360°</p>
-                <p class="mt-2">© {{ date('Y') }} - Todos los derechos reservados</p>
-                <p class="mt-1 text-xs">Este reporte es confidencial y está destinado únicamente para uso interno</p>
-            </footer>
+                <!-- Footer del Reporte -->
+                <footer class="mt-8 bg-white rounded-xl shadow-lg p-6 text-center text-gray-500 text-sm">
+                    <p class="font-semibold text-gray-700">E360 Pro - Sistema de Evaluación 360°</p>
+                    <p class="mt-2">© {{ date('Y') }} - Todos los derechos reservados</p>
+                    <p class="mt-1 text-xs">Este reporte es confidencial y está destinado únicamente para uso interno</p>
+                </footer>
+            </div>
         </div>
     </div>
-</div>

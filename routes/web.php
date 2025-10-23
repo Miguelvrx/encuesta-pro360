@@ -19,6 +19,7 @@ use App\Livewire\Encuesta\Evaluacion\VerEvaluacion;
 use App\Livewire\Encuesta\MostrarEmpresa;
 use App\Livewire\Encuesta\PapeleraEmpresas;
 use App\Livewire\Encuesta\Pregunta\GestionarPregunta;
+use App\Livewire\Encuesta\Reaking\ReakingExcelencia;
 use App\Livewire\Encuesta\Resultado\ReporteEvaluacion;
 use App\Livewire\Encuesta\Resultado\VerResultado;
 use App\Livewire\Encuesta\Usuario\CrearUsuario;
@@ -73,6 +74,7 @@ Route::get('/evaluacion/{uuid}', RealizarEvaluacion::class)->name('realizar-eval
 Route::get('/mis-evaluaciones', MisEvaluaciones::class)->name('mis-evaluaciones');
 Route::get('/evaluacion-completada', \App\Livewire\Encuesta\Evaluacion\EvaluacionCompletada::class)->name('evaluacion-completada');
 Route::get('/reporte-evaluacion', ReporteEvaluacion::class)->name('reporte-evaluacion');
-Route::get('/ver-resultado/{evaluacion}/{usuario}', \App\Livewire\Encuesta\Resultado\VerResultado::class)->name('ver-resultado');
+Route::get('/reaking-excelencia', ReakingExcelencia::class)->name('reaking-excelencia');
+
 
 //crear-evaluacion  Route::get('/select2-example', Select2Example::class)->name('select2-example');
