@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
 
           $this->call([
             CategoriaCompetenciaSeeder::class,
+            RolesAndPermissionsSeeder::class,
             // ... tus otros seeders
         ]);
     }

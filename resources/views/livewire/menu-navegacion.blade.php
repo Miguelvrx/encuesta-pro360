@@ -86,6 +86,7 @@
 
                     <div class="overflow-hidden transition-all duration-300 ease-in-out 
                         {{ $this->isMenuOpen('usuarios') ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0' }} mt-1 ml-4 space-y-1">
+                         @can('crear-empresas')
                         <a href="{{ route('crear-empresa') }}"
                             wire:click="closeMenus"
                             class="flex items-center px-3 py-2.5 rounded-lg group transition-all duration-200 ease-in-out 
@@ -96,6 +97,7 @@
                             </svg>
                             <span class="text-sm">Crear Empresa</span>
                         </a>
+                        @endcan
                         <a href="{{ route('mostrar-empresa') }}"
                             wire:click="closeMenus"
                             class="flex items-center px-3 py-2.5 rounded-lg group transition-all duration-200 ease-in-out 

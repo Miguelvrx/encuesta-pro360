@@ -22,6 +22,8 @@ use App\Livewire\Encuesta\Pregunta\GestionarPregunta;
 use App\Livewire\Encuesta\Reaking\ReakingExcelencia;
 use App\Livewire\Encuesta\Resultado\ReporteEvaluacion;
 use App\Livewire\Encuesta\Resultado\VerResultado;
+use App\Livewire\Encuesta\Rolesx\AsignarRoles;
+use App\Livewire\Encuesta\Rolesx\GestionRoles;
 use App\Livewire\Encuesta\Usuario\CrearUsuario;
 use App\Livewire\Encuesta\Usuario\EditarUsuario;
 use App\Livewire\Encuesta\Usuario\MostrarUsuario;
@@ -46,7 +48,7 @@ Route::middleware([
 });
 
 Route::get('/menu-navegacion', MenuNavegacion::class)->name('menu-navegacion');
-Route::get('/crear-empresa', CrearEmpresa::class)->name('crear-empresa');
+Route::get('/crear-empresa', CrearEmpresa::class)->middleware('can:crear-empresas')->name('crear-empresa');
 Route::get('/mostrar-empresa', MostrarEmpresa::class)->name('mostrar-empresa');
 Route::get('/empresas/{empresa}', VerEmpresa::class)->name('ver-empresa');
 Route::get('/empresas/editar/{empresa}', EditarEmpresa::class)->name('editar-empresa');
@@ -75,6 +77,9 @@ Route::get('/mis-evaluaciones', MisEvaluaciones::class)->name('mis-evaluaciones'
 Route::get('/evaluacion-completada', \App\Livewire\Encuesta\Evaluacion\EvaluacionCompletada::class)->name('evaluacion-completada');
 Route::get('/reporte-evaluacion', ReporteEvaluacion::class)->name('reporte-evaluacion');
 Route::get('/reaking-excelencia', ReakingExcelencia::class)->name('reaking-excelencia');
+Route::get('/asignar-roles', AsignarRoles::class)->name('asignar-roles');
+Route::get('/gestion-roles', GestionRoles::class)->name('gestion-roles');
 
 
 //crear-evaluacion  Route::get('/select2-example', Select2Example::class)->name('select2-example');
+//Route::get('/mostrar-compromiso-administrador', MostrarCompromisoAdministrador::class)->middleware('can:Mostrar Compromisos ADMIN')->name('portal360.compromiso.compromiso-administrador.mostrar-compromiso-administrador');
