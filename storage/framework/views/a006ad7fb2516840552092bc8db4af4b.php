@@ -194,24 +194,32 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 
                 <!-- Sección: Asignación Organizacional -->
                 <div class="p-6 border-t">
-                    <h2 class="text-lg font-semibold text-gray-800 border-b pb-4">Asignación Organizacional</h2>
-                    <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <h2 class="text-lg font-semibold text-gray-800 border-b pb-4">Asignación Organizacional <span class="text-sm font-normal text-gray-500">/ Obligatorio</span></h2>
+                    <div class="mt-6 space-y-6">
+                        <!-- ⭐ NUEVO: Selector de Empresa -->
                         <div>
-                            <label for="departamento_id" class="block text-sm font-medium text-gray-700">Departamento</label>
-                            <select wire:model="departamento_id" id="departamento_id" class="mt-1 w-full input-style <?php $__errorArgs = ['departamento_id'];
+                            <label for="empresa_id" class="block text-sm font-medium text-gray-700">
+                                Empresa <span class="text-red-500">*</span>
+                            </label>
+                            <select 
+                                wire:model.live="empresa_id" 
+                                id="empresa_id" 
+                                class="mt-1 w-full input-style <?php $__errorArgs = ['empresa_id'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?> input-error <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
-unset($__errorArgs, $__bag); ?>">
-                                <option value="">Selecciona un departamento</option>
-                                <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $departamentos; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $departamento): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                <option value="<?php echo e($departamento->id_departamento); ?>"><?php echo e($departamento->nombre_departamento); ?></option>
+unset($__errorArgs, $__bag); ?>"
+                            >
+                                <option value="">Selecciona una empresa</option>
+                                <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $empresas; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $empresa): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($empresa->id_empresa); ?>"><?php echo e($empresa->nombre_comercial); ?></option>
                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                             </select>
-                            <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['departamento_id'];
+                            <p class="mt-1 text-xs text-gray-500">Primero selecciona la empresa para ver sus departamentos</p>
+                            <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['empresa_id'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -220,17 +228,42 @@ if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                         </div>
-                        <div>
-                            <label for="puesto" class="block text-sm font-medium text-gray-700">Puesto</label>
-                            <input type="text" wire:model="puesto" id="puesto" class="mt-1 w-full input-style <?php $__errorArgs = ['puesto'];
+
+                        <!-- Grid para Departamento y Puesto -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <!-- Selector de Departamento -->
+                            <div>
+                                <label for="departamento_id" class="block text-sm font-medium text-gray-700">
+                                    Departamento <span class="text-red-500">*</span>
+                                </label>
+                                <select 
+                                    wire:model="departamento_id" 
+                                    id="departamento_id" 
+                                    class="mt-1 w-full input-style <?php $__errorArgs = ['departamento_id'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?> input-error <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
-unset($__errorArgs, $__bag); ?>">
-                            <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['puesto'];
+unset($__errorArgs, $__bag); ?>"
+                                    <?php if(!$empresa_id): ?> disabled <?php endif; ?>
+                                >
+                                    <option value="">
+                                        <!--[if BLOCK]><![endif]--><?php if($empresa_id): ?>
+                                            Selecciona un departamento
+                                        <?php else: ?>
+                                            Primero selecciona una empresa
+                                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                    </option>
+                                    <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $departamentos; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $departamento): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($departamento->id_departamento); ?>"><?php echo e($departamento->nombre_departamento); ?></option>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
+                                </select>
+                                <!--[if BLOCK]><![endif]--><?php if(!$empresa_id): ?>
+                                <p class="mt-1 text-xs text-amber-600">⚠️ Selecciona primero una empresa</p>
+                                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['departamento_id'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -238,6 +271,36 @@ $message = $__bag->first($__errorArgs[0]); ?> <span class="error-message"><?php 
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
+                            </div>
+
+                            <!-- Input de Puesto -->
+                            <div>
+                                <label for="puesto" class="block text-sm font-medium text-gray-700">
+                                    Puesto <span class="text-red-500">*</span>
+                                </label>
+                                <input 
+                                    type="text" 
+                                    wire:model="puesto" 
+                                    id="puesto" 
+                                    placeholder="Ej. Analista de Datos" 
+                                    class="mt-1 w-full input-style <?php $__errorArgs = ['puesto'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> input-error <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>"
+                                >
+                                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['puesto'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <span class="error-message"><?php echo e($message); ?></span> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
+                            </div>
                         </div>
                     </div>
                 </div>

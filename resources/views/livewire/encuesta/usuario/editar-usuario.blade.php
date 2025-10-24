@@ -110,22 +110,71 @@
 
                 <!-- Sección: Asignación Organizacional -->
                 <div class="p-6 border-t">
-                    <h2 class="text-lg font-semibold text-gray-800 border-b pb-4">Asignación Organizacional</h2>
-                    <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <h2 class="text-lg font-semibold text-gray-800 border-b pb-4">Asignación Organizacional <span class="text-sm font-normal text-gray-500">/ Obligatorio</span></h2>
+                    <div class="mt-6 space-y-6">
+                        <!-- ⭐ NUEVO: Selector de Empresa -->
                         <div>
-                            <label for="departamento_id" class="block text-sm font-medium text-gray-700">Departamento</label>
-                            <select wire:model="departamento_id" id="departamento_id" class="mt-1 w-full input-style @error('departamento_id') input-error @enderror">
-                                <option value="">Selecciona un departamento</option>
-                                @foreach ($departamentos as $departamento)
-                                <option value="{{ $departamento->id_departamento }}">{{ $departamento->nombre_departamento }}</option>
+                            <label for="empresa_id" class="block text-sm font-medium text-gray-700">
+                                Empresa <span class="text-red-500">*</span>
+                            </label>
+                            <select 
+                                wire:model.live="empresa_id" 
+                                id="empresa_id" 
+                                class="mt-1 w-full input-style @error('empresa_id') input-error @enderror"
+                            >
+                                <option value="">Selecciona una empresa</option>
+                                @foreach ($empresas as $empresa)
+                                <option value="{{ $empresa->id_empresa }}">{{ $empresa->nombre_comercial }}</option>
                                 @endforeach
                             </select>
-                            @error('departamento_id') <span class="error-message">{{ $message }}</span> @enderror
+                            <p class="mt-1 text-xs text-gray-500">Primero selecciona la empresa para ver sus departamentos</p>
+                            @error('empresa_id') <span class="error-message">{{ $message }}</span> @enderror
                         </div>
-                        <div>
-                            <label for="puesto" class="block text-sm font-medium text-gray-700">Puesto</label>
-                            <input type="text" wire:model="puesto" id="puesto" class="mt-1 w-full input-style @error('puesto') input-error @enderror">
-                            @error('puesto') <span class="error-message">{{ $message }}</span> @enderror
+
+                        <!-- Grid para Departamento y Puesto -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <!-- Selector de Departamento -->
+                            <div>
+                                <label for="departamento_id" class="block text-sm font-medium text-gray-700">
+                                    Departamento <span class="text-red-500">*</span>
+                                </label>
+                                <select 
+                                    wire:model="departamento_id" 
+                                    id="departamento_id" 
+                                    class="mt-1 w-full input-style @error('departamento_id') input-error @enderror"
+                                    @if(!$empresa_id) disabled @endif
+                                >
+                                    <option value="">
+                                        @if($empresa_id)
+                                            Selecciona un departamento
+                                        @else
+                                            Primero selecciona una empresa
+                                        @endif
+                                    </option>
+                                    @foreach ($departamentos as $departamento)
+                                    <option value="{{ $departamento->id_departamento }}">{{ $departamento->nombre_departamento }}</option>
+                                    @endforeach
+                                </select>
+                                @if(!$empresa_id)
+                                <p class="mt-1 text-xs text-amber-600">⚠️ Selecciona primero una empresa</p>
+                                @endif
+                                @error('departamento_id') <span class="error-message">{{ $message }}</span> @enderror
+                            </div>
+
+                            <!-- Input de Puesto -->
+                            <div>
+                                <label for="puesto" class="block text-sm font-medium text-gray-700">
+                                    Puesto <span class="text-red-500">*</span>
+                                </label>
+                                <input 
+                                    type="text" 
+                                    wire:model="puesto" 
+                                    id="puesto" 
+                                    placeholder="Ej. Analista de Datos" 
+                                    class="mt-1 w-full input-style @error('puesto') input-error @enderror"
+                                >
+                                @error('puesto') <span class="error-message">{{ $message }}</span> @enderror
+                            </div>
                         </div>
                     </div>
                 </div>

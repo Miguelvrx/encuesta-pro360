@@ -3,6 +3,7 @@
 namespace App\Livewire\Encuesta\Usuario;
 
 use App\Models\Departamento;
+use App\Models\Empresa;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -20,16 +21,18 @@ class EditarUsuario extends Component
     public ?string $segundo_apellido = null;
     public ?string $telefono = null;
     public string $email = '';
-    public ?string $username = null; // ⭐ NUEVO CAMPO OPCIONAL
+    public ?string $username = null;
     public string $password = '';
     public string $password_confirmation = '';
     public int $rol = 1;
+    public ?int $empresa_id = null; // ⭐ NUEVO: ID de empresa seleccionada
     public ?int $departamento_id = null;
     public ?string $puesto = null;
     public string $estado = 'activo';
     public ?string $genero = null;
     public ?string $escolaridad = null;
 
+    public $empresas = [];
     public $departamentos = [];
 
     /**
@@ -39,8 +42,21 @@ class EditarUsuario extends Component
     {
         $this->user = $user;
 
-        // Cargamos la lista de departamentos para el selector
-        $this->departamentos = Departamento::orderBy('nombre_departamento')->get(['id_departamento', 'nombre_departamento']);
+        // ⭐ Cargamos todas las empresas para el selector
+        $this->empresas = Empresa::orderBy('nombre_comercial')->get(['id_empresa', 'nombre_comercial']);
+
+        // ⭐ Obtenemos la empresa del departamento actual del usuario
+        if ($user->departamento_id) {
+            $departamento = Departamento::find($user->departamento_id);
+            if ($departamento) {
+                $this->empresa_id = $departamento->empresa_id_empresa;
+
+                // Cargamos los departamentos de esa empresa
+                $this->departamentos = Departamento::where('empresa_id_empresa', $this->empresa_id)
+                    ->orderBy('nombre_departamento')
+                    ->get(['id_departamento', 'nombre_departamento']);
+            }
+        }
 
         // Llenamos el formulario con los datos del usuario
         $this->name = $user->name;
@@ -48,14 +64,30 @@ class EditarUsuario extends Component
         $this->segundo_apellido = $user->segundo_apellido;
         $this->telefono = $user->telefono;
         $this->email = $user->email;
-        $this->username = $user->username; // ⭐ Cargar username si existe
+        $this->username = $user->username;
         $this->rol = $user->rol;
         $this->departamento_id = $user->departamento_id;
         $this->puesto = $user->puesto;
         $this->estado = $user->estado;
         $this->genero = $user->genero;
         $this->escolaridad = $user->escolaridad;
-        // La contraseña se deja vacía a propósito
+    }
+
+    /**
+     * ⭐ Actualiza los departamentos cuando se selecciona una empresa
+     */
+    public function updatedEmpresaId($value): void
+    {
+        if ($value) {
+            $this->departamentos = Departamento::where('empresa_id_empresa', $value)
+                ->orderBy('nombre_departamento')
+                ->get(['id_departamento', 'nombre_departamento']);
+        } else {
+            $this->departamentos = [];
+        }
+
+        // Resetear el departamento seleccionado cuando cambia la empresa
+        $this->departamento_id = null;
     }
 
     /**
@@ -68,9 +100,7 @@ class EditarUsuario extends Component
             'primer_apellido' => 'required|string|max:100',
             'segundo_apellido' => 'nullable|string|max:100',
             'telefono' => 'required|string|max:20',
-            // La regla 'unique' se ajusta para ignorar el email del usuario actual
             'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($this->user->id)],
-            // ⭐ Username opcional pero único (ignorando el actual)
             'username' => [
                 'nullable',
                 'string',
@@ -78,9 +108,9 @@ class EditarUsuario extends Component
                 'alpha_dash',
                 Rule::unique('users')->ignore($this->user->id)
             ],
-            // La contraseña es opcional en la edición
             'password' => 'nullable|string|min:8|confirmed',
             'rol' => 'required|integer',
+            'empresa_id' => 'required|integer|exists:empresas,id_empresa', // ⭐ NUEVO
             'departamento_id' => 'required|integer|exists:departamentos,id_departamento',
             'puesto' => 'required|string|max:100',
             'estado' => 'required|in:activo,inactivo',
@@ -94,6 +124,7 @@ class EditarUsuario extends Component
         'primer_apellido' => 'primer apellido',
         'username' => 'nombre de usuario',
         'password' => 'contraseña',
+        'empresa_id' => 'empresa', // ⭐ NUEVO
         'departamento_id' => 'departamento',
     ];
 
@@ -116,7 +147,7 @@ class EditarUsuario extends Component
             'segundo_apellido' => $validatedData['segundo_apellido'],
             'telefono' => $validatedData['telefono'],
             'email' => $validatedData['email'],
-            'username' => $validatedData['username'], // ⭐ Actualizar username
+            'username' => $validatedData['username'],
             'rol' => $validatedData['rol'],
             'puesto' => $validatedData['puesto'],
             'estado' => $validatedData['estado'],
@@ -138,7 +169,6 @@ class EditarUsuario extends Component
             session()->flash('error', 'Error al actualizar el usuario: ' . $e->getMessage());
         }
     }
-
 
     public function render()
     {

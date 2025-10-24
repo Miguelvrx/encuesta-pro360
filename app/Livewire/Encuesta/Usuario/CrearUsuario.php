@@ -3,6 +3,7 @@
 namespace App\Livewire\Encuesta\Usuario;
 
 use App\Models\Departamento;
+use App\Models\Empresa;
 use App\Models\User;
 use Livewire\Component;
 
@@ -14,16 +15,18 @@ class CrearUsuario extends Component
     public ?string $segundo_apellido = null;
     public ?string $telefono = null;
     public string $email = '';
-    public ?string $username = null; // ⭐ NUEVO CAMPO OPCIONAL
+    public ?string $username = null;
     public string $password = '';
     public string $password_confirmation = '';
     public int $rol = 1;
+    public ?int $empresa_id = null; // ⭐ NUEVO: ID de empresa seleccionada
     public ?int $departamento_id = null;
     public ?string $puesto = null;
     public string $estado = 'activo';
     public ?string $genero = null;
     public ?string $escolaridad = null;
 
+    public $empresas = [];
     public $departamentos = [];
 
     /**
@@ -31,8 +34,25 @@ class CrearUsuario extends Component
      */
     public function mount(): void
     {
-        // Cargamos los departamentos para el selector
-        $this->departamentos = Departamento::orderBy('nombre_departamento')->get(['id_departamento', 'nombre_departamento']);
+        // Cargamos todas las empresas para el selector
+        $this->empresas = Empresa::orderBy('nombre_comercial')->get(['id_empresa', 'nombre_comercial']);
+    }
+
+    /**
+     * ⭐ Actualiza los departamentos cuando se selecciona una empresa
+     */
+    public function updatedEmpresaId($value): void
+    {
+        if ($value) {
+            $this->departamentos = Departamento::where('empresa_id_empresa', $value)
+                ->orderBy('nombre_departamento')
+                ->get(['id_departamento', 'nombre_departamento']);
+        } else {
+            $this->departamentos = [];
+        }
+        
+        // Resetear el departamento seleccionado cuando cambia la empresa
+        $this->departamento_id = null;
     }
 
     /**
@@ -46,9 +66,10 @@ class CrearUsuario extends Component
             'segundo_apellido' => 'nullable|string|max:100',
             'telefono' => 'required|string|max:20',
             'email' => 'required|email|max:255|unique:users,email',
-             'username' => 'nullable|string|max:100|unique:users,username|alpha_dash', // ⭐ Opcional pero único
-            'password' => 'required|string|min:8|confirmed', // 'confirmed' busca un campo 'password_confirmation'
+            'username' => 'nullable|string|max:100|unique:users,username|alpha_dash',
+            'password' => 'required|string|min:8|confirmed',
             'rol' => 'required|integer',
+            'empresa_id' => 'required|integer|exists:empresas,id_empresa', // ⭐ NUEVO
             'departamento_id' => 'required|integer|exists:departamentos,id_departamento',
             'puesto' => 'required|string|max:100',
             'estado' => 'required|in:activo,inactivo',
@@ -60,11 +81,12 @@ class CrearUsuario extends Component
     /**
      * Mapeo para mensajes de validación amigables.
      */
-   protected $validationAttributes = [
+    protected $validationAttributes = [
         'name' => 'nombre',
         'primer_apellido' => 'primer apellido',
         'username' => 'nombre de usuario',
         'password' => 'contraseña',
+        'empresa_id' => 'empresa', // ⭐ NUEVO
         'departamento_id' => 'departamento',
     ];
 
@@ -76,7 +98,7 @@ class CrearUsuario extends Component
     /**
      * Método para guardar el nuevo usuario.
      */
-     public function save(): void
+    public function save(): void
     {
         $validatedData = $this->validate();
 
@@ -87,7 +109,7 @@ class CrearUsuario extends Component
                 'segundo_apellido' => $validatedData['segundo_apellido'],
                 'telefono' => $validatedData['telefono'],
                 'email' => $validatedData['email'],
-                'username' => $validatedData['username'], // ⭐ Se guarda si existe
+                'username' => $validatedData['username'],
                 'password' => $validatedData['password'],
                 'rol' => $validatedData['rol'],
                 'puesto' => $validatedData['puesto'],
@@ -104,7 +126,6 @@ class CrearUsuario extends Component
             session()->flash('error', 'Error al crear el usuario: ' . $e->getMessage());
         }
     }
-
 
     public function render()
     {
