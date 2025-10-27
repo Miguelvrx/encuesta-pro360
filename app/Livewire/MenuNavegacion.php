@@ -28,6 +28,12 @@ class MenuNavegacion extends Component
         'catalogo-competencia' => 'competencias',
         'gestionar-pregunta' => 'preguntas',
         'crear-evaluacion' => 'evaluaciones',
+        'mostrar-evaluaciones' => 'evaluaciones',
+        'mis-evaluaciones' => 'realizarevaluaciones',
+        'reporte-evaluacion' => 'reporteevaluaciones',
+        'reaking-excelencia' => 'rakingexcelencias',
+        'asignar-roles' => 'rolespermisos',
+        'gestion-roles' => 'rolespermisos',
 
 
         // 'index' => 'usuarios',

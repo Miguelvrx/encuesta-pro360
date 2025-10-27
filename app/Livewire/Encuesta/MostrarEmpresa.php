@@ -37,17 +37,6 @@ class MostrarEmpresa extends Component
         'filtroEstado' => ['except' => ''],
     ];
 
-    /**
-     * Este método se ejecuta cada vez que una propiedad con #[Url] cambia.
-     * Resetea la paginación para que el usuario siempre vaya a la primera página
-     * de los nuevos resultados filtrados.
-     */
-    // public function updating($property): void
-    // {
-    //     if (in_array($property, ['busqueda', 'filtroSector', 'filtroEstado'])) {
-    //         $this->resetPage();
-    //     }
-    // }
     public function updating($property): void
     {
         if (in_array($property, ['busqueda', 'filtroSector', 'filtroEstado'])) {
@@ -55,18 +44,6 @@ class MostrarEmpresa extends Component
         }
     }
 
-    /**
-     * Método para cambiar la columna de ordenación y la dirección.
-     */
-    // public function ordenar($columna): void
-    // {
-    //     if ($this->ordenarPor === $columna) {
-    //         $this->direccionOrden = $this->direccionOrden === 'asc' ? 'desc' : 'asc';
-    //     } else {
-    //         $this->ordenarPor = $columna;
-    //         $this->direccionOrden = 'asc';
-    //     }
-    // }
 
     public function ordenar($columna): void
     {
@@ -90,51 +67,6 @@ class MostrarEmpresa extends Component
             'icon' => 'warning',
         ]);
     }
-
-    /**
-     * 4. Escucha el evento final 'delete-confirmed' desde SweetAlert y elimina la empresa.
-     */
-    // #[On('delete-confirmed')]
-    // public function deleteEmpresa(int $id): void
-    // {
-    //     try {
-    //         $empresa = Empresa::findOrFail($id);
-
-    //         // Si la empresa tiene un logo, lo borramos del almacenamiento.
-    //         if ($empresa->logo) { // <-- Corregido de 'image' a 'logo' para coincidir con la BD
-    //             Storage::disk('public')->delete($empresa->logo);
-    //         }
-
-    //         $empresa->delete();
-
-    //         // Usamos session()->flash() para el mensaje de éxito.
-    //         session()->flash('message', 'Empresa eliminada exitosamente.');
-
-    //         $this->resetPage();
-    //     } catch (\Exception $e) {
-    //         session()->flash('error', 'Error al eliminar la empresa: ' . $e->getMessage());
-    //     }
-    // }
-    // #[On('delete-confirmed')]
-    // public function deleteEmpresa(int $id): void
-    // {
-    //     try {
-    //         $empresa = Empresa::findOrFail($id);
-
-    //         if ($empresa->logo) {
-    //             Storage::disk('public')->delete($empresa->logo);
-    //         }
-
-    //         $empresa->delete();
-
-    //         // Cambia session()->flash() por dispatch para Toastr
-    //         $this->dispatch('toastr-success', message: 'Empresa eliminada exitosamente.');
-
-    //         $this->resetPage();
-    //     } catch (\Exception $e) {
-    //         $this->dispatch('toastr-error', message: 'Error al eliminar la empresa: ' . $e->getMessage());
-    //     }
-    // }
 
     #[On('delete-confirmed')]
     public function deleteEmpresa(int $id): void
@@ -169,7 +101,6 @@ class MostrarEmpresa extends Component
     public function exportarPdf()
     {
         // 1. Obtenemos los datos con los mismos filtros que la tabla.
-        //    Reutilizamos la lógica de la consulta del método render().
         $empresasQuery = Empresa::query();
 
         if ($this->busqueda) {
@@ -189,9 +120,12 @@ class MostrarEmpresa extends Component
         // Aplicamos la ordenación actual de la tabla
         $empresas = $empresasQuery->orderBy($this->ordenarPor, $this->direccionOrden)->get();
 
-        // 2. Generamos el PDF
+        // 2. Generamos el PDF pasando todas las variables necesarias
         $pdf = Pdf::loadView('livewire.encuesta.empresas-pdf', [
-            'empresas' => $empresas
+            'empresas' => $empresas,
+            'busqueda' => $this->busqueda,
+            'filtroSector' => $this->filtroSector,
+            'filtroEstado' => $this->filtroEstado
         ]);
 
         // 3. Descargamos el PDF en el navegador del usuario.
@@ -202,123 +136,92 @@ class MostrarEmpresa extends Component
 
     public function exportarZip()
     {
-        // 1. OBTENER LOS DATOS FILTRADOS (sin cambios)
-        $empresasQuery = Empresa::query();
-        if ($this->busqueda) {
-            $empresasQuery->where(function ($query) {
-                $query->where('nombre_comercial', 'like', '%' . $this->busqueda . '%')
-                    ->orWhere('razon_social', 'like', '%' . $this->busqueda . '%')
-                    ->orWhere('rfc', 'like', '%' . $this->busqueda . '%');
-            });
-        }
-        if ($this->filtroSector) {
-            $empresasQuery->where('sector', $this->filtroSector);
-        }
-        if ($this->filtroEstado) {
-            $empresasQuery->where('estado_inicial', $this->filtroEstado);
-        }
-        $empresas = $empresasQuery->orderBy($this->ordenarPor, $this->direccionOrden)->get();
-
-        // 2. PREPARAR CARPETAS Y NOMBRES DE ARCHIVO (sin cambios)
-        $fecha = now()->format('Y-m-d');
-        $nombreBase = 'reporte-empresas-' . $fecha;
-        $directorioTemporal = storage_path('app/temp/' . $nombreBase);
-
-        File::makeDirectory($directorioTemporal . '/empresa', 0755, true, true);
-
-        $rutaExcel = $directorioTemporal . '/empresa/empresas-' . $fecha . '.xlsx';
-        $rutaPdf = $directorioTemporal . '/empresa/listado-empresas-' . $fecha . '.pdf';
-
-        // --- INICIO DE LA CORRECCIÓN ---
-
-        // 3. GENERAR Y GUARDAR LOS ARCHIVOS (Lógica de Excel modificada)
         try {
-            // Guardar Excel de forma explícita
-            $export = new EmpresasExport($this->busqueda, $this->filtroSector, $this->filtroEstado);
-            $contenidoExcel = Excel::raw($export, \Maatwebsite\Excel\Excel::XLSX);
-            File::put($rutaExcel, $contenidoExcel);
+            // 1. OBTENER DATOS
+            $empresasQuery = Empresa::query();
 
-            // Guardar PDF (sin cambios)
-            $pdf = Pdf::loadView('livewire.encuesta.empresas-pdf', ['empresas' => $empresas]);
-            File::put($rutaPdf, $pdf->output());
-        } catch (\Exception $e) {
-            // Si algo falla al generar los archivos, podemos manejar el error aquí.
-            // Por ejemplo, mostrando un mensaje de error al usuario.
-            session()->flash('error', 'No se pudieron generar los archivos de reporte: ' . $e->getMessage());
-            return; // Detenemos la ejecución
-        }
-
-        // --- FIN DE LA CORRECCIÓN ---
-
-        // 4. CREAR EL ARCHIVO ZIP (sin cambios)
-        $zip = new ZipArchive;
-        $nombreZip = storage_path('app/' . $nombreBase . '.zip');
-
-        if ($zip->open($nombreZip, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
-            $archivos = File::allFiles($directorioTemporal);
-            foreach ($archivos as $archivo) {
-                $rutaRelativa = 'reportes/' . substr($archivo->getPathname(), strlen($directorioTemporal) + 1);
-                $zip->addFile($archivo->getPathname(), $rutaRelativa);
+            if ($this->busqueda) {
+                $empresasQuery->where(function ($query) {
+                    $query->where('nombre_comercial', 'like', '%' . $this->busqueda . '%')
+                        ->orWhere('razon_social', 'like', '%' . $this->busqueda . '%')
+                        ->orWhere('rfc', 'like', '%' . $this->busqueda . '%');
+                });
             }
-            $zip->close();
+
+            if ($this->filtroSector) {
+                $empresasQuery->where('sector', $this->filtroSector);
+            }
+
+            if ($this->filtroEstado) {
+                $empresasQuery->where('estado_inicial', $this->filtroEstado);
+            }
+
+            $empresas = $empresasQuery->orderBy($this->ordenarPor, $this->direccionOrden)->get();
+
+            if ($empresas->isEmpty()) {
+                session()->flash('warning', 'No hay empresas para exportar con los filtros aplicados.');
+                return;
+            }
+
+            // 2. CREAR ZIP
+            $fecha = now()->format('Y-m-d_H-i-s');
+            $zipFileName = 'reporte-empresas-' . $fecha . '.zip';
+            $zipPath = storage_path('app/' . $zipFileName);
+
+            $zip = new ZipArchive;
+
+            if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
+
+                // 3. AGREGAR EXCEL AL ZIP (USANDO RAW)
+                $export = new EmpresasExport($this->busqueda, $this->filtroSector, $this->filtroEstado);
+
+                // Generar Excel en memoria
+                $excelContent = Excel::raw($export, \Maatwebsite\Excel\Excel::XLSX);
+
+                // Agregar Excel al ZIP
+                if ($excelContent) {
+                    $zip->addFromString('Reporte_Empresas.xlsx', $excelContent);
+                } else {
+                    throw new \Exception('No se pudo generar el archivo Excel');
+                }
+
+                // 4. AGREGAR PDF AL ZIP
+                $pdf = Pdf::loadView('livewire.encuesta.empresas-pdf', [
+                    'empresas' => $empresas,
+                    'busqueda' => $this->busqueda,
+                    'filtroSector' => $this->filtroSector,
+                    'filtroEstado' => $this->filtroEstado
+                ]);
+
+                $pdfContent = $pdf->output();
+                if ($pdfContent) {
+                    $zip->addFromString('Listado_Empresas.pdf', $pdfContent);
+                }
+
+                $zip->close();
+
+                // 5. VERIFICAR QUE EL ZIP SE CREÓ CORRECTAMENTE
+                if (!File::exists($zipPath) || File::size($zipPath) === 0) {
+                    throw new \Exception('El archivo ZIP se creó vacío o no se creó');
+                }
+
+                // 6. DESCARGAR
+                return response()->download($zipPath, $zipFileName)->deleteFileAfterSend(true);
+            } else {
+                throw new \Exception('No se pudo crear el archivo ZIP');
+            }
+        } catch (\Exception $e) {
+            // Limpiar en caso de error
+            if (isset($zipPath) && File::exists($zipPath)) {
+                File::delete($zipPath);
+            }
+
+            session()->flash('error', 'Error al generar el archivo ZIP: ' . $e->getMessage());
+            logger()->error('Error en exportarZip: ' . $e->getMessage());
+            return;
         }
-
-        // 5. LIMPIAR LA CARPETA TEMPORAL (sin cambios)
-        File::deleteDirectory($directorioTemporal);
-
-        // 6. DESCARGAR EL ZIP Y LUEGO BORRARLO DEL SERVIDOR (sin cambios)
-        return response()->download($nombreZip)->deleteFileAfterSend(true);
     }
 
-
-
-
-    // public function render()
-    // {
-    //     // 1. Construir la consulta a la base de datos con los filtros
-    //     $empresasQuery = Empresa::query();
-
-    //     // Aplicar filtro de búsqueda
-    //     if ($this->busqueda) {
-    //         $empresasQuery->where(function ($query) {
-    //             $query->where('nombre_comercial', 'like', '%' . $this->busqueda . '%')
-    //                 ->orWhere('razon_social', 'like', '%' . $this->busqueda . '%')
-    //                 ->orWhere('rfc', 'like', '%' . $this->busqueda . '%');
-    //         });
-    //     }
-
-    //     // Aplicar filtro por sector
-    //     if ($this->filtroSector) {
-    //         $empresasQuery->where('sector', $this->filtroSector);
-    //     }
-
-    //     // Aplicar filtro por estado inicial
-    //     if ($this->filtroEstado) {
-    //         $empresasQuery->where('estado_inicial', $this->filtroEstado);
-    //     }
-
-    //     // --- INICIO DE LA CORRECCIÓN ---
-
-    //     // 2. OBTENER DATOS PARA LOS FILTROS (ANTES DE ORDENAR)
-    //     //    Clonamos la consulta con los `where` pero sin el `orderBy`.
-    //     $sectores = (clone $empresasQuery)->distinct()->pluck('sector')->sort();
-    //     $estados = (clone $empresasQuery)->distinct()->pluck('estado_inicial')->sort();
-
-    //     // 3. AHORA SÍ, APLICAR LA ORDENACIÓN a la consulta principal
-    //     $empresasQuery->orderBy($this->ordenarPor, $this->direccionOrden);
-
-    //     // 4. Obtener los datos paginados
-    //     $empresas = $empresasQuery->paginate(10);
-
-    //     // --- FIN DE LA CORRECCIÓN ---
-
-    //     // 5. Pasar todos los datos a la vista
-    //     return view('livewire.encuesta.mostrar-empresa', [
-    //         'empresas' => $empresas,
-    //         'sectores' => $sectores,
-    //         'estados' => $estados,
-    //     ])->layout('layouts.app');
-    // }
 
     public function render()
     {
