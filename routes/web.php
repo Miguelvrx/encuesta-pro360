@@ -79,6 +79,8 @@ Route::get('/reporte-evaluacion', ReporteEvaluacion::class)->name('reporte-evalu
 Route::get('/reaking-excelencia', ReakingExcelencia::class)->name('reaking-excelencia');
 Route::get('/asignar-roles', AsignarRoles::class)->name('asignar-roles');
 Route::get('/gestion-roles', GestionRoles::class)->name('gestion-roles');
+Route::get('/manual-usuario-empresas', \App\Livewire\Empresa\ManualUsuarioEmpModal::class)
+     ->name('manual-usuario-empresas');
 
 
 //crear-evaluacion  Route::get('/select2-example', Select2Example::class)->name('select2-example');

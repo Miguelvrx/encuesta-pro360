@@ -1,21 +1,20 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Listado de Empresas</title>
     <style>
-        /* Estilos generales para el documento PDF */
+        /* Estilos generales */
         body {
             font-family: 'Helvetica', 'Arial', sans-serif;
-            font-size: 10px;
+            font-size: 9px;
             color: #333;
             margin: 0;
             padding: 15px;
-            background-color: #ffffff;
         }
 
-        /* Header mejorado */
+        /* --- Estilos del Header, Footer y otros elementos (sin cambios) --- */
         .header {
             width: 100%;
             border-bottom: 2px solid #003366;
@@ -25,14 +24,14 @@
         }
 
         .header-logo {
-            width: 60px;
+            width: 200px;
             text-align: left;
             vertical-align: top;
         }
 
         .header-logo img {
-            max-width: 50px;
-            max-height: 50px;
+            max-width: 180px;
+            height: auto;
             display: block;
         }
 
@@ -55,7 +54,6 @@
             color: #666;
         }
 
-        /* Información de la empresa */
         .company-info {
             margin-bottom: 15px;
             padding: 8px;
@@ -64,91 +62,15 @@
             font-size: 9px;
         }
 
-        /* Tabla principal mejorada */
-        table.data-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-            font-size: 8px;
-        }
-
-        .data-table th,
-        .data-table td {
-            border: 1px solid #ddd;
-            padding: 5px 4px;
-            text-align: left;
-            vertical-align: top;
-            line-height: 1.2;
-        }
-
-        .data-table thead {
-            background-color: #003366;
-        }
-
-        .data-table th {
+        .section-title {
+            font-size: 12px;
+            color: #003366;
+            margin: 20px 0 10px 0;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #e2e8f0;
             font-weight: bold;
-            font-size: 8px;
-            text-transform: uppercase;
-            color: white;
-            padding: 6px 4px;
         }
 
-        .data-table tbody tr:nth-child(even) {
-            background-color: #f8fafc;
-        }
-
-        /* Logo de empresa en PDF */
-        .empresa-logo {
-            width: 25px;
-            height: 25px;
-            object-fit: cover;
-            border-radius: 3px;
-            border: 1px solid #ddd;
-            display: block;
-        }
-
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        /* Estados mejorados */
-        .badge {
-            padding: 2px 6px;
-            border-radius: 8px;
-            font-size: 7px;
-            font-weight: bold;
-            text-align: center;
-            display: inline-block;
-            min-width: 40px;
-        }
-
-        .badge-activo {
-            background-color: #d1fae5;
-            color: #065f46;
-            border: 1px solid #a7f3d0;
-        }
-
-        .badge-inactivo {
-            background-color: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #fca5a5;
-        }
-
-        .badge-proceso {
-            background-color: #fef3c7;
-            color: #92400e;
-            border: 1px solid #fcd34d;
-        }
-
-        .badge-suspendido {
-            background-color: #e5e7eb;
-            color: #374151;
-            border: 1px solid #d1d5db;
-        }
-
-        /* Resumen al final */
         .summary {
             margin-top: 15px;
             padding: 8px;
@@ -158,11 +80,6 @@
             border-left: 3px solid #003366;
         }
 
-        .summary strong {
-            color: #003366;
-        }
-
-        /* Footer mejorado */
         .footer {
             position: fixed;
             bottom: 0;
@@ -180,44 +97,109 @@
             content: "Página " counter(page);
         }
 
-        /* Estilos para celdas específicas */
-        .rfc-cell {
-            font-family: 'Courier New', monospace;
-            font-size: 7px;
+        /* --- Estructura de Tabla --- */
+        .empresa-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
         }
 
-        .nombre-comercial {
-            font-weight: 500;
+        .empresa-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            vertical-align: top;
         }
 
-        .id-cell {
-            font-weight: bold;
-            color: #003366;
+        .empresa-table tr.main-info:nth-child(odd) {
+            background-color: #ffffff;
         }
 
-        /* Encabezado de sección */
-        .section-title {
-            font-size: 11px;
-            color: #003366;
-            margin: 15px 0 8px 0;
-            padding-bottom: 4px;
-            border-bottom: 1px solid #e2e8f0;
-            font-weight: bold;
+        .empresa-table tr.main-info:nth-child(even) {
+            background-color: #f8fafc;
         }
 
-        /* Avatar para empresas sin logo */
+        /* Celda del Logo */
+        .logo-cell {
+            width: 80px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .empresa-logo {
+            width: 100px;
+            height: auto;
+            margin: 0 auto;
+            display: block;
+        }
+
         .avatar {
-            width: 25px;
-            height: 25px;
-            border-radius: 3px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background-color: #003366;
+            color: white;
+            font-size: 22px;
+            font-weight: bold;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
+            margin: 0 auto;
+        }
+
+
+        /* Celda de Información */
+        .info-cell h3 {
+            font-size: 11px;
+            color: #003366;
+            margin: 0 0 8px 0;
+            font-weight: bold;
+        }
+
+        .info-cell p {
+            margin: 0 0 4px 0;
+            font-size: 9px;
+            line-height: 1.4;
+        }
+
+        .info-cell strong {
+            font-weight: bold;
+            color: #555;
+        }
+
+        /* --- NUEVO: Celda de Contacto --- */
+        .contact-cell {
+            background-color: #f9f9f9;
+            padding: 8px;
+            font-size: 8.5px;
+            border-top: 1px solid #ccc;
+        }
+
+        .contact-cell strong {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .contact-cell p {
+            margin: 0 0 3px 0;
+        }
+
+        /* Badges de estado */
+        .badge {
+            padding: 2px 6px;
+            border-radius: 8px;
             font-size: 8px;
             font-weight: bold;
-            border: 1px solid #ddd;
+            display: inline-block;
+        }
+
+        .badge-activo {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-inactivo {
+            background-color: #fee2e2;
+            color: #991b1b;
         }
     </style>
 </head>
@@ -227,128 +209,77 @@
     
     <table class="header">
         <tr>
-            <td class="header-logo">
-                <img src="<?php echo e(public_path('images/cesrhv.png')); ?>" alt="CESRH Logo" style="width: 90px; height: auto;">
-            </td>
+            <td class="header-logo"><img src="<?php echo e(public_path('images/cesrhv.png')); ?>" alt="CESRH Logo"></td>
             <td class="header-text">
                 <h1>Listado de Empresas Registradas</h1>
                 <p>Reporte generado el: <?php echo e(now()->format('d/m/Y H:i')); ?></p>
-                <p style="font-size: 8px; color: #888; margin-top: 2px;">
+                <!-- <p style="font-size: 8px; color: #888; margin-top: 2px;">
                     Sistema de Gestión Empresarial - CESRH
-                </p>
+                </p> -->
             </td>
         </tr>
     </table>
-
-    
-    <div class="company-info">
-        <strong>Filtros aplicados:</strong> 
-        <?php echo e($busqueda ? "Búsqueda: \"$busqueda\" • " : ''); ?>
-
-        <?php echo e($filtroSector ? "Sector: $filtroSector • " : ''); ?>
-
-        <?php echo e($filtroEstado ? "Estado: $filtroEstado" : 'Todos los registros'); ?>
-
-    </div>
-
-    
+    <div class="company-info"><strong>Filtros aplicados:</strong> <?php echo e($busqueda || $filtroSector || $filtroEstado ? ($busqueda ? "Búsqueda: \"$busqueda\"" : '') . ($filtroSector ? " • Sector: $filtroSector" : '') . ($filtroEstado ? " • Estado: $filtroEstado" : '') : 'Todos los registros'); ?></div>
     <div class="section-title">Detalle de Empresas</div>
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th width="5%">ID</th>
-                <th width="5%">Logo</th>
-                <th width="20%">Nombre Comercial</th>
-                <th width="15%">RFC</th>
-                <th width="12%">Sector</th>
-                <th width="18%">Ubicación</th>
-                <th width="10%">Registro</th>
-                <th width="15%">Estado</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php $__empty_1 = true; $__currentLoopData = $empresas; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $empresa): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-            <tr>
-                
-                <td class="id-cell"><?php echo e($empresa->id_empresa); ?></td>
-                
-                
-                <td>
-                    <div class="logo-container">
-                        <?php if($empresa->logo && file_exists(public_path('storage/' . $empresa->logo))): ?>
-                            <img src="<?php echo e(public_path('storage/' . $empresa->logo)); ?>" 
-                                 alt="Logo" 
-                                 class="empresa-logo"
-                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                            <div class="avatar" style="display: none;">
-                                <?php echo e(strtoupper(substr($empresa->nombre_comercial, 0, 2))); ?>
-
-                            </div>
-                        <?php else: ?>
-                            <div class="avatar">
-                                <?php echo e(strtoupper(substr($empresa->nombre_comercial, 0, 2))); ?>
-
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                </td>
-                
-                
-                <td class="nombre-comercial"><?php echo e($empresa->nombre_comercial); ?></td>
-                
-                
-                <td class="rfc-cell"><?php echo e($empresa->rfc); ?></td>
-                
-                
-                <td><?php echo e($empresa->sector); ?></td>
-                
-                
-                <td><?php echo e($empresa->municipio ?? $empresa->ciudad); ?>, <?php echo e($empresa->estado); ?>, <?php echo e($empresa->pais); ?></td>
-                
-                
-                <td><?php echo e($empresa->fecha_registro->format('d/m/Y')); ?></td>
-                
-                
-                <td>
-                    <?php
-                    $estadoClass = 'badge-suspendido';
-                    if ($empresa->estado_inicial == 'Activo') $estadoClass = 'badge-activo';
-                    if ($empresa->estado_inicial == 'Inactivo') $estadoClass = 'badge-inactivo';
-                    if ($empresa->estado_inicial == 'En Proceso') $estadoClass = 'badge-proceso';
-                    ?>
-                    <span class="badge <?php echo e($estadoClass); ?>"><?php echo e($empresa->estado_inicial); ?></span>
-                </td>
-            </tr>
-            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-            <tr>
-                <td colspan="8" style="text-align: center; padding: 15px; color: #666; font-style: italic;">
-                    No se encontraron empresas con los filtros aplicados.
-                </td>
-            </tr>
-            <?php endif; ?>
-        </tbody>
-    </table>
 
     
-    <?php if($empresas->count() > 0): ?>
-    <div class="summary">
-        <strong>Resumen del reporte:</strong> 
-        Se encontraron <?php echo e($empresas->count()); ?> empresa(s) registrada(s)
-        <?php if($busqueda || $filtroSector || $filtroEstado): ?>
-        con los filtros aplicados
-        <?php endif; ?>
-        • Generado por: <?php echo e(auth()->user()->name ?? 'Sistema'); ?>
+    <?php $__empty_1 = true; $__currentLoopData = $empresas; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $empresa): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+    <table class="empresa-table" style="margin-bottom: 15px;">
+        <tr class="main-info">
+            
+            <td class="logo-cell">
+                <?php if($empresa->logo && file_exists(public_path('storage/' . $empresa->logo))): ?>
+                <img src="<?php echo e(public_path('storage/' . $empresa->logo)); ?>" alt="Logo" class="empresa-logo">
+                <?php else: ?>
+                <div class="avatar"><span><?php echo e(strtoupper(substr($empresa->nombre_comercial, 0, 2))); ?></span></div>
+                <?php endif; ?>
+            </td>
 
-    </div>
+            
+            <td class="info-cell">
+                <h3>(#<?php echo e($empresa->id_empresa); ?>) <?php echo e($empresa->nombre_comercial); ?></h3>
+                <p><strong>Razón Social:</strong> <?php echo e($empresa->razon_social ?? 'N/A'); ?></p>
+                <p><strong>RFC:</strong> <?php echo e($empresa->rfc ?? 'N/A'); ?></p>
+                <p><strong>Dirección:</strong> <?php echo e($empresa->direccion ?? ''); ?>, <?php echo e($empresa->municipio ?? $empresa->ciudad ?? ''); ?>, <?php echo e($empresa->estado ?? ''); ?>. <strong>C.P.</strong> <?php echo e($empresa->codigo_postal ?? 'S/N'); ?></p>
+            </td>
+
+            
+            <td class="info-cell" style="width: 35%;">
+                <p><strong>Estado:</strong> <span class="badge badge-<?php echo e(strtolower($empresa->estado_inicial)); ?>"><?php echo e($empresa->estado_inicial); ?></span></p>
+                <p><strong>Sector:</strong> <?php echo e($empresa->sector ?? 'N/A'); ?></p>
+                <p><strong>Nº Empleados:</strong> <?php echo e($empresa->numero_empleados ?? 'N/A'); ?></p>
+                <p><strong>Año en Mercado:</strong> <?php echo e($empresa->ano_mercado ?? 'N/A'); ?></p>
+                <p><strong>Tipo de Org.:</strong> <?php echo e($empresa->tipo_organizacion ?? 'N/A'); ?></p>
+                <p><strong>Registro:</strong> <?php echo e($empresa->fecha_registro->format('d/m/Y')); ?></p>
+            </td>
+        </tr>
+        
+        
+        
+        <tr>
+            <td class="contact-cell" colspan="3">
+                <strong>Contacto Principal:</strong> <?php echo e($empresa->contacto_nombre ?? 'No especificado'); ?>
+
+                <?php if($empresa->contacto_puesto): ?>
+                <em>(<?php echo e($empresa->contacto_puesto); ?>)</em>
+                <?php endif; ?>
+                &nbsp; • &nbsp; <strong>Tel:</strong> <?php echo e($empresa->contacto_telefono ?? 'N/A'); ?>
+
+                &nbsp; • &nbsp; <strong>Email:</strong> <?php echo e($empresa->contacto_correo ?? 'N/A'); ?>
+
+            </td>
+        </tr>
+    </table>
+    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+    <p style="text-align: center; padding: 20px; background-color: #f8fafc;">No se encontraron empresas con los filtros aplicados.</p>
     <?php endif; ?>
 
     
-    <div class="footer">
-        <span class="page-number"></span> 
-        • CESRH Consultoría y Coaching • 
-        <?php echo e(now()->format('d/m/Y')); ?> • 
-        Confidencial
-    </div>
+    <?php if($empresas->count() > 0): ?>
+    <div class="summary"><strong>Resumen del reporte:</strong> Se encontraron <?php echo e($empresas->count()); ?> empresa(s) registrada(s). • Generado por: <?php echo e(auth()->user()->name ?? 'Sistema'); ?></div>
+    <?php endif; ?>
+    <div class="footer"><span class="page-number"></span> • CESRH Consultoría y Coaching • <?php echo e(now()->format('d/m/Y')); ?> • Confidencial</div>
 
 </body>
+
 </html><?php /**PATH D:\laragon\www\encuesta-pro360\resources\views/livewire/encuesta/empresas-pdf.blade.php ENDPATH**/ ?>

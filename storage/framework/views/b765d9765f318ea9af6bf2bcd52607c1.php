@@ -13,7 +13,6 @@
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-
     <!-- Select2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -35,12 +34,10 @@
             from {
                 transform: rotate(0deg);
             }
-
             to {
                 transform: rotate(360deg);
             }
         }
-
         .rotating-border {
             background: conic-gradient(from 0deg,
                     #3b82f6,
@@ -53,8 +50,6 @@
             animation: rotate 3s linear infinite;
         }
     </style>
-
-    
 </head>
 
 <body class="font-sans antialiased">
@@ -136,11 +131,9 @@ if (isset($__slots)) unset($__slots);
 
     <?php echo $__env->yieldPushContent('modals'); ?>
 
-    <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::scripts(); ?>
-
-
     <!-- jQuery (requerido para Select2) -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
     <!-- Select2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -151,7 +144,15 @@ if (isset($__slots)) unset($__slots);
     <!-- Toastr JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
-    <!-- Script para manejar notificaciones Toastr -->
+    <!-- Livewire Scripts PRIMERO -->
+    <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::scripts(); ?>
+
+
+    <!-- Alpine.js DESPUÉS de Livewire -->
+    <!-- <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.15.0/dist/cdn.min.js"></script> -->
+
+    <?php echo $__env->yieldPushContent('scripts'); ?>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Configuración de Toastr
@@ -179,24 +180,5 @@ if (isset($__slots)) unset($__slots);
             });
         });
     </script>
-
-    <?php echo $__env->yieldPushContent('scripts'); ?>
-    <?php
-$__split = function ($name, $params = []) {
-    return [$name, $params];
-};
-[$__name, $__params] = $__split('encuesta.departamento.manual-usuario-dep-modal', []);
-
-$__html = app('livewire')->mount($__name, $__params, 'lw-1000852958-2', $__slots ?? [], get_defined_vars());
-
-echo $__html;
-
-unset($__html);
-unset($__name);
-unset($__params);
-unset($__split);
-if (isset($__slots)) unset($__slots);
-?>
 </body>
-
 </html><?php /**PATH D:\laragon\www\encuesta-pro360\resources\views/layouts/app.blade.php ENDPATH**/ ?>

@@ -4,6 +4,7 @@ namespace App\Livewire\Encuesta\Departamento;
 
 use App\Models\Departamento;
 use App\Models\Empresa;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -81,6 +82,51 @@ class MostrarDepartamento extends Component
             session()->flash('error', 'Error al eliminar el departamento: ' . $e->getMessage());
         }
         // No es necesario resetPage() aquí, Livewire re-renderizará la vista.
+    }
+
+      public function exportarPdf()
+    {
+        // 1. Obtenemos los datos con los mismos filtros que la tabla.
+        $departamentosQuery = Departamento::with('empresa');
+
+        if ($this->busqueda) {
+            $departamentosQuery->where(function ($query) {
+                $query->where('nombre_departamento', 'like', '%' . $this->busqueda . '%')
+                      ->orWhere('puesto', 'like', '%' . $this->busqueda . '%')
+                      ->orWhere('descripcion', 'like', '%' . $this->busqueda . '%');
+            });
+        }
+
+        if ($this->filtroEmpresa) {
+            $departamentosQuery->where('empresa_id_empresa', $this->filtroEmpresa);
+        }
+
+        if ($this->filtroEstado) {
+            $departamentosQuery->where('estado', $this->filtroEstado);
+        }
+
+        // Aplicamos la ordenación actual de la tabla
+        $departamentos = $departamentosQuery->orderBy($this->ordenarPor, $this->direccionOrden)->get();
+
+        // Obtener nombre de la empresa si hay filtro
+        $empresaFiltroNombre = null;
+        if ($this->filtroEmpresa) {
+            $empresa = Empresa::find($this->filtroEmpresa);
+            $empresaFiltroNombre = $empresa ? $empresa->nombre_comercial : null;
+        }
+
+        // 2. Generamos el PDF pasando todas las variables necesarias
+        $pdf = Pdf::loadView('livewire.encuesta.departamento.departamento-pdf', [
+            'departamentos' => $departamentos,
+            'busqueda' => $this->busqueda,
+            'filtroEmpresa' => $empresaFiltroNombre,
+            'filtroEstado' => $this->filtroEstado
+        ]);
+
+        // 3. Descargamos el PDF en el navegador del usuario.
+        return response()->streamDownload(function () use ($pdf) {
+            echo $pdf->stream();
+        }, 'listado-departamentos-' . now()->format('Y-m-d') . '.pdf');
     }
 
 

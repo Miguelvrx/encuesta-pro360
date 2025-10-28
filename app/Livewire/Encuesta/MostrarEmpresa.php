@@ -37,6 +37,23 @@ class MostrarEmpresa extends Component
         'filtroEstado' => ['except' => ''],
     ];
 
+    // NUEVO: Método para verificar si el logo existe
+    public function logoExists($logoPath)
+    {
+        if (!$logoPath) {
+            return false;
+        }
+
+        $fullPath = public_path('storage/' . $logoPath);
+        return file_exists($fullPath) && is_file($fullPath);
+    }
+
+    public function getLogoPath($logoPath)
+    {
+        return public_path('storage/' . $logoPath);
+    }
+
+
     public function updating($property): void
     {
         if (in_array($property, ['busqueda', 'filtroSector', 'filtroEstado'])) {
