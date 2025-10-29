@@ -38,6 +38,34 @@
                         <dt class="text-sm font-medium text-gray-500">Correo Electrónico</dt>
                         <dd class="mt-1 text-sm text-gray-900">{{ $user->email }}</dd>
                     </div>
+
+                    <!-- ========== NUEVA SECCIÓN: USERNAME ========== -->
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Username</dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            @if($user->username)
+                            <div class="flex items-center">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
+                                    {{ $user->username }}
+                                </span>
+                            </div>
+                            @else
+                            <div class="flex items-center">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-600">
+                                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                    </svg>
+                                    Usa Email
+                                </span>
+                            </div>
+                            @endif
+                        </dd>
+                    </div>
+                    <!-- ============================================= -->
+
                     <div>
                         <dt class="text-sm font-medium text-gray-500">Teléfono</dt>
                         <dd class="mt-1 text-sm text-gray-900">{{ $user->telefono ?? 'No especificado' }}</dd>

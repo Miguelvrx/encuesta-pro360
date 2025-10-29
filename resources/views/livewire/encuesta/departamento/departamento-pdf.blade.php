@@ -1,440 +1,332 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Listado de Departamentos</title>
     <style>
-        /* Estilos generales */
+        /* ==========================
+           ESTILOS GENERALES
+        =========================== */
+        @page {
+            margin: 20px 25px;
+        }
+
         body {
             font-family: 'Helvetica', 'Arial', sans-serif;
             font-size: 10px;
             color: #1e293b;
             margin: 0;
-            padding: 20px;
+            padding: 0;
             background: #ffffff;
         }
 
-        /* Header usando tabla */
+        h1,
+        h3,
+        p {
+            margin: 0;
+            padding: 0;
+        }
+
+        /* ==========================
+           ENCABEZADO
+        =========================== */
         .header {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
-            border-bottom: 3px solid #4f46e5;
-            padding-bottom: 10px;
+            margin-bottom: 15px;
         }
 
         .header td {
-            vertical-align: middle;
-            padding: 10px 0;
+            vertical-align: top;
+            padding: 0;
         }
 
         .header-logo {
-            width: 160px;
+            width: 150px;
         }
 
         .header-logo img {
-            max-width: 160px;
+            max-width: 120px;
             height: auto;
         }
 
         .header-info {
             text-align: right;
+            padding-top: 10px;
+            /* Pequeño ajuste para alinear con el logo */
         }
 
         .header h1 {
-            font-size: 18px;
-            margin: 0 0 5px 0;
-            color: #4f46e5;
-            font-weight: 700;
+            font-size: 16px;
+            color: #1e40af;
+            /* Azul oscuro */
+            font-weight: bold;
+            border-bottom: 2px solid #3b82f6;
+            /* Línea azul */
+            padding-bottom: 5px;
+            margin-bottom: 3px;
         }
 
         .header-meta {
             font-size: 9px;
             color: #64748b;
-            margin: 0;
         }
 
-        /* Filtros aplicados */
+        /* ==========================
+           FILTROS
+        =========================== */
         .filters-bar {
-            background: #f1f5f9;
-            padding: 10px 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border-left: 4px solid #4f46e5;
+            background: #eff6ff;
+            /* Azul muy claro */
+            border-left: 4px solid #3b82f6;
+            /* Azul */
+            padding: 8px 12px;
+            margin-bottom: 15px;
+            font-size: 9px;
+            color: #1e40af;
         }
 
         .filters-bar strong {
-            color: #334155;
-            font-size: 9px;
+            font-weight: bold;
+            color: #1e3a8a;
         }
 
-        .filters-bar span {
-            color: #475569;
+        /* ==========================
+           TABLA DE DATOS
+        =========================== */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
             font-size: 9px;
+            margin-bottom: 20px;
         }
 
-        /* Section title */
-        .section-title {
-            font-size: 13px;
-            color: #0f172a;
-            margin: 25px 0 15px 0;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #e2e8f0;
-            font-weight: 700;
+        .data-table thead th {
+            background-color: #3b82f6;
+            /* Azul principal */
+            color: #ffffff;
+            padding: 8px 10px;
+            text-align: left;
+            font-weight: bold;
+            border: 1px solid #3b82f6;
             text-transform: uppercase;
         }
 
-        /* Card de departamento usando tabla */
-        .departamento-card {
-            width: 100%;
-            border-collapse: collapse;
-            background: #ffffff;
+        .data-table tbody td {
+            padding: 8px 10px;
             border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            page-break-inside: avoid;
+            /* Gris muy claro */
+            vertical-align: top;
         }
 
-        /* Card header */
-        .card-header {
-            background: #4f46e5;
-            padding: 0;
+        .data-table tbody tr:nth-child(even) {
+            background-color: #f8fafc;
+            /* Alternar filas */
         }
 
-        .card-header td {
-            padding: 12px 15px;
-            vertical-align: middle;
+        .data-table tbody tr:hover {
+            background-color: #eff6ff;
         }
 
-        .card-avatar-cell {
-            width: 55px;
+        /* Estilos específicos de columna */
+        .col-id {
+            width: 5%;
             text-align: center;
         }
 
-        .card-avatar {
-            width: 45px;
-            height: 45px;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px solid rgba(255, 255, 255, 0.3);
+        .col-departamento {
+            width: 15%;
+            font-weight: bold;
+        }
+
+        .col-empresa {
+            width: 15%;
+        }
+
+        .col-puesto {
+            width: 15%;
+        }
+
+        .col-fecha {
+            width: 10%;
             text-align: center;
-            line-height: 45px;
-            font-size: 16px;
-            font-weight: 700;
-            color: #ffffff;
-            display: inline-block;
         }
 
-        .card-title {
-            font-size: 13px;
-            font-weight: 700;
-            color: #ffffff;
-            margin: 0 0 3px 0;
+        .col-estado {
+            width: 10%;
+            text-align: center;
         }
 
-        .card-id {
+        .col-descripcion {
+            width: 30%;
+            max-width: 30%;
+            word-wrap: break-word;
+            line-height: 1.2;
+            /* Reducir el interlineado para ahorrar espacio vertical */
             font-size: 9px;
-            color: rgba(255, 255, 255, 0.8);
-            margin: 0;
+            /* Asegurar que el texto de la descripción sea un poco más pequeño */
         }
 
-        .card-status-cell {
-            width: 80px;
-            text-align: right;
-        }
-
-        .card-status {
-            padding: 4px 10px;
-            border-radius: 12px;
+        /* Badge de estado */
+        .badge {
             font-size: 8px;
-            font-weight: 600;
+            font-weight: bold;
+            border-radius: 4px;
+            padding: 3px 6px;
             text-transform: uppercase;
             display: inline-block;
         }
 
         .badge-activo {
             background-color: #d1fae5;
+            /* Verde claro */
             color: #065f46;
+            /* Verde oscuro */
         }
 
         .badge-inactivo {
             background-color: #fee2e2;
+            /* Rojo claro */
             color: #991b1b;
+            /* Rojo oscuro */
         }
 
-        /* Card body */
-        .card-body {
-            padding: 15px;
+        /* Imagen de la empresa */
+        .empresa-img {
+            max-width: 40px;
+            max-height: 20px;
+            display: block;
+            margin: 0 auto;
         }
 
-        .description-box {
-            background: #f8fafc;
-            padding: 10px;
-            border-radius: 6px;
-            border-left: 3px solid #4f46e5;
-            margin-bottom: 12px;
-        }
-
-        .info-label {
-            font-size: 8px;
-            color: #64748b;
-            text-transform: uppercase;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .info-value {
-            font-size: 10px;
-            color: #1e293b;
-            font-weight: 500;
-            line-height: 1.5;
-        }
-
-        /* Tabla de info usando tabla real */
-        .info-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 5px;
-        }
-
-        .info-table td {
-            padding: 8px 10px 8px 0;
-            vertical-align: top;
-            width: 50%;
-        }
-
-        /* Card footer */
-        .card-footer {
-            background: #f8fafc;
-            border-top: 1px solid #e2e8f0;
-        }
-
-        .card-footer td {
-            padding: 12px 15px;
-            vertical-align: middle;
-        }
-
-        .empresa-logo-cell {
-            width: 50px;
-            text-align: center;
-        }
-
-        .empresa-logo {
-            width: 40px;
-            height: 40px;
-            border-radius: 6px;
-            border: 1px solid #cbd5e1;
-        }
-
-        .empresa-placeholder {
-            width: 40px;
-            height: 40px;
-            border-radius: 6px;
-            background: #64748b;
-            color: white;
-            text-align: center;
-            line-height: 40px;
-            font-size: 12px;
-            font-weight: 700;
-            display: inline-block;
-        }
-
-        .empresa-name {
-            font-size: 10px;
-            color: #0f172a;
-            font-weight: 600;
-            margin: 0 0 2px 0;
-        }
-
-        .empresa-id {
-            font-size: 8px;
-            color: #64748b;
-            margin: 0;
-        }
-
-        /* Summary */
-        .summary {
-            background: #eff6ff;
-            padding: 12px 15px;
-            border-radius: 8px;
-            margin-top: 20px;
-            border-left: 4px solid #3b82f6;
-        }
-
-        .summary-content {
-            font-size: 9px;
-            color: #1e40af;
-            line-height: 1.6;
-        }
-
-        .summary-content strong {
-            font-weight: 700;
-            color: #1e3a8a;
-        }
-
-        /* Footer */
-        .footer {
-            width: 100%;
-            background: #f8fafc;
-            border-top: 2px solid #e2e8f0;
-            padding: 10px 0;
-            font-size: 8px;
-            color: #64748b;
-            margin-top: 30px;
-            text-align: center;
-        }
-
-        .footer-brand {
-            font-weight: 600;
-            color: #4f46e5;
-        }
-
-        /* Empty state */
+        /* ==========================
+           ESTADO VACÍO
+        =========================== */
         .empty-state {
             text-align: center;
-            padding: 40px 20px;
             background: #f8fafc;
-            border-radius: 10px;
             border: 2px dashed #cbd5e1;
-        }
-
-        .empty-state-icon {
-            font-size: 40px;
-            color: #cbd5e1;
-            margin-bottom: 15px;
+            padding: 30px 20px;
+            border-radius: 8px;
+            margin-top: 20px;
         }
 
         .empty-state-text {
-            font-size: 11px;
             color: #64748b;
-            margin: 0;
+            font-size: 10px;
+        }
+
+        /* ==========================
+           PIE DE PÁGINA
+        =========================== */
+        .footer {
+            width: 100%;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+            /* Volver a centrar el texto del footer */
+            font-size: 8px;
+            color: #64748b;
+            padding: 8px 0;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+
+        .page-number:before {
+            content: "Página " counter(page) " de " counter(pages);
+        }
+
+        .footer-brand {
+            font-weight: bold;
+            color: #1e40af;
         }
     </style>
 </head>
+
 <body>
 
     {{-- Header --}}
     <table class="header">
         <tr>
             <td class="header-logo">
-                <img src="{{ public_path('images/cesrhv.png') }}" alt="CESRH Logo">
+                {{-- Asumiendo que el logo está en public/images/cesrhv.png --}}
+                <img src="{{ public_path('images/cesrhv.png') }}" alt="Logo">
             </td>
             <td class="header-info">
                 <h1>Listado de Departamentos Registrados</h1>
-                <p class="header-meta">Reporte generado el: {{ now()->format('d/m/Y H:i') }}</p>
+                <p class="header-meta">Generado el {{ now()->format('d/m/Y') }} a las {{ now()->format('H:i:s') }}</p>
             </td>
         </tr>
     </table>
 
-    {{-- Información de filtros --}}
+    {{-- Filtros --}}
     <div class="filters-bar">
         <strong>Filtros aplicados:</strong>
         <span>
-            {{ $busqueda || $filtroEmpresa || $filtroEstado ? 
-                ($busqueda ? "Búsqueda: \"$busqueda\"" : '') . 
-                ($filtroEmpresa ? " • Empresa: $filtroEmpresa" : '') . 
-                ($filtroEstado ? " • Estado: " . ucfirst($filtroEstado) : '') 
-                : 'Todos los registros' 
-            }}
+            {{ $busqueda || $filtroEmpresa || $filtroEstado
+                ? ($busqueda ? "Búsqueda: \"$busqueda\"" : '') .
+                  ($filtroEmpresa ? " • Empresa: $filtroEmpresa" : '') .
+                  ($filtroEstado ? " • Estado: " . ucfirst($filtroEstado) : '')
+                : 'Todos los registros' }}
         </span>
     </div>
 
-    <div class="section-title">Detalle de Departamentos</div>
-
-    {{-- Card de departamento --}}
-    @forelse ($departamentos as $departamento)
-    <table class="departamento-card">
-        {{-- Header de la card --}}
-        <tr class="card-header">
-            <td class="card-avatar-cell">
-                <div class="card-avatar">
-                    {{ strtoupper(substr($departamento->nombre_departamento, 0, 2)) }}
-                </div>
-            </td>
-            <td>
-                <h3 class="card-title">{{ $departamento->nombre_departamento }}</h3>
-                <p class="card-id">ID: #{{ $departamento->id_departamento }}</p>
-            </td>
-            <td class="card-status-cell">
-                <span class="card-status badge-{{ strtolower($departamento->estado) }}">
-                    {{ ucfirst($departamento->estado) }}
-                </span>
-            </td>
-        </tr>
-
-        {{-- Body de la card --}}
-        <tr>
-            <td colspan="3" class="card-body">
-                {{-- Descripción --}}
-                @if($departamento->descripcion)
-                <div class="description-box">
-                    <div class="info-label">Descripción</div>
-                    <div class="info-value">{{ $departamento->descripcion }}</div>
-                </div>
-                @endif
-
-                {{-- Información en tabla --}}
-                <table class="info-table">
-                    <tr>
-                        <td>
-                            <div class="info-label">Puesto Principal</div>
-                            <div class="info-value">{{ $departamento->puesto ?? 'N/A' }}</div>
-                        </td>
-                        <td>
-                            <div class="info-label">Fecha de Registro</div>
-                            <div class="info-value">
-                                {{ $departamento->fecha_registro_departamento ? $departamento->fecha_registro_departamento->format('d/m/Y') : 'N/A' }}
-                            </div>
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-
-        {{-- Footer de la card (Empresa) --}}
-        <tr class="card-footer">
-            <td class="empresa-logo-cell">
-                @if($departamento->empresa && $departamento->empresa->logo && file_exists(public_path('storage/' . $departamento->empresa->logo)))
-                    <img src="{{ public_path('storage/' . $departamento->empresa->logo) }}" 
-                         alt="Logo" class="empresa-logo">
-                @else
-                    <div class="empresa-placeholder">
-                        {{ $departamento->empresa ? strtoupper(substr($departamento->empresa->nombre_comercial, 0, 2)) : 'N/A' }}
-                    </div>
-                @endif
-            </td>
-            <td colspan="2">
-                <p class="empresa-name">{{ $departamento->empresa->nombre_comercial ?? 'No asignada' }}</p>
-                @if($departamento->empresa)
-                <p class="empresa-id">ID Empresa: {{ $departamento->empresa->id_empresa }}</p>
-                @endif
-            </td>
-        </tr>
+    {{-- Listado en Tabla --}}
+    @if ($departamentos->count() > 0)
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th class="col-id">ID</th>
+                <th class="col-departamento">Departamento</th>
+                <th class="col-descripcion">Descripción</th>
+                <th class="col-empresa">Empresa</th>
+                <th class="col-puesto">Puesto Principal</th>
+                <th class="col-fecha">Reg.</th>
+                <th class="col-estado">Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($departamentos as $departamento)
+            <tr>
+                <td class="col-id">#{{ $departamento->id_departamento }}</td>
+                <td class="col-departamento">{{ $departamento->nombre_departamento }}</td>
+                <td class="col-descripcion">{{ Str::limit($departamento->descripcion, 100, '...') }}</td>
+                <td class="col-empresa">
+                    @if($departamento->empresa)
+                    {{ $departamento->empresa->nombre_comercial }}
+                    @else
+                    N/A
+                    @endif
+                </td>
+                <td class="col-puesto">{{ $departamento->puesto ?? 'N/A' }}</td>
+                <td class="col-fecha">
+                    {{ $departamento->fecha_registro_departamento
+                        ? $departamento->fecha_registro_departamento->format('d/m/Y')
+                        : 'N/A' }}
+                </td>
+                <td class="col-estado">
+                    <span class="badge badge-{{ strtolower($departamento->estado) }}">
+                        {{ ucfirst($departamento->estado) }}
+                    </span>
+                </td>
+            </tr>
+            @endforeach
+        </tbody>
     </table>
-    @empty
+    @else
     <div class="empty-state">
-        <div class="empty-state-icon">📋</div>
-        <p class="empty-state-text">No se encontraron departamentos con los filtros aplicados.</p>
-    </div>
-    @endforelse
-
-    {{-- Resumen --}}
-    @if($departamentos->count() > 0)
-    <div class="summary">
-        <div class="summary-content">
-            <strong>Resumen del reporte:</strong> 
-            Se encontraron {{ $departamentos->count() }} departamento(s) registrado(s). • 
-            <strong>Generado por:</strong> {{ auth()->user()->name ?? 'Sistema' }}
-        </div>
+        <p class="empty-state-text">📋 No se encontraron departamentos con los filtros aplicados.</p>
     </div>
     @endif
 
     {{-- Footer --}}
+    {{-- Nota: DomPDF no soporta 'position: fixed' perfectamente, pero lo incluimos como buena práctica. --}}
     <div class="footer">
-        <span class="footer-brand">CESRH Consultoría y Coaching</span> • 
-        {{ now()->format('d/m/Y') }} • 
-        Confidencial
+        <span class="page-number"></span> • <span class="footer-brand">CESRH Consultoría y Coaching</span> • {{ now()->format('d/m/Y') }} • Confidencial
     </div>
 
 </body>
+
 </html>

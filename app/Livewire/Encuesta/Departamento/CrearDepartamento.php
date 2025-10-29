@@ -74,7 +74,7 @@ class CrearDepartamento extends Component
             session()->flash('message', '¡Departamento creado exitosamente!');
 
             // Redirigimos al usuario (puedes cambiar esta ruta a donde quieras mostrar los departamentos).
-            $this->redirect(route('crear-departamento'), navigate: true); // Asumiendo que tienes una ruta llamada 'crear-departamento'
+            $this->redirect(route('mostrar-departamento'), navigate: true); // Asumiendo que tienes una ruta llamada 'crear-departamento'
 
         } catch (\Exception $e) {
             // Si algo falla, guardamos el error en la sesión.

@@ -19,13 +19,13 @@
         }
 
         .header-logo {
-            width: 80px;
+            width: 200px;
             text-align: left;
         }
 
         .header-logo img {
-            max-width: 70px;
-            max-height: 70px;
+            max-width: 180px;
+            max-height: 180px;
         }
 
         .header-text {
@@ -68,6 +68,27 @@
             text-transform: uppercase;
         }
 
+        /* ===== NUEVO ESTILO PARA USERNAME ===== */
+        .username-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 8px;
+            font-weight: bold;
+        }
+
+        .username-badge.has-username {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .username-badge.no-username {
+            background-color: #f3f4f6;
+            color: #6b7280;
+        }
+
+        /* ====================================== */
+
         .footer {
             position: fixed;
             bottom: 0;
@@ -105,6 +126,9 @@
             <tr>
                 <th>Nombre Completo</th>
                 <th>Email</th>
+                <!-- ===== NUEVA COLUMNA: USERNAME ===== -->
+                <th>Username</th>
+                <!-- =================================== -->
                 <th>Empresa / Depto.</th>
                 <th>Puesto</th>
                 <th>Rol</th>
@@ -116,9 +140,20 @@
             <tr>
                 <td>{{ $usuario->name }} {{ $usuario->primer_apellido }}</td>
                 <td>{{ $usuario->email }}</td>
+
+                <!-- ===== NUEVA CELDA: USERNAME ===== -->
+                <td>
+                    @if($usuario->username)
+                    <span class="username-badge has-username">{{ $usuario->username }}</span>
+                    @else
+                    <span class="username-badge no-username">Usa Email</span>
+                    @endif
+                </td>
+                <!-- ================================= -->
+
                 <td>
                     <strong>{{ $usuario->departamento->empresa->nombre_comercial ?? 'N/A' }}</strong>
-
+                    <br>
                     <small>{{ $usuario->departamento->nombre_departamento ?? 'N/A' }}</small>
                 </td>
                 <td>{{ $usuario->puesto }}</td>
@@ -127,7 +162,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="6" style="text-align: center;">No se encontraron usuarios.</td>
+                <td colspan="7" style="text-align: center;">No se encontraron usuarios.</td> <!-- ← CAMBIAR de 6 a 7 -->
             </tr>
             @endforelse
         </tbody>

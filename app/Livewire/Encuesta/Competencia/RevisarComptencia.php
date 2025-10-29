@@ -12,7 +12,7 @@ use Livewire\WithPagination;
 class RevisarComptencia extends Component
 {
 
-     use WithPagination;
+    use WithPagination;
 
     #[Url(as: 'q', keep: true)]
     public string $busqueda = '';
@@ -33,6 +33,16 @@ class RevisarComptencia extends Component
         if ($property === 'busqueda' || $property === 'categoriaFiltro') {
             $this->resetPage();
         }
+    }
+
+    /**
+     * ========== MÉTODO FALTANTE: resetFiltros ==========
+     * Este método limpia todos los filtros y resetea la paginación
+     */
+    public function resetFiltros(): void
+    {
+        $this->reset(['busqueda', 'categoriaFiltro']);
+        $this->resetPage();
     }
 
     public function render()
@@ -58,7 +68,6 @@ class RevisarComptencia extends Component
             'competencias' => $competencias,
         ])->layout('layouts.app');
     }
-
 
     // public function render()
     // {

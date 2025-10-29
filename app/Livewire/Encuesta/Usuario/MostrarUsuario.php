@@ -94,6 +94,7 @@ class MostrarUsuario extends Component
         }
     }
 
+
     /**
      * Prepara la consulta base con los filtros aplicados.
      * Es una función de ayuda para no repetir código.
@@ -106,6 +107,7 @@ class MostrarUsuario extends Component
             $query->where(function ($q) {
                 $q->where('name', 'like', '%' . $this->busqueda . '%')
                     ->orWhere('email', 'like', '%' . $this->busqueda . '%')
+                    ->orWhere('username', 'like', '%' . $this->busqueda . '%') // ← AGREGAR ESTA LÍNEA
                     ->orWhere('primer_apellido', 'like', '%' . $this->busqueda . '%');
             });
         }
@@ -221,6 +223,7 @@ class MostrarUsuario extends Component
             $usuariosQuery->where(function ($query) {
                 $query->where('name', 'like', '%' . $this->busqueda . '%')
                     ->orWhere('email', 'like', '%' . $this->busqueda . '%')
+                    ->orWhere('username', 'like', '%' . $this->busqueda . '%') // ← AGREGAR ESTA LÍNEA
                     ->orWhere('primer_apellido', 'like', '%' . $this->busqueda . '%');
             });
         }

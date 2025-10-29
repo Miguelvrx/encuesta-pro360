@@ -2,7 +2,7 @@
     <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50/30 py-8 px-4 sm:px-6 lg:px-8">
         <div class="max-w-7xl mx-auto">
 
-            {{-- 1. Encabezado Principal Mejorado --}}
+            
             <header class="mb-8">
                 <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-100/50 backdrop-blur-sm">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
@@ -23,20 +23,21 @@
                                     <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                                     </svg>
-                                    {{ $competencias->total() }} {{ $competencias->total() == 1 ? 'Competencia' : 'Competencias' }}
+                                    <?php echo e($competencias->total()); ?> <?php echo e($competencias->total() == 1 ? 'Competencia' : 'Competencias'); ?>
+
                                 </span>
-                                @if($busqueda || $categoriaFiltro)
+                                <!--[if BLOCK]><![endif]--><?php if($busqueda || $categoriaFiltro): ?>
                                 <span class="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-md">
                                     (Filtros aplicados)
                                 </span>
-                                @endif
+                                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                             </div>
                         </div>
 
-                        {{-- Botones de acción mejorados --}}
+                        
                         <div class="flex items-center gap-3 flex-wrap">
                             <!-- Botón Nueva Competencia -->
-                            <a href="{{ route('crear-competencia') }}" wire:navigate
+                            <a href="<?php echo e(route('crear-competencia')); ?>" wire:navigate
                                 class="group relative inline-flex items-center px-4 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold text-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                                 <div class="absolute inset-0 bg-white/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -59,7 +60,7 @@
                 </div>
             </header>
 
-            {{-- 2. Barra de Filtros Mejorada --}}
+            
             <div class="mb-8 bg-white p-5 rounded-2xl shadow-lg border border-gray-100/50">
                 <form @submit.prevent>
                     <div class="flex flex-col sm:flex-row items-center gap-4">
@@ -83,40 +84,41 @@
                                 id="categoria"
                                 class="w-full rounded-xl border-gray-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500/50 py-3 transition-all duration-200">
                                 <option value="">Todas las Categorías</option>
-                                @foreach($categorias as $categoria)
-                                <option value="{{ $categoria->id_categoria_competencia }}">{{ $categoria->categoria }}</option>
-                                @endforeach
+                                <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $categorias; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $categoria): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($categoria->id_categoria_competencia); ?>"><?php echo e($categoria->categoria); ?></option>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                             </select>
                         </div>
                     </div>
                 </form>
 
-                @if($busqueda || $categoriaFiltro)
+                <!--[if BLOCK]><![endif]--><?php if($busqueda || $categoriaFiltro): ?>
                 <div class="mt-4 flex flex-wrap gap-2">
-                    @if($busqueda)
+                    <!--[if BLOCK]><![endif]--><?php if($busqueda): ?>
                     <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        Búsqueda: "{{ $busqueda }}"
+                        Búsqueda: "<?php echo e($busqueda); ?>"
                         <button type="button" wire:click="$set('busqueda', '')" class="ml-1.5 hover:bg-blue-200 rounded-full p-0.5">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
                     </span>
-                    @endif
+                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
-                    @if($categoriaFiltro)
-                    @php
+                    <!--[if BLOCK]><![endif]--><?php if($categoriaFiltro): ?>
+                    <?php
                     $categoriaSeleccionada = $categorias->firstWhere('id_categoria_competencia', $categoriaFiltro);
-                    @endphp
+                    ?>
                     <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                        Categoría: {{ $categoriaSeleccionada->categoria ?? 'Seleccionada' }}
+                        Categoría: <?php echo e($categoriaSeleccionada->categoria ?? 'Seleccionada'); ?>
+
                         <button type="button" wire:click="$set('categoriaFiltro', null)" class="ml-1.5 hover:bg-indigo-200 rounded-full p-0.5">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
                     </span>
-                    @endif
+                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
                     <button
                         type="button"
@@ -128,39 +130,42 @@
                         Limpiar filtros
                     </button>
                 </div>
-                @endif
+                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
             </div>
 
 
-            {{-- 3. Listado de Competencias Mejorado --}}
+            
             <div class="space-y-6">
-                @forelse ($competencias as $competencia)
-                <div wire:key="competencia-{{ $competencia->id_competencia }}"
+                <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $competencias; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $competencia): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                <div wire:key="competencia-<?php echo e($competencia->id_competencia); ?>"
                     class="group bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100/50 hover:shadow-xl transition-all duration-500 hover:border-indigo-200/50">
 
-                    {{-- Encabezado de la tarjeta con gradiente --}}
+                    
                     <div class="bg-gradient-to-r from-gray-50 to-gray-100/80 p-6 border-b border-gray-200/50">
                         <div class="flex flex-col sm:flex-row justify-between items-start gap-4">
                             <div class="flex-1">
                                 <div class="flex items-center gap-3 mb-3">
                                     <span class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-700 border border-indigo-200/50 shadow-sm">
-                                        {{ $competencia->categoria->categoria ?? 'Sin categoría' }}
+                                        <?php echo e($competencia->categoria->categoria ?? 'Sin categoría'); ?>
+
                                     </span>
                                     <div class="h-2 w-2 rounded-full bg-indigo-300"></div>
                                     <span class="text-xs text-gray-500 font-medium">
-                                        {{ $competencia->niveles->count() }} Niveles
+                                        <?php echo e($competencia->niveles->count()); ?> Niveles
                                     </span>
                                 </div>
                                 <h2 class="text-2xl font-bold text-gray-900 group-hover:text-indigo-700 transition-colors duration-300">
-                                    {{ $competencia->nombre_competencia }}
+                                    <?php echo e($competencia->nombre_competencia); ?>
+
                                 </h2>
                                 <p class="mt-3 text-gray-600 leading-relaxed max-w-3xl">
-                                    {{ $competencia->definicion_competencia }}
+                                    <?php echo e($competencia->definicion_competencia); ?>
+
                                 </p>
                             </div>
                             <a
-                                href="{{ route('editar-competencia', ['competencia' => $competencia->id_competencia]) }}"
-                                wire:navigate {{-- CORRECCIÓN: Usar wire:navigate para navegación SPA --}}
+                                href="<?php echo e(route('editar-competencia', ['competencia' => $competencia->id_competencia])); ?>"
+                                wire:navigate 
                                 class="relative inline-flex items-center mt-4 px-4 py-2 text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors z-10">
                                 <div class="absolute inset-0 bg-white/20 rounded-xl opacity-0 group-hover/edit:opacity-100 transition-opacity duration-300"></div>
                                 <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -172,7 +177,7 @@
                         </div>
                     </div>
 
-                    {{-- Contenido de niveles --}}
+                    
                     <div class="p-6">
                         <div class="flex items-center gap-2 mb-6">
                             <div class="p-1.5 bg-indigo-100 rounded-lg">
@@ -183,8 +188,8 @@
                             <h4 class="text-sm font-bold text-gray-700 uppercase tracking-widest">Niveles de Comportamiento</h4>
                         </div>
 
-                        {{-- Escala de niveles definida --}}
-                        @php
+                        
+                        <?php
                         $escalaDeNiveles = [
                         'Excepcional' => ['numero' => 5, 'tagline' => 'Modelo a seguir con impacto sostenido', 'color' => 'from-emerald-500 to-green-600', 'bg' => 'bg-gradient-to-r from-emerald-50 to-green-50', 'border' => 'border-emerald-200'],
                         'Supera las Expectativas' => ['numero' => 4, 'tagline' => 'Desempeño consistentemente superior', 'color' => 'from-blue-500 to-indigo-600', 'bg' => 'bg-gradient-to-r from-blue-50 to-indigo-50', 'border' => 'border-blue-200'],
@@ -192,52 +197,55 @@
                         'En Desarrollo' => ['numero' => 2, 'tagline' => 'Avanza con áreas por fortalecer', 'color' => 'from-amber-500 to-orange-600', 'bg' => 'bg-gradient-to-r from-amber-50 to-orange-50', 'border' => 'border-amber-200'],
                         'Requiere Apoyo' => ['numero' => 1, 'tagline' => 'Necesita acompañamiento para el estándar', 'color' => 'from-red-500 to-rose-600', 'bg' => 'bg-gradient-to-r from-red-50 to-rose-50', 'border' => 'border-red-200'],
                         ];
-                        @endphp
+                        ?>
 
-                        {{-- Listado de niveles --}}
+                        
                         <div class="space-y-4">
-                            @forelse ($competencia->niveles as $nivel)
-                            @php
+                            <!--[if BLOCK]><![endif]--><?php $__empty_2 = true; $__currentLoopData = $competencia->niveles; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $nivel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_2 = false; ?>
+                            <?php
                             $datosNivel = $escalaDeNiveles[$nivel->nombre_nivel] ?? null;
-                            @endphp
+                            ?>
 
-                            <div class="group/nivel {{ $datosNivel['bg'] ?? 'bg-gray-50' }} rounded-xl border {{ $datosNivel['border'] ?? 'border-gray-200' }} p-5 transition-all duration-300 hover:shadow-md hover:scale-[1.02]">
+                            <div class="group/nivel <?php echo e($datosNivel['bg'] ?? 'bg-gray-50'); ?> rounded-xl border <?php echo e($datosNivel['border'] ?? 'border-gray-200'); ?> p-5 transition-all duration-300 hover:shadow-md hover:scale-[1.02]">
                                 <div class="grid grid-cols-12 gap-6 items-start">
-                                    {{-- Columna Izquierda: Información del nivel --}}
+                                    
                                     <div class="col-span-12 md:col-span-5">
-                                        @if ($datosNivel)
+                                        <!--[if BLOCK]><![endif]--><?php if($datosNivel): ?>
                                         <div class="flex items-center gap-4">
                                             <div class="flex-shrink-0">
-                                                <div class="h-14 w-14 rounded-xl bg-gradient-to-r {{ $datosNivel['color'] }} flex items-center justify-center text-white font-bold text-lg shadow-md">
-                                                    {{ $datosNivel['numero'] }}
+                                                <div class="h-14 w-14 rounded-xl bg-gradient-to-r <?php echo e($datosNivel['color']); ?> flex items-center justify-center text-white font-bold text-lg shadow-md">
+                                                    <?php echo e($datosNivel['numero']); ?>
+
                                                 </div>
                                             </div>
                                             <div class="flex-1">
                                                 <p class="text-lg font-bold text-gray-800 group-hover/nivel:text-gray-900 transition-colors">
-                                                    {{ $nivel->nombre_nivel }}
+                                                    <?php echo e($nivel->nombre_nivel); ?>
+
                                                 </p>
-                                                <p class="text-sm text-gray-500 italic mt-1 leading-tight">"{{ $datosNivel['tagline'] }}"</p>
+                                                <p class="text-sm text-gray-500 italic mt-1 leading-tight">"<?php echo e($datosNivel['tagline']); ?>"</p>
                                             </div>
                                         </div>
-                                        @else
+                                        <?php else: ?>
                                         <div class="flex items-center gap-4">
                                             <div class="h-14 w-14 rounded-xl bg-gradient-to-r from-gray-400 to-gray-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
                                                 ?
                                             </div>
-                                            <p class="text-lg font-bold text-gray-800">{{ $nivel->nombre_nivel }}</p>
+                                            <p class="text-lg font-bold text-gray-800"><?php echo e($nivel->nombre_nivel); ?></p>
                                         </div>
-                                        @endif
+                                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                     </div>
 
-                                    {{-- Columna Derecha: Descripción del comportamiento --}}
+                                    
                                     <div class="col-span-12 md:col-span-7">
                                         <p class="text-gray-600 leading-relaxed group-hover/nivel:text-gray-700 transition-colors">
-                                            {{ $nivel->descripcion_nivel }}
+                                            <?php echo e($nivel->descripcion_nivel); ?>
+
                                         </p>
                                     </div>
                                 </div>
                             </div>
-                            @empty
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_2): ?>
                             <div class="text-center py-12 bg-gradient-to-br from-gray-50 to-gray-100/50 rounded-xl border-2 border-dashed border-gray-300/50">
                                 <div class="mx-auto h-16 w-16 bg-gradient-to-r from-gray-200 to-gray-300 rounded-full flex items-center justify-center mb-4">
                                     <svg class="h-8 w-8 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -246,8 +254,8 @@
                                 </div>
                                 <h3 class="text-lg font-medium text-gray-900 mb-2">Sin niveles definidos</h3>
                                 <p class="text-gray-500 max-w-md mx-auto">Esta competencia aún no tiene niveles de comportamiento configurados.</p>
-                                <a href="{{ route('editar-competencia', ['competencia' => $competencia->id_competencia]) }}"
-                                    wire:navigate {{-- CORRECCIÓN: Usar wire:navigate --}}
+                                <a href="<?php echo e(route('editar-competencia', ['competencia' => $competencia->id_competencia])); ?>"
+                                    wire:navigate 
                                     class="relative inline-flex items-center mt-4 px-4 py-2 text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors z-10">
                                     <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -255,11 +263,11 @@
                                     Agregar niveles
                                 </a>
                             </div>
-                            @endforelse
+                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                         </div>
                     </div>
                 </div>
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <div class="text-center bg-white p-16 rounded-2xl shadow-lg border border-gray-100/50">
                     <div class="mx-auto h-20 w-20 bg-gradient-to-r from-gray-100 to-gray-200 rounded-full flex items-center justify-center mb-6">
                         <svg class="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -268,7 +276,7 @@
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 mb-2">No se encontraron competencias</h3>
                     <p class="text-gray-600 mb-6 max-w-md mx-auto">Intenta ajustar los filtros de búsqueda o crea una nueva competencia para comenzar.</p>
-                    <a href="{{ route('crear-competencia') }}" wire:navigate
+                    <a href="<?php echo e(route('crear-competencia')); ?>" wire:navigate
                         class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -276,15 +284,16 @@
                         Crear Primera Competencia
                     </a>
                 </div>
-                @endforelse
+                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
             </div>
 
-            {{-- 4. Paginación Mejorada --}}
-            @if ($competencias->hasPages())
+            
+            <!--[if BLOCK]><![endif]--><?php if($competencias->hasPages()): ?>
             <div class="mt-8">
-                {{ $competencias->links() }}
+                <?php echo e($competencias->links()); ?>
+
             </div>
-            @endif
+            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
         </div>
     </div>
-</div>
+</div><?php /**PATH D:\laragon\www\encuesta-pro360\resources\views/livewire/encuesta/competencia/revisar-comptencia.blade.php ENDPATH**/ ?>
