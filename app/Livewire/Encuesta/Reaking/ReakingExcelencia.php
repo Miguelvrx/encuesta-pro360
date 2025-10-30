@@ -19,7 +19,7 @@ class ReakingExcelencia extends Component
     public $busqueda = '';
 
     public $evaluaciones;
-    public $empresas;
+    public $empresas = []; // Cambiar a array vacío
     public $departamentos;
     public $rankingData = [];
 
@@ -33,22 +33,56 @@ class ReakingExcelencia extends Component
 
     public function mount()
     {
-        $this->evaluaciones = Evaluacion::where('estado', 'completada')
-            ->orderBy('fecha_cierre', 'desc')
-            ->get();
-        $this->empresas = Empresa::all();
+        $this->evaluaciones = $this->obtenerEvaluacionesUnicas();
+        
+        // Inicialmente no cargar todas las empresas
+        $this->empresas = collect();
         $this->departamentos = collect();
 
         if ($this->evaluaciones->count() > 0) {
             $this->evaluacionSeleccionada = $this->evaluaciones->first()->id_evaluacion;
+            $this->cargarEmpresasPorEvaluacion();
             $this->calcularRanking();
         }
+    }
+
+    // NUEVO MÉTODO: Agrupar evaluaciones por nombre y fecha
+    protected function obtenerEvaluacionesUnicas()
+    {
+        $evaluacionesCompletadas = Evaluacion::where('estado', 'completada')
+            ->orderBy('fecha_cierre', 'desc')
+            ->get();
+
+        // Agrupar por tipo_evaluacion y fecha_inicio para evitar duplicados
+        $evaluacionesUnicas = collect();
+        $evaluacionesVistas = [];
+
+        foreach ($evaluacionesCompletadas as $evaluacion) {
+            $clave = $evaluacion->tipo_evaluacion . '_' . $evaluacion->fecha_inicio->format('Y-m-d');
+            
+            if (!in_array($clave, $evaluacionesVistas)) {
+                $evaluacionesUnicas->push($evaluacion);
+                $evaluacionesVistas[] = $clave;
+            }
+        }
+
+        return $evaluacionesUnicas;
+    }
+
+    // NUEVO MÉTODO: Obtener todas las evaluaciones con el mismo nombre y fecha
+    public function getEvaluacionesAgrupadas($tipoEvaluacion, $fecha)
+    {
+        return Evaluacion::where('tipo_evaluacion', $tipoEvaluacion)
+            ->whereDate('fecha_inicio', $fecha)
+            ->where('estado', 'completada')
+            ->get();
     }
 
     public function updatedEvaluacionSeleccionada()
     {
         $this->reset(['empresaSeleccionada', 'departamentoSeleccionado']);
         $this->departamentos = collect();
+        $this->cargarEmpresasPorEvaluacion();
         $this->calcularRanking();
     }
 
@@ -85,6 +119,59 @@ class ReakingExcelencia extends Component
         $this->calcularRanking();
     }
 
+    protected function cargarEmpresasPorEvaluacion()
+    {
+        if (!$this->evaluacionSeleccionada) {
+            $this->empresas = collect();
+            return;
+        }
+
+        $evaluacionSeleccionada = Evaluacion::find($this->evaluacionSeleccionada);
+        if (!$evaluacionSeleccionada) {
+            $this->empresas = collect();
+            return;
+        }
+
+        // Obtener todas las evaluaciones con el mismo nombre y fecha
+        $evaluacionesAgrupadas = $this->getEvaluacionesAgrupadas(
+            $evaluacionSeleccionada->tipo_evaluacion,
+            $evaluacionSeleccionada->fecha_inicio->format('Y-m-d')
+        );
+
+        // Recolectar todas las empresas únicas de todas las evaluaciones agrupadas
+        $todasLasEmpresas = collect();
+        
+        foreach ($evaluacionesAgrupadas as $eval) {
+            if ($eval->encuestados_data) {
+                $empresasDeEstaEvaluacion = collect($eval->encuestados_data)
+                    ->pluck('empresa')
+                    ->unique()
+                    ->filter()
+                    ->values();
+                $todasLasEmpresas = $todasLasEmpresas->merge($empresasDeEstaEvaluacion);
+            }
+        }
+
+        $empresasUnicas = $todasLasEmpresas->unique()->values();
+
+        // Buscar las empresas en la base de datos que coincidan con los nombres
+        $this->empresas = Empresa::whereIn('nombre_comercial', $empresasUnicas)
+            ->orWhereIn('razon_social', $empresasUnicas)
+            ->orderBy('nombre_comercial')
+            ->get();
+
+        // Si no se encuentran empresas en la BD, crear una colección con los nombres
+        if ($this->empresas->isEmpty() && $empresasUnicas->isNotEmpty()) {
+            $this->empresas = $empresasUnicas->map(function ($nombreEmpresa, $index) {
+                return (object) [
+                    'id_empresa' => 'temp_' . $index,
+                    'nombre_comercial' => $nombreEmpresa,
+                    'razon_social' => $nombreEmpresa
+                ];
+            });
+        }
+    }
+
     public function calcularRanking()
     {
         $this->rankingData = [];
@@ -93,21 +180,49 @@ class ReakingExcelencia extends Component
             return;
         }
 
-        $evaluacion = Evaluacion::with(['respuestas.pregunta.competencia'])
-            ->find($this->evaluacionSeleccionada);
-
-        if (!$evaluacion || !$evaluacion->encuestados_data) {
+        $evaluacionSeleccionada = Evaluacion::find($this->evaluacionSeleccionada);
+        if (!$evaluacionSeleccionada) {
             return;
         }
 
-        $idsEncuestados = collect($evaluacion->encuestados_data)->pluck('id')->toArray();
-        $query = User::whereIn('id', $idsEncuestados);
+        // Obtener todas las evaluaciones con el mismo nombre y fecha
+        $evaluacionesAgrupadas = $this->getEvaluacionesAgrupadas(
+            $evaluacionSeleccionada->tipo_evaluacion,
+            $evaluacionSeleccionada->fecha_inicio->format('Y-m-d')
+        );
+
+        // Recolectar todos los IDs de encuestados de todas las evaluaciones agrupadas
+        $todosLosIdsEncuestados = collect();
+        
+        foreach ($evaluacionesAgrupadas as $eval) {
+            if ($eval->encuestados_data) {
+                $idsDeEstaEvaluacion = collect($eval->encuestados_data)->pluck('id')->toArray();
+                $todosLosIdsEncuestados = $todosLosIdsEncuestados->merge($idsDeEstaEvaluacion);
+            }
+        }
+
+        $todosLosIdsEncuestados = $todosLosIdsEncuestados->unique()->toArray();
+
+        if (empty($todosLosIdsEncuestados)) {
+            return;
+        }
+
+        $query = User::whereIn('id', $todosLosIdsEncuestados);
 
         // Aplicar filtros
         if ($this->empresaSeleccionada) {
-            $query->whereHas('departamento', function ($q) {
-                $q->where('empresa_id_empresa', $this->empresaSeleccionada);
-            });
+            // Si la empresa seleccionada es temporal (empresa de la evaluación pero no en BD)
+            if (str_starts_with($this->empresaSeleccionada, 'temp_')) {
+                $empresaNombre = $this->empresas->firstWhere('id_empresa', $this->empresaSeleccionada)->nombre_comercial;
+                $query->whereHas('departamento.empresa', function ($q) use ($empresaNombre) {
+                    $q->where('nombre_comercial', $empresaNombre)
+                        ->orWhere('razon_social', $empresaNombre);
+                });
+            } else {
+                $query->whereHas('departamento', function ($q) {
+                    $q->where('empresa_id_empresa', $this->empresaSeleccionada);
+                });
+            }
         }
 
         if ($this->departamentoSeleccionado) {
@@ -125,18 +240,36 @@ class ReakingExcelencia extends Component
         $resultados = [];
 
         foreach ($usuariosEvaluados as $evaluado) {
-            $indiceEvaluado = collect($evaluacion->encuestados_data)
-                ->search(fn($e) => $e['id'] == $evaluado->id);
+            // Buscar el evaluado en todas las evaluaciones agrupadas
+            $evaluacionDelEvaluado = null;
+            $indiceEvaluado = null;
 
-            if ($indiceEvaluado === false) continue;
+            foreach ($evaluacionesAgrupadas as $eval) {
+                if (!$eval->encuestados_data) continue;
 
-            $calificadoresDelEvaluado = $evaluacion->calificadores_data[$indiceEvaluado] ?? [];
+                $indice = collect($eval->encuestados_data)->search(fn($e) => $e['id'] == $evaluado->id);
+                
+                if ($indice !== false) {
+                    $evaluacionDelEvaluado = $eval;
+                    $indiceEvaluado = $indice;
+                    break;
+                }
+            }
+
+            if (!$evaluacionDelEvaluado || $indiceEvaluado === null) {
+                continue;
+            }
+
+            // Cargar las relaciones necesarias
+            $evaluacionDelEvaluado->load(['respuestas.pregunta.competencia']);
+
+            $calificadoresDelEvaluado = $evaluacionDelEvaluado->calificadores_data[$indiceEvaluado] ?? [];
             if (empty($calificadoresDelEvaluado)) continue;
 
             $idsCalificadores = collect($calificadoresDelEvaluado)->pluck('id')->toArray();
 
             $registrosEvaluacionUsuario = DB::table('evaluacion_usuario')
-                ->where('evaluacion_id_evaluacion', $evaluacion->id_evaluacion)
+                ->where('evaluacion_id_evaluacion', $evaluacionDelEvaluado->id_evaluacion)
                 ->where('user_id', $evaluado->id)
                 ->first();
 
@@ -144,18 +277,18 @@ class ReakingExcelencia extends Component
 
             $idEvaluadoEnTabla = $registrosEvaluacionUsuario->evaluado;
 
-            $respuestasParaEvaluado = $evaluacion->respuestas->filter(function ($respuesta) use ($idsCalificadores, $idEvaluadoEnTabla, $evaluacion) {
+            $respuestasParaEvaluado = $evaluacionDelEvaluado->respuestas->filter(function ($respuesta) use ($idsCalificadores, $idEvaluadoEnTabla, $evaluacionDelEvaluado) {
                 if (!in_array($respuesta->user_id, $idsCalificadores)) return false;
 
                 return DB::table('evaluacion_usuario')
-                    ->where('evaluacion_id_evaluacion', $evaluacion->id_evaluacion)
+                    ->where('evaluacion_id_evaluacion', $evaluacionDelEvaluado->id_evaluacion)
                     ->where('user_id', $respuesta->user_id)
                     ->where('evaluado', $idEvaluadoEnTabla)
                     ->exists();
             });
 
             // Obtener datos del usuario
-            $datosEvaluado = collect($evaluacion->encuestados_data)->firstWhere('id', $evaluado->id);
+            $datosEvaluado = collect($evaluacionDelEvaluado->encuestados_data)->firstWhere('id', $evaluado->id);
 
             // Calcular promedios
             $autoevaluacion = null;
@@ -264,6 +397,7 @@ class ReakingExcelencia extends Component
         // Implementar exportación a PDF
         $this->dispatch('exportar-pdf', $this->rankingData);
     }
+
 
     public function render()
     {

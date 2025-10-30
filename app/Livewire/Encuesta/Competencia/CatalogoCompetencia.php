@@ -11,7 +11,7 @@ use Livewire\WithPagination;
 
 class CatalogoCompetencia extends Component
 {
-       // Propiedades para los filtros
+    // Propiedades para los filtros
     public ?int $categoriaSeleccionada = null;
     public ?int $competenciaSeleccionada = null;
 
@@ -21,6 +21,8 @@ class CatalogoCompetencia extends Component
 
     // Propiedad para mostrar los detalles de la competencia elegida
     public ?Competencia $competenciaActual = null;
+
+    public int $competenciasTotales = 0;
 
     // Nueva propiedad para la vista de catálogo completo
     public $vistaCatalogo = false;
@@ -32,6 +34,9 @@ class CatalogoCompetencia extends Component
         $this->categorias = Categoria::orderBy('categoria')->get();
         $this->competenciasFiltradas = new Collection();
         $this->competenciasCatalogo = new Collection();
+
+        // Calcular el total de competencias
+        $this->competenciasTotales = Competencia::distinct('id_competencia')->count();
     }
 
     // Hook que se ejecuta cuando se actualiza 'categoriaSeleccionada'
@@ -46,7 +51,7 @@ class CatalogoCompetencia extends Component
         } else {
             $this->competenciasFiltradas = new Collection();
         }
-        
+
         // Reseteamos la competencia seleccionada y los detalles
         $this->reset(['competenciaSeleccionada', 'competenciaActual', 'vistaCatalogo']);
         $this->competenciasCatalogo = new Collection();
@@ -72,7 +77,7 @@ class CatalogoCompetencia extends Component
             $this->vistaCatalogo = true;
             $this->competenciaActual = null;
             $this->competenciaSeleccionada = null;
-            
+
             // Cargar todas las competencias de la categoría con sus relaciones
             $this->competenciasCatalogo = Competencia::with('categoria', 'niveles')
                 ->where('categoria_id_competencia', $this->categoriaSeleccionada)
@@ -80,6 +85,21 @@ class CatalogoCompetencia extends Component
                 ->orderBy('nombre_competencia')
                 ->get();
         }
+    }
+
+    public function resetFiltros(): void
+    {
+        // Resetear todas las propiedades relacionadas con filtros
+        $this->reset([
+            'categoriaSeleccionada',
+            'competenciaSeleccionada',
+            'competenciaActual',
+            'vistaCatalogo'
+        ]);
+
+        // Limpiar las colecciones
+        $this->competenciasFiltradas = new Collection();
+        $this->competenciasCatalogo = new Collection();
     }
 
     public function render()

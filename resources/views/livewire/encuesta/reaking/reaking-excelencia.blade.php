@@ -40,12 +40,21 @@
                         class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 rounded-lg">
                         <option value="">-- Selecciona una Evaluación --</option>
                         @foreach($evaluaciones as $eval)
+                        @php
+                        $totalEval = $this->getEvaluacionesAgrupadas($eval->tipo_evaluacion, $eval->fecha_inicio->format('Y-m-d'))->sum(function($e) {
+                        return $e->encuestados_data ? count($e->encuestados_data) : 0;
+                        });
+                        @endphp
                         <option value="{{ $eval->id_evaluacion }}">
                             {{ $eval->tipo_evaluacion }} ({{ $eval->fecha_inicio->format('d/m/Y') }})
+                            @if($totalEval > 0)
+                            <span class="text-gray-500">- {{ $totalEval }} evaluados</span>
+                            @endif
                         </option>
                         @endforeach
                     </select>
                 </div>
+
 
                 <!-- Empresa -->
                 <div>
@@ -102,7 +111,6 @@
                 </div>
             </div>
         </div>
-
         <!-- Estadísticas Rápidas -->
         @if(count($rankingData) > 0)
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">

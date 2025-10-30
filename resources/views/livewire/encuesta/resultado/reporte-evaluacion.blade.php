@@ -25,40 +25,71 @@
                 </div>
             </header>
 
-            <!-- Controles de Filtro -->
+            <!-- Controles de Filtro Mejorados -->
             <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
                 <h2 class="text-lg font-semibold text-gray-800 mb-4">Filtros de Búsqueda</h2>
+
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                    <!-- Filtro por Evaluación -->
+                    <!-- Evaluación con información adicional -->
                     <div>
-                        <label for="select-evaluacion" class="block text-sm font-medium text-gray-700 mb-1">Evaluación</label>
+                        <label for="select-evaluacion" class="block text-sm font-medium text-gray-700 mb-1">
+                            Evaluación
+                            @if($evaluacionIdSeleccionada)
+                            <span class="text-green-600 text-xs">({{ $totalEvaluados }} eval.)</span>
+                            @endif
+                        </label>
                         <select wire:model.live="evaluacionIdSeleccionada" id="select-evaluacion"
                             class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 rounded-lg">
-                            <option value="">-- Selecciona una Evaluación --</option>
+                            <option value="">-- Todas las Evaluaciones --</option>
                             @foreach($evaluaciones as $eval)
-                            <option value="{{ $eval->id_evaluacion }}">{{ $eval->tipo_evaluacion }} ({{ $eval->fecha_inicio->format('d/m/Y') }})</option>
+                            @php
+                            $totalEval = $this->getEvaluacionesAgrupadas($eval->tipo_evaluacion, $eval->fecha_inicio->format('Y-m-d'))->sum(function($e) {
+                            return $e->encuestados_data ? count($e->encuestados_data) : 0;
+                            });
+                            @endphp
+                            <option value="{{ $eval->id_evaluacion }}">
+                                {{ $eval->tipo_evaluacion }} ({{ $eval->fecha_inicio->format('d/m/Y') }})
+                                @if($totalEval > 0)
+                                <span class="text-gray-500">- {{ $totalEval }} evaluados</span>
+                                @endif
+                            </option>
                             @endforeach
                         </select>
+                        @if($evaluacionIdSeleccionada)
+                        <p class="text-xs text-gray-500 mt-1">
+                            {{ $empresaActual }}{{ $departamentoActual ? ' • ' . $departamentoActual : '' }}
+                        </p>
+                        @endif
                     </div>
-
-                    <!-- Filtro por Empresa -->
+                    <!-- Empresa con departamentos disponibles -->
                     <div>
-                        <label for="select-empresa" class="block text-sm font-medium text-gray-700 mb-1">Empresa</label>
+                        <label for="select-empresa" class="block text-sm font-medium text-gray-700 mb-1">
+                            Empresa
+                            @if($empresaSeleccionada && $departamentos->count())
+                            <span class="text-blue-600 text-xs">({{ $departamentos->count() }} dept.)</span>
+                            @endif
+                        </label>
                         <select wire:model.live="empresaSeleccionada" id="select-empresa"
-                            class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 rounded-lg">
+                            class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 rounded-lg"
+                            {{ !$evaluacionIdSeleccionada ? 'disabled' : '' }}>
                             <option value="">-- Todas las Empresas --</option>
-                            @foreach($empresas as $empresa)
+                            @foreach($empresasDisponibles as $empresa)
                             <option value="{{ $empresa->id_empresa }}">{{ $empresa->nombre_comercial }}</option>
                             @endforeach
                         </select>
                     </div>
 
-                    <!-- Filtro por Departamento -->
+                    <!-- Departamento con evaluados disponibles -->
                     <div>
-                        <label for="select-departamento" class="block text-sm font-medium text-gray-700 mb-1">Departamento</label>
+                        <label for="select-departamento" class="block text-sm font-medium text-gray-700 mb-1">
+                            Departamento
+                            @if($departamentoSeleccionado && $usuariosEvaluados->count())
+                            <span class="text-purple-600 text-xs">({{ $usuariosEvaluados->count() }} pers.)</span>
+                            @endif
+                        </label>
                         <select wire:model.live="departamentoSeleccionado" id="select-departamento"
                             class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 rounded-lg"
-                            @if(!$departamentos->count()) disabled @endif>
+                            {{ !$empresaSeleccionada ? 'disabled' : '' }}>
                             <option value="">-- Todos los Departamentos --</option>
                             @foreach($departamentos as $departamento)
                             <option value="{{ $departamento->id_departamento }}">{{ $departamento->nombre_departamento }}</option>
@@ -66,36 +97,30 @@
                         </select>
                     </div>
 
-                    <!-- Filtro por Usuario Evaluado -->
+                    <!-- Evaluado con información de puesto -->
                     <div>
-                        <label for="select-evaluado" class="block text-sm font-medium text-gray-700 mb-1">Evaluado</label>
+                        <label for="select-evaluado" class="block text-sm font-medium text-gray-700 mb-1">
+                            Evaluado
+                            @if($usuarioEvaluadoSeleccionado)
+                            <span class="text-green-600 text-xs">(Individual)</span>
+                            @endif
+                        </label>
                         <select wire:model.live="usuarioEvaluadoSeleccionado" id="select-evaluado"
                             class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 rounded-lg"
-                            @if(!$usuariosEvaluados->count()) disabled @endif>
+                            {{ !$departamentoSeleccionado ? 'disabled' : '' }}>
                             <option value="">-- Todos los Evaluados --</option>
                             @foreach($usuariosEvaluados as $usuario)
-                            <option value="{{ $usuario->id }}">{{ $usuario->name }} {{ $usuario->primer_apellido }}</option>
+                            @php
+                            $puesto = $this->getPuestoFromEvaluacion($usuario->id, $evaluacionIdSeleccionada);
+                            @endphp
+                            <option value="{{ $usuario->id }}">
+                                {{ $usuario->name }}
+                                @if($puesto)
+                                <span class="text-gray-500">- {{ $puesto }}</span>
+                                @endif
+                            </option>
                             @endforeach
                         </select>
-                    </div>
-                </div>
-
-                <!-- Selección de Tipo de Reporte -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Reporte:</label>
-                    <div class="flex flex-wrap gap-3">
-                        <button wire:click="$set('tipoReporte', 'general')"
-                            class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-sm {{ $tipoReporte === 'general' ? 'bg-indigo-600 text-white shadow-indigo-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
-                            📊 General
-                        </button>
-                        <button wire:click="$set('tipoReporte', 'por_competencia')"
-                            class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-sm {{ $tipoReporte === 'por_competencia' ? 'bg-indigo-600 text-white shadow-indigo-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
-                            🎯 Por Competencia
-                        </button>
-                        <button wire:click="$set('tipoReporte', 'por_evaluado')"
-                            class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-sm {{ $tipoReporte === 'por_evaluado' ? 'bg-indigo-600 text-white shadow-indigo-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
-                            👤 Por Evaluado
-                        </button>
                     </div>
                 </div>
             </div>
@@ -168,17 +193,17 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm text-gray-500 font-medium">Promedio General</p>
-                                <p class="text-4xl font-bold text-indigo-600 mt-2">{{ $evaluado['promedio_general'] }}</p>
+                                <p class="text-4xl font-bold text-indigo-600 mt-2">{{ $evaluado['promedio_general'] ?? '0.00' }}</p>
                             </div>
                             <div class="w-16 h-16 rounded-full flex items-center justify-center"
-                                style="background-color: {{ $nivelesEvaluacion[$evaluado['nivel_general']]['color'] }}20">
+                                style="background-color: {{ ($nivelesEvaluacion[$evaluado['nivel_general']]['color'] ?? '#EF4444') }}20">
                                 <span class="text-2xl">📊</span>
                             </div>
                         </div>
                         <div class="mt-4 pt-4 border-t border-gray-100">
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium text-white"
-                                style="background-color: {{ $nivelesEvaluacion[$evaluado['nivel_general']]['color'] }}">
-                                {{ $nivelesEvaluacion[$evaluado['nivel_general']]['nombre'] }}
+                                style="background-color: {{ $nivelesEvaluacion[$evaluado['nivel_general']]['color'] ?? '#EF4444' }}">
+                                {{ $nivelesEvaluacion[$evaluado['nivel_general']]['nombre'] ?? 'Sin datos' }}
                             </span>
                         </div>
                     </div>
@@ -315,7 +340,6 @@
                     </div>
                 </div>
 
-                <!-- Tabla Detalle por Rol -->
                 <!-- Tabla Detalle por Rol -->
                 <div class="bg-white rounded-xl shadow-lg overflow-hidden">
                     <div class="p-6">
@@ -546,13 +570,19 @@
                                     </td>
                                     @if($tipoReporte === 'general' || $tipoReporte === 'por_evaluado')
                                     <td class="px-6 py-4 whitespace-nowrap text-center">
-                                        <span class="text-2xl font-bold text-indigo-600">{{ $evaluado['promedio_general'] }}</span>
+                                        <span class="text-2xl font-bold text-indigo-600">{{ $evaluado['promedio_general'] ?? '0.00' }}</span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center">
+                                        @if(isset($evaluado['nivel_general']) && isset($nivelesEvaluacion[$evaluado['nivel_general']]))
                                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium text-white"
                                             style="background-color: {{ $nivelesEvaluacion[$evaluado['nivel_general']]['color'] }}">
                                             Nivel {{ $evaluado['nivel_general'] }}
                                         </span>
+                                        @else
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-500 text-white">
+                                            Sin datos
+                                        </span>
+                                        @endif
                                     </td>
                                     @endif
                                     @if($tipoReporte === 'por_competencia' || $tipoReporte === 'por_evaluado')
@@ -566,9 +596,9 @@
                                     @endforeach
                                     @endif
                                     <td class="px-6 py-4 whitespace-nowrap text-center">
-                                        <button wire:click="$set('usuarioEvaluadoSeleccionado', {{ $evaluado['id'] }})"
-                                            onclick="$wire.set('tipoReporte', 'por_evaluado')"
-                                            class="text-indigo-600 hover:text-indigo-900 font-medium text-sm">
+                                        <button
+                                            wire:click="verDetalle({{ $evaluado['id'] }})"
+                                            class="text-indigo-600 hover:text-indigo-900 font-medium text-sm transition-colors duration-200 hover:scale-105">
                                             Ver Detalle →
                                         </button>
                                     </td>
@@ -588,7 +618,11 @@
                         <div>
                             <p class="text-sm text-gray-600 mb-4">Distribución de Niveles de Desempeño</p>
                             @php
-                            $distribucionNiveles = array_count_values(array_column($resultados, 'nivel_general'));
+                            $distribucionNiveles = array_count_values(
+                            array_map(function($evaluado) {
+                            return $evaluado['nivel_general'] ?? 1; // Valor por defecto 1 si no existe
+                            }, $resultados)
+                            );
                             @endphp
                             <div class="space-y-3">
                                 @foreach($nivelesEvaluacion as $nivel => $info)
@@ -613,7 +647,9 @@
                         <div>
                             <p class="text-sm text-gray-600 mb-4">Estadísticas Generales</p>
                             @php
-                            $promedios = array_column($resultados, 'promedio_general');
+                            $promedios = array_map(function($evaluado) {
+                            return $evaluado['promedio_general'] ?? 0; // Valor por defecto 0 si no existe
+                            }, $resultados);
                             $promedioGlobal = count($promedios) > 0 ? array_sum($promedios) / count($promedios) : 0;
                             $maximo = count($promedios) > 0 ? max($promedios) : 0;
                             $minimo = count($promedios) > 0 ? min($promedios) : 0;
@@ -648,3 +684,4 @@
             </div>
         </div>
     </div>
+</div>

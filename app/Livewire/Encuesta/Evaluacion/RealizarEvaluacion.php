@@ -18,7 +18,7 @@ class RealizarEvaluacion extends Component
     public $pasoActual = 1;
     public $totalPasos = 1;
     public $progreso = 0;
-    public $evaluado;
+    public $evaluadoNombre = 'N/A';
 
     // Definir los niveles de evaluación estáticos
     public $nivelesEvaluacion = [
@@ -38,7 +38,8 @@ class RealizarEvaluacion extends Component
             ->where('estado', 'completada')
             ->firstOrFail();
 
-        $this->evaluado = $this->evaluacion->usuarios->first();
+        // Obtener el nombre del evaluado desde encuestados_data
+        $this->evaluadoNombre = $this->obtenerNombreEvaluado();
 
         // Cargar competencias desde configuracion_data
         $competenciaIds = $this->evaluacion->configuracion_data['competencias'] ?? [];
@@ -51,6 +52,20 @@ class RealizarEvaluacion extends Component
         // Cargar respuestas existentes
         $this->cargarRespuestas();
         $this->calcularProgreso();
+    }
+
+    protected function obtenerNombreEvaluado()
+    {
+        // Obtener el nombre desde encuestados_data
+        $encuestadosData = $this->evaluacion->encuestados_data ?? [];
+
+        if (!empty($encuestadosData) && is_array($encuestadosData)) {
+            // Tomar el primer evaluado del array
+            $primerEvaluado = $encuestadosData[0] ?? [];
+            return $primerEvaluado['nombre'] ?? 'N/A';
+        }
+
+        return 'N/A';
     }
 
     protected function cargarRespuestas()

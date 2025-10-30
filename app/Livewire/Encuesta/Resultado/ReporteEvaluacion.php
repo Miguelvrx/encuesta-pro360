@@ -20,6 +20,11 @@ class ReporteEvaluacion extends Component
     public $departamentoSeleccionado = null;
     public $usuarioEvaluadoSeleccionado = null;
     public $tipoReporte = 'general';
+    public $totalEvaluados = 0;
+    public $empresaActual = null;
+    public $departamentoActual = null;
+    public $empresasDisponibles = [];
+    public $departamentosPorUsuario = [];
 
     public $evaluaciones;
     public $empresas;
@@ -37,16 +42,128 @@ class ReporteEvaluacion extends Component
 
     public function mount()
     {
-        $this->evaluaciones = Evaluacion::where('estado', 'completada')->orderBy('fecha_cierre', 'desc')->get();
+        $this->evaluaciones = $this->obtenerEvaluacionesUnicas();
         $this->empresas = Empresa::all();
         $this->departamentos = collect();
         $this->usuariosEvaluados = collect();
 
         if ($this->evaluaciones->count() > 0) {
             $this->evaluacionIdSeleccionada = $this->evaluaciones->first()->id_evaluacion;
+            $this->actualizarDatosContextuales();
             $this->actualizarUsuariosEvaluados();
             $this->calcularResultados();
         }
+    }
+
+    // NUEVO MÉTODO: Agrupar evaluaciones por nombre y fecha
+    protected function obtenerEvaluacionesUnicas()
+    {
+        $evaluacionesCompletadas = Evaluacion::where('estado', 'completada')
+            ->orderBy('fecha_cierre', 'desc')
+            ->get();
+
+        // Agrupar por tipo_evaluacion y fecha_inicio para evitar duplicados
+        $evaluacionesUnicas = collect();
+        $evaluacionesVistas = [];
+
+        foreach ($evaluacionesCompletadas as $evaluacion) {
+            $clave = $evaluacion->tipo_evaluacion . '_' . $evaluacion->fecha_inicio->format('Y-m-d');
+
+            if (!in_array($clave, $evaluacionesVistas)) {
+                $evaluacionesUnicas->push($evaluacion);
+                $evaluacionesVistas[] = $clave;
+            }
+        }
+
+        return $evaluacionesUnicas;
+    }
+
+    protected function actualizarDatosContextuales()
+    {
+        if (!$this->evaluacionIdSeleccionada) {
+            $this->reset(['empresasDisponibles', 'departamentosPorUsuario', 'empresaActual', 'departamentoActual', 'totalEvaluados']);
+            return;
+        }
+
+        $evaluacion = Evaluacion::find($this->evaluacionIdSeleccionada);
+
+        if (!$evaluacion || !$evaluacion->encuestados_data) {
+            $this->reset(['empresasDisponibles', 'departamentosPorUsuario', 'empresaActual', 'departamentoActual', 'totalEvaluados']);
+            return;
+        }
+
+        // Extraer empresas únicas de la evaluación
+        $this->empresasDisponibles = $this->extraerEmpresasDeEvaluacion($evaluacion);
+
+        // Extraer departamentos por usuario
+        $this->departamentosPorUsuario = $this->extraerDepartamentosPorUsuario($evaluacion);
+
+        // Calcular total de evaluados
+        $this->totalEvaluados = count($evaluacion->encuestados_data);
+
+        // Determinar empresa y departamento actual (si es único)
+        $empresasUnicas = array_unique(array_column($evaluacion->encuestados_data, 'empresa'));
+        $departamentosUnicos = array_unique(array_column($evaluacion->encuestados_data, 'departamento'));
+
+        $this->empresaActual = count($empresasUnicas) === 1 ? $empresasUnicas[0] : null;
+        $this->departamentoActual = count($departamentosUnicos) === 1 ? $departamentosUnicos[0] : null;
+    }
+
+    protected function extraerEmpresasDeEvaluacion($evaluacion)
+    {
+        if (!$evaluacion->encuestados_data) {
+            return collect();
+        }
+
+        $empresasNombres = array_unique(array_column($evaluacion->encuestados_data, 'empresa'));
+        return Empresa::whereIn('nombre_comercial', $empresasNombres)->get();
+    }
+
+    protected function extraerDepartamentosPorUsuario($evaluacion)
+    {
+        if (!$evaluacion->encuestados_data) {
+            return [];
+        }
+
+        $departamentosPorUsuario = [];
+        foreach ($evaluacion->encuestados_data as $encuestado) {
+            $departamentosPorUsuario[$encuestado['id']] = $encuestado['departamento'] ?? 'N/A';
+        }
+
+        return $departamentosPorUsuario;
+    }
+
+    public function getEmpresasFromEvaluacion($eval)
+    {
+        if (!$eval->encuestados_data) {
+            return [];
+        }
+
+        return array_unique(array_column($eval->encuestados_data, 'empresa'));
+    }
+
+    public function getPuestoFromEvaluacion($usuarioId, $evaluacionId)
+    {
+        if (!$evaluacionId) {
+            return null;
+        }
+
+        $evaluacion = Evaluacion::find($evaluacionId);
+        if (!$evaluacion || !$evaluacion->encuestados_data) {
+            return null;
+        }
+
+        $encuestado = collect($evaluacion->encuestados_data)->firstWhere('id', $usuarioId);
+        return $encuestado['puesto'] ?? null;
+    }
+
+    // NUEVO MÉTODO: Obtener todas las evaluaciones con el mismo nombre y fecha
+    public function getEvaluacionesAgrupadas($tipoEvaluacion, $fecha)
+    {
+        return Evaluacion::where('tipo_evaluacion', $tipoEvaluacion)
+            ->whereDate('fecha_inicio', $fecha)
+            ->where('estado', 'completada')
+            ->get();
     }
 
     public function updatedEvaluacionIdSeleccionada($value)
@@ -55,6 +172,7 @@ class ReporteEvaluacion extends Component
         $this->departamentos = collect();
         $this->usuariosEvaluados = collect();
         if ($value) {
+            $this->actualizarDatosContextuales();
             $this->actualizarUsuariosEvaluados();
             $this->calcularResultados();
         } else {
@@ -99,14 +217,36 @@ class ReporteEvaluacion extends Component
             return;
         }
 
-        $evaluacion = Evaluacion::find($this->evaluacionIdSeleccionada);
-        if (!$evaluacion || !$evaluacion->encuestados_data) {
+        $evaluacionSeleccionada = Evaluacion::find($this->evaluacionIdSeleccionada);
+        if (!$evaluacionSeleccionada) {
             $this->usuariosEvaluados = collect();
             return;
         }
 
-        $idsEncuestados = collect($evaluacion->encuestados_data)->pluck('id')->toArray();
-        $query = User::whereIn('id', $idsEncuestados);
+        // Obtener todas las evaluaciones con el mismo nombre y fecha
+        $evaluacionesAgrupadas = $this->getEvaluacionesAgrupadas(
+            $evaluacionSeleccionada->tipo_evaluacion,
+            $evaluacionSeleccionada->fecha_inicio->format('Y-m-d')
+        );
+
+        // Recolectar todos los IDs de encuestados de todas las evaluaciones agrupadas
+        $todosLosIdsEncuestados = collect();
+
+        foreach ($evaluacionesAgrupadas as $eval) {
+            if ($eval->encuestados_data) {
+                $idsDeEstaEvaluacion = collect($eval->encuestados_data)->pluck('id')->toArray();
+                $todosLosIdsEncuestados = $todosLosIdsEncuestados->merge($idsDeEstaEvaluacion);
+            }
+        }
+
+        $todosLosIdsEncuestados = $todosLosIdsEncuestados->unique()->toArray();
+
+        if (empty($todosLosIdsEncuestados)) {
+            $this->usuariosEvaluados = collect();
+            return;
+        }
+
+        $query = User::whereIn('id', $todosLosIdsEncuestados);
 
         if ($this->empresaSeleccionada) {
             $query->whereHas('departamento', function ($q) {
@@ -121,6 +261,13 @@ class ReporteEvaluacion extends Component
         $this->usuariosEvaluados = $query->orderBy('name')->get();
     }
 
+    public function verDetalle($evaluadoId)
+    {
+        $this->usuarioEvaluadoSeleccionado = $evaluadoId;
+        $this->tipoReporte = 'por_evaluado';
+        $this->calcularResultados();
+    }
+
     public function calcularResultados()
     {
         $this->resultadosEvaluacion = [];
@@ -129,12 +276,16 @@ class ReporteEvaluacion extends Component
             return;
         }
 
-        $evaluacion = Evaluacion::with(['respuestas.pregunta.competencia'])
-            ->find($this->evaluacionIdSeleccionada);
-
-        if (!$evaluacion) {
+        $evaluacionSeleccionada = Evaluacion::find($this->evaluacionIdSeleccionada);
+        if (!$evaluacionSeleccionada) {
             return;
         }
+
+        // Obtener todas las evaluaciones con el mismo nombre y fecha
+        $evaluacionesAgrupadas = $this->getEvaluacionesAgrupadas(
+            $evaluacionSeleccionada->tipo_evaluacion,
+            $evaluacionSeleccionada->fecha_inicio->format('Y-m-d')
+        );
 
         $usuariosParaReporte = $this->usuariosEvaluados;
         if ($this->usuarioEvaluadoSeleccionado) {
@@ -144,14 +295,30 @@ class ReporteEvaluacion extends Component
         $resultadosPorEvaluado = [];
 
         foreach ($usuariosParaReporte as $evaluado) {
-            $indiceEvaluado = collect($evaluacion->encuestados_data)
-                ->search(fn($e) => $e['id'] == $evaluado->id);
+            // Buscar el evaluado en todas las evaluaciones agrupadas
+            $evaluacionDelEvaluado = null;
+            $indiceEvaluado = null;
 
-            if ($indiceEvaluado === false) {
+            foreach ($evaluacionesAgrupadas as $eval) {
+                if (!$eval->encuestados_data) continue;
+
+                $indice = collect($eval->encuestados_data)->search(fn($e) => $e['id'] == $evaluado->id);
+
+                if ($indice !== false) {
+                    $evaluacionDelEvaluado = $eval;
+                    $indiceEvaluado = $indice;
+                    break;
+                }
+            }
+
+            if (!$evaluacionDelEvaluado || $indiceEvaluado === null) {
                 continue;
             }
 
-            $calificadoresDelEvaluado = $evaluacion->calificadores_data[$indiceEvaluado] ?? [];
+            // Cargar las relaciones necesarias
+            $evaluacionDelEvaluado->load(['respuestas.pregunta.competencia']);
+
+            $calificadoresDelEvaluado = $evaluacionDelEvaluado->calificadores_data[$indiceEvaluado] ?? [];
 
             if (empty($calificadoresDelEvaluado)) {
                 continue;
@@ -160,7 +327,7 @@ class ReporteEvaluacion extends Component
             $idsCalificadores = collect($calificadoresDelEvaluado)->pluck('id')->toArray();
 
             $registrosEvaluacionUsuario = DB::table('evaluacion_usuario')
-                ->where('evaluacion_id_evaluacion', $evaluacion->id_evaluacion)
+                ->where('evaluacion_id_evaluacion', $evaluacionDelEvaluado->id_evaluacion)
                 ->where('user_id', $evaluado->id)
                 ->first();
 
@@ -170,13 +337,13 @@ class ReporteEvaluacion extends Component
 
             $idEvaluadoEnTabla = $registrosEvaluacionUsuario->evaluado;
 
-            $respuestasParaEvaluado = $evaluacion->respuestas->filter(function ($respuesta) use ($idsCalificadores, $idEvaluadoEnTabla, $evaluacion) {
+            $respuestasParaEvaluado = $evaluacionDelEvaluado->respuestas->filter(function ($respuesta) use ($idsCalificadores, $idEvaluadoEnTabla, $evaluacionDelEvaluado) {
                 if (!in_array($respuesta->user_id, $idsCalificadores)) {
                     return false;
                 }
 
                 $esEvaluacionDeEsteUsuario = DB::table('evaluacion_usuario')
-                    ->where('evaluacion_id_evaluacion', $evaluacion->id_evaluacion)
+                    ->where('evaluacion_id_evaluacion', $evaluacionDelEvaluado->id_evaluacion)
                     ->where('user_id', $respuesta->user_id)
                     ->where('evaluado', $idEvaluadoEnTabla)
                     ->exists();
@@ -185,7 +352,7 @@ class ReporteEvaluacion extends Component
             });
 
             // Obtener datos del usuario
-            $datosEvaluado = collect($evaluacion->encuestados_data)->firstWhere('id', $evaluado->id);
+            $datosEvaluado = collect($evaluacionDelEvaluado->encuestados_data)->firstWhere('id', $evaluado->id);
 
             $resultadosPorEvaluado[$evaluado->id] = [
                 'id' => $evaluado->id,
@@ -195,11 +362,13 @@ class ReporteEvaluacion extends Component
                 'puesto' => $datosEvaluado['puesto'] ?? 'N/A',
                 'competencias' => [],
                 'promedio_general' => 0,
+                'nivel_general' => 1, // Valor por defecto
                 'calificadores' => $calificadoresDelEvaluado,
                 'total_calificadores' => count($calificadoresDelEvaluado),
+                'evaluacion_id' => $evaluacionDelEvaluado->id_evaluacion,
             ];
 
-            $competenciasIds = $evaluacion->configuracion_data['competencias'] ?? [];
+            $competenciasIds = $evaluacionDelEvaluado->configuracion_data['competencias'] ?? [];
             $competenciasEvaluacion = Competencia::with('preguntas')
                 ->whereIn('id_competencia', $competenciasIds)
                 ->get();
@@ -246,10 +415,15 @@ class ReporteEvaluacion extends Component
                 }
             }
 
+            // Asegurar que siempre se calcule el nivel_general
             if ($totalRespuestasGeneral > 0) {
                 $promedioGeneral = $totalPuntuacionGeneral / $totalRespuestasGeneral;
                 $resultadosPorEvaluado[$evaluado->id]['promedio_general'] = round($promedioGeneral, 2);
                 $resultadosPorEvaluado[$evaluado->id]['nivel_general'] = $this->obtenerNivel($promedioGeneral);
+            } else {
+                // Si no hay respuestas, establecer valores por defecto
+                $resultadosPorEvaluado[$evaluado->id]['promedio_general'] = 0;
+                $resultadosPorEvaluado[$evaluado->id]['nivel_general'] = 1;
             }
         }
 
@@ -270,7 +444,6 @@ class ReporteEvaluacion extends Component
         if ($promedio >= 1.5) return 2;
         return 1;
     }
-
 
     public function generarUrlGraficaRadar($evaluadoId)
     {
@@ -434,125 +607,71 @@ class ReporteEvaluacion extends Component
 
         return 'https://quickchart.io/chart?width=1000&height=400&v=' . time() . '&c=' . urlencode(json_encode($chartConfig));
     }
-    // public function generarUrlGraficaBarrasHorizontal($evaluadoId)
-    // {
-    //     if (!isset($this->resultadosEvaluacion[$evaluadoId])) {
-    //         return '';
-    //     }
 
-    //     $resultado = $this->resultadosEvaluacion[$evaluadoId];
-    //     $competencias = $resultado['competencias'];
+    public function generarUrlGraficaComparativaRoles($evaluadoId, $competenciaId)
+    {
+        if (!isset($this->resultadosEvaluacion[$evaluadoId]['competencias'][$competenciaId])) {
+            return '';
+        }
 
-    //     $labels = [];
-    //     $datos = [];
-    //     $colores = [];
+        $competencia = $this->resultadosEvaluacion[$evaluadoId]['competencias'][$competenciaId];
+        $promediosPorRol = $competencia['promedios_por_rol'];
 
-    //     foreach ($competencias as $comp) {
-    //         $labels[] = $comp['nombre'];
-    //         $datos[] = $comp['promedio'];
-    //         $nivel = $comp['nivel'];
-    //         $colores[] = $this->nivelesEvaluacion[$nivel]['color'];
-    //     }
+        $labels = array_keys($promediosPorRol);
+        $datos = array_values($promediosPorRol);
 
-    //     $chartConfig = [
-    //         'type' => 'horizontalBar',
-    //         'data' => [
-    //             'labels' => $labels,
-    //             'datasets' => [[
-    //                 'label' => 'Promedio',
-    //                 'data' => $datos,
-    //                 'backgroundColor' => $colores,
-    //                 'borderColor' => $colores,
-    //                 'borderWidth' => 1,
-    //                 'barThickness' => 20,
-    //             ]]
-    //         ],
-    //         'options' => [
-    //             'indexAxis' => 'y',
-    //             'scales' => [
-    //                 'x' => [
-    //                     'min' => 0,
-    //                     'max' => 5,
-    //                     'ticks' => ['stepSize' => 1]
-    //                 ]
-    //             ],
-    //             'plugins' => [
-    //                 'datalabels' => [
-    //                     'anchor' => 'end',
-    //                     'align' => 'end',
-    //                     'color' => '#000',
-    //                     'font' => ['weight' => 'bold']
-    //                 ]
-    //             ]
-    //         ]
-    //     ];
-
-    //     return 'https://quickchart.io/chart?width=700&height=300&chart=' . urlencode(json_encode($chartConfig));
-    // }
-
- public function generarUrlGraficaComparativaRoles($evaluadoId, $competenciaId)
-{
-    if (!isset($this->resultadosEvaluacion[$evaluadoId]['competencias'][$competenciaId])) {
-        return '';
-    }
-
-    $competencia = $this->resultadosEvaluacion[$evaluadoId]['competencias'][$competenciaId];
-    $promediosPorRol = $competencia['promedios_por_rol'];
-
-    $labels = array_keys($promediosPorRol);
-    $datos = array_values($promediosPorRol);
-
-    $chartConfig = [
-        'type' => 'horizontalBar', // Usar el tipo antiguo pero compatible
-        'data' => [
-            'labels' => $labels,
-            'datasets' => [[
-                'label' => $competencia['nombre'],
-                'data' => $datos,
-                'backgroundColor' => ['#6366F1', '#EC4899', '#10B981', '#F59E0B'],
-                'barThickness' => 30,
-            ]]
-        ],
-        'options' => [
-            'scales' => [
-                'xAxes' => [[
-                    'ticks' => [
-                        'beginAtZero' => true,
-                        'min' => 0,
-                        'max' => 5,
-                        'stepSize' => 1,
-                        'fontColor' => 'black',
-                        'fontSize' => 10,
-                    ],
-                    'gridLines' => [
-                        'color' => 'rgba(0, 0, 0, 0.1)',
-                        'zeroLineWidth' => 1,
-                        'zeroLineColor' => 'black',
-                    ],
-                ]],
-                'yAxes' => [[
-                    'ticks' => [
-                        'fontColor' => 'black',
-                        'fontSize' => 11,
-                    ],
-                    'gridLines' => [
-                        'display' => false,
-                    ],
-                ]],
+        $chartConfig = [
+            'type' => 'horizontalBar', // Usar el tipo antiguo pero compatible
+            'data' => [
+                'labels' => $labels,
+                'datasets' => [[
+                    'label' => $competencia['nombre'],
+                    'data' => $datos,
+                    'backgroundColor' => ['#6366F1', '#EC4899', '#10B981', '#F59E0B'],
+                    'barThickness' => 30,
+                ]]
             ],
-            'legend' => [
-                'display' => true,
-                'position' => 'top',
-                'labels' => [
-                    'fontColor' => 'black',
-                    'fontSize' => 12
+            'options' => [
+                'scales' => [
+                    'xAxes' => [[
+                        'ticks' => [
+                            'beginAtZero' => true,
+                            'min' => 0,
+                            'max' => 5,
+                            'stepSize' => 1,
+                            'fontColor' => 'black',
+                            'fontSize' => 10,
+                        ],
+                        'gridLines' => [
+                            'color' => 'rgba(0, 0, 0, 0.1)',
+                            'zeroLineWidth' => 1,
+                            'zeroLineColor' => 'black',
+                        ],
+                    ]],
+                    'yAxes' => [[
+                        'ticks' => [
+                            'fontColor' => 'black',
+                            'fontSize' => 11,
+                        ],
+                        'gridLines' => [
+                            'display' => false,
+                        ],
+                    ]],
+                ],
+                'legend' => [
+                    'display' => true,
+                    'position' => 'top',
+                    'labels' => [
+                        'fontColor' => 'black',
+                        'fontSize' => 12
+                    ]
                 ]
             ]
-        ]
-    ];
+        ];
 
-    return 'https://quickchart.io/chart?width=800&height=300&chart=' . urlencode(json_encode($chartConfig));
-}
+        return 'https://quickchart.io/chart?width=800&height=300&chart=' . urlencode(json_encode($chartConfig));
+    }
+
     public function render()
     {
         return view('livewire.encuesta.resultado.reporte-evaluacion', [

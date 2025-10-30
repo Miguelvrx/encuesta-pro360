@@ -8,13 +8,13 @@
                 <div class="flex-1">
                     <h1 class="text-2xl font-bold text-gray-900">{{ $evaluacion->tipo_evaluacion }}</h1>
                     <p class="text-gray-600 mt-1">{{ $evaluacion->descripcion_evaluacion }}</p>
-                    
+
                     <div class="flex items-center gap-4 mt-3 text-sm text-gray-500">
                         <div class="flex items-center gap-1">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
-                            <span>Evaluando a: <strong>{{ $evaluado->name ?? 'N/A' }}</strong></span>
+                            <span>Evaluando a: <strong>{{ $evaluadoNombre }}</strong></span>
                         </div>
                         <div class="flex items-center gap-1">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -32,8 +32,8 @@
                         <span class="text-sm font-bold text-blue-700">{{ $progreso }}%</span>
                     </div>
                     <div class="w-full bg-blue-200 rounded-full h-2">
-                        <div class="bg-blue-600 h-2 rounded-full transition-all duration-300" 
-                             style="width: {{ $progreso }}%"></div>
+                        <div class="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                            style="width: {{ $progreso }}%"></div>
                     </div>
                     <p class="text-xs text-blue-600 mt-1 text-center">
                         {{ count($respuestas) }} de {{ $competencias->sum(function($c) { return $c->preguntas->count(); }) }} preguntas
@@ -101,12 +101,12 @@
                     <div class="ml-12">
                         <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
                             @foreach($nivelesEvaluacion as $valor => $nivel)
-                            <label class="relative cursor-pointer" 
-                                   wire:key="pregunta-{{ $pregunta->id_pregunta }}-nivel-{{ $valor }}"
-                                   x-data="{ preguntaId: {{ $pregunta->id_pregunta }}, valorNivel: {{ $valor }} }">
-                                <input 
-                                    type="radio" 
-                                    name="pregunta_{{ $pregunta->id_pregunta }}" 
+                            <label class="relative cursor-pointer group"
+                                wire:key="pregunta-{{ $pregunta->id_pregunta }}-nivel-{{ $valor }}"
+                                x-data="{ preguntaId: {{ $pregunta->id_pregunta }}, valorNivel: {{ $valor }} }">
+                                <input
+                                    type="radio"
+                                    name="pregunta_{{ $pregunta->id_pregunta }}"
                                     value="{{ $valor }}"
                                     @checked(isset($respuestas[$pregunta->id_pregunta]) && $respuestas[$pregunta->id_pregunta] == $valor)
                                     @click="$wire.seleccionarRespuesta(preguntaId, valorNivel)"
@@ -117,6 +117,15 @@
                                     <div class="text-xs text-gray-500 mt-1 leading-tight">{{ \Illuminate\Support\Str::limit($nivel['descripcion'], 40) }}</div>
                                 </div>
                                 <div class="absolute top-2 right-2 w-4 h-4 border-2 border-white rounded-full bg-gray-300 peer-checked:bg-blue-500 transition-colors"></div>
+
+                                <!-- Tooltip -->
+                                <div class="absolute invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 bottom-full left-1/2 transform -translate-x-1/2 mb-2 z-10">
+                                    <div class="bg-gray-900 text-white text-xs rounded py-2 px-3 whitespace-nowrap max-w-xs text-center">
+                                        <div class="font-semibold">{{ $nivel['nombre'] }}</div>
+                                        <div class="mt-1">{{ $nivel['descripcion'] }}</div>
+                                        <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                    </div>
+                                </div>
                             </label>
                             @endforeach
                         </div>
@@ -183,7 +192,7 @@
                     <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
                 </svg>
                 <p class="ml-3 text-sm text-blue-700">
-                    <strong>Instrucciones:</strong> Selecciona el nivel que mejor represente el desempeño observado. 
+                    <strong>Instrucciones:</strong> Selecciona el nivel que mejor represente el desempeño observado.
                     Tu evaluación será confidencial y solo se mostrarán resultados agregados.
                 </p>
             </div>
