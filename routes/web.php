@@ -4,6 +4,7 @@ use App\Livewire\Encuesta\Competencia\CatalogoCompetencia;
 use App\Livewire\Encuesta\Competencia\CrearCompetencia;
 use App\Livewire\Encuesta\Competencia\EditarComptencia;
 use App\Livewire\Encuesta\Competencia\RevisarComptencia;
+use App\Livewire\Encuesta\Compromiso\CrearCompromiso;
 use App\Livewire\Encuesta\CrearEmpresa;
 use App\Livewire\Encuesta\Departamento\CrearDepartamento;
 use App\Livewire\Encuesta\Departamento\EditarDepartamento;
@@ -81,7 +82,6 @@ Route::get('/asignar-roles', AsignarRoles::class)->name('asignar-roles');
 Route::get('/gestion-roles', GestionRoles::class)->name('gestion-roles');
 Route::get('/manual-usuario-empresas', \App\Livewire\Empresa\ManualUsuarioEmpModal::class)
      ->name('manual-usuario-empresas');
-
-
+Route::get('/compromisos/crear', CrearCompromiso::class)->name('crear-compromiso');
 //crear-evaluacion  Route::get('/select2-example', Select2Example::class)->name('select2-example');
 //Route::get('/mostrar-compromiso-administrador', MostrarCompromisoAdministrador::class)->middleware('can:Mostrar Compromisos ADMIN')->name('portal360.compromiso.compromiso-administrador.mostrar-compromiso-administrador');

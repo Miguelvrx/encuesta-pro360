@@ -694,6 +694,371 @@
                 <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                 <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
+
+                <!-- Sección de Compromisos de Mejora -->
+                <!-- Agregar después de la tabla comparativa y antes del footer -->
+                <!--[if BLOCK]><![endif]--><?php if($tipoReporte === 'por_evaluado' && $usuarioEvaluadoSeleccionado): ?>
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-800">🎯 Plan de Acción y Compromisos</h3>
+                            <p class="text-sm text-gray-600 mt-1">Compromisos establecidos para el desarrollo de competencias</p>
+                        </div>
+                        <button
+                            wire:click="abrirFormularioCompromiso"
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium shadow-md transition-colors flex items-center space-x-2">
+                            <span>➕</span>
+                            <span>Nuevo Compromiso</span>
+                        </button>
+                    </div>
+
+                    <?php
+                    $compromisos = $this->cargarCompromisos($usuarioEvaluadoSeleccionado);
+                    ?>
+
+                    <!--[if BLOCK]><![endif]--><?php if($compromisos->isEmpty()): ?>
+                    <div class="text-center py-12 bg-gray-50 rounded-lg">
+                        <div class="text-gray-400 mb-4">
+                            <svg class="mx-auto h-16 w-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                            </svg>
+                        </div>
+                        <p class="text-gray-600 mb-2">No hay compromisos registrados</p>
+                        <p class="text-sm text-gray-500">Crea el primer compromiso para iniciar el plan de acción</p>
+                    </div>
+                    <?php else: ?>
+                    <!-- Resumen de Compromisos -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                        <?php
+                        $stats = [
+                        'total' => $compromisos->count(),
+                        'pendiente' => $compromisos->where('estado', 'pendiente')->count(),
+                        'en_progreso' => $compromisos->where('estado', 'en_progreso')->count(),
+                        'completado' => $compromisos->where('estado', 'completado')->count(),
+                        ];
+                        ?>
+                        <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                            <p class="text-sm text-blue-600 font-medium">Total</p>
+                            <p class="text-2xl font-bold text-blue-700"><?php echo e($stats['total']); ?></p>
+                        </div>
+                        <div class="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
+                            <p class="text-sm text-yellow-600 font-medium">Pendientes</p>
+                            <p class="text-2xl font-bold text-yellow-700"><?php echo e($stats['pendiente']); ?></p>
+                        </div>
+                        <div class="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                            <p class="text-sm text-purple-600 font-medium">En Progreso</p>
+                            <p class="text-2xl font-bold text-purple-700"><?php echo e($stats['en_progreso']); ?></p>
+                        </div>
+                        <div class="bg-green-50 rounded-lg p-4 border border-green-200">
+                            <p class="text-sm text-green-600 font-medium">Completados</p>
+                            <p class="text-2xl font-bold text-green-700"><?php echo e($stats['completado']); ?></p>
+                        </div>
+                    </div>
+
+                    <!-- Lista de Compromisos -->
+                    <div class="space-y-4">
+                        <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $compromisos; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $compromiso): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <div class="border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow">
+                            <div class="flex justify-between items-start mb-3">
+                                <div class="flex-1">
+                                    <div class="flex items-center space-x-3 mb-2">
+                                        <h4 class="text-lg font-semibold text-gray-800"><?php echo e($compromiso->titulo); ?></h4>
+                                        <?php
+                                        $estadoConfig = [
+                                        'pendiente' => ['color' => 'yellow', 'icono' => '⏳', 'texto' => 'Pendiente'],
+                                        'en_progreso' => ['color' => 'blue', 'icono' => '🚀', 'texto' => 'En Progreso'],
+                                        'completado' => ['color' => 'green', 'icono' => '✅', 'texto' => 'Completado'],
+                                        'vencido' => ['color' => 'red', 'icono' => '⚠️', 'texto' => 'Vencido'],
+                                        ];
+                                        $config = $estadoConfig[$compromiso->estado] ?? $estadoConfig['pendiente'];
+                                        ?>
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-<?php echo e($config['color']); ?>-100 text-<?php echo e($config['color']); ?>-800">
+                                            <?php echo e($config['icono']); ?> <?php echo e($config['texto']); ?>
+
+                                        </span>
+                                    </div>
+
+                                    <!-- Competencia vinculada -->
+                                    <!--[if BLOCK]><![endif]--><?php if($compromiso->competencia): ?>
+                                    <?php
+                                    $competenciaData = $evaluado['competencias'][$compromiso->competencia] ?? null;
+                                    ?>
+                                    <!--[if BLOCK]><![endif]--><?php if($competenciaData): ?>
+                                    <div class="flex items-center space-x-2 mb-3">
+                                        <span class="text-sm text-gray-600">Competencia:</span>
+                                        <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium text-white"
+                                            style="background-color: <?php echo e($nivelesEvaluacion[$competenciaData['nivel']]['color']); ?>">
+                                            <?php echo e($competenciaData['nombre']); ?>
+
+                                        </span>
+                                    </div>
+                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+
+                                    <p class="text-gray-700 mb-3"><?php echo e($compromiso->descripcion_compromiso); ?></p>
+
+                                    <!-- Niveles -->
+                                    <!--[if BLOCK]><![endif]--><?php if($compromiso->nivel_actual && $compromiso->nivel_objetivo): ?>
+                                    <div class="flex items-center space-x-4 mb-3 text-sm">
+                                        <div class="flex items-center space-x-2">
+                                            <span class="text-gray-600">Nivel Actual:</span>
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                                Nivel <?php echo e($compromiso->nivel_actual); ?>
+
+                                            </span>
+                                        </div>
+                                        <span class="text-gray-400">→</span>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="text-gray-600">Objetivo:</span>
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                Nivel <?php echo e($compromiso->nivel_objetivo); ?>
+
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+
+                                    <!-- Fechas -->
+                                    <div class="flex items-center space-x-4 text-sm text-gray-600 mb-3">
+                                        <div class="flex items-center space-x-1">
+                                            <span>📅</span>
+                                            <span>Creado: <?php echo e($compromiso->fecha_alta->format('d/m/Y')); ?></span>
+                                        </div>
+                                        <div class="flex items-center space-x-1">
+                                            <span>⏰</span>
+                                            <span>Vencimiento: <?php echo e($compromiso->fecha_vencimiento->format('d/m/Y')); ?></span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Acciones específicas -->
+                                    <!--[if BLOCK]><![endif]--><?php if($compromiso->acciones_especificas): ?>
+                                    <div class="bg-indigo-50 rounded-lg p-3 mb-3">
+                                        <p class="text-xs font-semibold text-indigo-800 mb-1">Acciones Específicas:</p>
+                                        <p class="text-sm text-indigo-700"><?php echo e($compromiso->acciones_especificas); ?></p>
+                                    </div>
+                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+
+                                    <!-- Recursos de apoyo -->
+                                    <!--[if BLOCK]><![endif]--><?php if($compromiso->recursos_apoyo): ?>
+                                    <div class="bg-purple-50 rounded-lg p-3">
+                                        <p class="text-xs font-semibold text-purple-800 mb-1">Recursos de Apoyo:</p>
+                                        <p class="text-sm text-purple-700"><?php echo e($compromiso->recursos_apoyo); ?></p>
+                                    </div>
+                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                </div>
+
+                                <!-- Acciones -->
+                                <div class="flex space-x-2 ml-4">
+                                    <!--[if BLOCK]><![endif]--><?php if($compromiso->estado !== 'completado'): ?>
+                                    <div class="relative group">
+                                        <button class="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                                            </svg>
+                                        </button>
+                                        <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 hidden group-hover:block z-10">
+                                            <!--[if BLOCK]><![endif]--><?php if($compromiso->estado === 'pendiente'): ?>
+                                            <button wire:click="cambiarEstadoCompromiso(<?php echo e($compromiso->id_compromiso); ?>, 'en_progreso')"
+                                                class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                🚀 Iniciar
+                                            </button>
+                                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                            <!--[if BLOCK]><![endif]--><?php if($compromiso->estado === 'en_progreso'): ?>
+                                            <button wire:click="cambiarEstadoCompromiso(<?php echo e($compromiso->id_compromiso); ?>, 'completado')"
+                                                class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                ✅ Completar
+                                            </button>
+                                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                            <button wire:click="editarCompromiso(<?php echo e($compromiso->id_compromiso); ?>)"
+                                                class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                ✏️ Editar
+                                            </button>
+                                            <button wire:click="eliminarCompromiso(<?php echo e($compromiso->id_compromiso); ?>)"
+                                                class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                                🗑️ Eliminar
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                </div>
+                            </div>
+
+                            <!-- Seguimientos -->
+                            <!--[if BLOCK]><![endif]--><?php if($compromiso->seguimientos->count() > 0): ?>
+                            <div class="mt-4 pt-4 border-t border-gray-200">
+                                <p class="text-sm font-semibold text-gray-700 mb-3">Seguimientos (<?php echo e($compromiso->seguimientos->count()); ?>):</p>
+                                <div class="space-y-2">
+                                    <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $compromiso->seguimientos->take(3); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $seguimiento): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <div class="bg-gray-50 rounded-lg p-3 text-sm">
+                                        <div class="flex justify-between items-start mb-1">
+                                            <span class="font-medium text-gray-800"><?php echo e($seguimiento->fecha_seguimiento->format('d/m/Y')); ?></span>
+                                            <span class="text-xs px-2 py-1 rounded bg-blue-100 text-blue-800"><?php echo e($seguimiento->avance); ?>% avance</span>
+                                        </div>
+                                        <p class="text-gray-600"><?php echo e($seguimiento->comentarios); ?></p>
+                                    </div>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
+                                </div>
+                            </div>
+                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                        </div>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
+                    </div>
+                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                </div>
+
+                <!-- Modal para Crear/Editar Compromiso -->
+                <!--[if BLOCK]><![endif]--><?php if($mostrarFormularioCompromiso): ?>
+                <div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" wire:click="cerrarFormularioCompromiso">
+                    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-lg bg-white" wire:click.stop>
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-xl font-bold text-gray-800">
+                                <?php echo e($compromisoEditando ? 'Editar Compromiso' : 'Nuevo Compromiso de Mejora'); ?>
+
+                            </h3>
+                            <button wire:click="cerrarFormularioCompromiso" class="text-gray-400 hover:text-gray-600">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <form wire:submit.prevent="guardarCompromiso" class="space-y-4">
+                            <!-- Título -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Título del Compromiso*</label>
+                                <input type="text" wire:model="compromiso_titulo"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    placeholder="Ej: Mejorar habilidades de comunicación">
+                                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['compromiso_titulo'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <span class="text-red-500 text-xs"><?php echo e($message); ?></span> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
+                            </div>
+
+                            <!-- Descripción -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Descripción*</label>
+                                <textarea wire:model="compromiso_descripcion" rows="3"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    placeholder="Describe el compromiso de mejora"></textarea>
+                                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['compromiso_descripcion'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <span class="text-red-500 text-xs"><?php echo e($message); ?></span> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
+                            </div>
+
+                            <!-- Grid de 2 columnas -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- Competencia -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Competencia Relacionada</label>
+                                    <select wire:model.live="compromiso_competencia"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                        <option value="">Seleccionar competencia</option>
+                                        <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $evaluado['competencias']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $idComp => $comp): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <option value="<?php echo e($idComp); ?>"><?php echo e($comp['nombre']); ?> (Nivel <?php echo e($comp['nivel']); ?>)</option>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
+                                    </select>
+                                </div>
+
+                                <!-- Fecha de Vencimiento -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Vencimiento*</label>
+                                    <input type="date" wire:model="compromiso_fecha_vencimiento"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                    <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['compromiso_fecha_vencimiento'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <span class="text-red-500 text-xs"><?php echo e($message); ?></span> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
+                                </div>
+
+                                <!-- Nivel Actual -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Nivel Actual</label>
+                                    <select wire:model="compromiso_nivel_actual"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                        <option value="">Seleccionar</option>
+                                        <!--[if BLOCK]><![endif]--><?php for($i = 1; $i <= 5; $i++): ?>
+                                            <option value="<?php echo e($i); ?>">Nivel <?php echo e($i); ?> - <?php echo e($nivelesEvaluacion[$i]['nombre']); ?></option>
+                                            <?php endfor; ?><!--[if ENDBLOCK]><![endif]-->
+                                    </select>
+                                </div>
+
+                                <!-- Nivel Objetivo -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Nivel Objetivo*</label>
+                                    <select wire:model="compromiso_nivel_objetivo"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                        <option value="">Seleccionar</option>
+                                        <!--[if BLOCK]><![endif]--><?php for($i = 1; $i <= 5; $i++): ?>
+                                            <option value="<?php echo e($i); ?>">Nivel <?php echo e($i); ?> - <?php echo e($nivelesEvaluacion[$i]['nombre']); ?></option>
+                                            <?php endfor; ?><!--[if ENDBLOCK]><![endif]-->
+                                    </select>
+                                    <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['compromiso_nivel_objetivo'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <span class="text-red-500 text-xs"><?php echo e($message); ?></span> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
+                                </div>
+                            </div>
+
+                            <!-- Acciones Específicas -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Acciones Específicas*</label>
+                                <textarea wire:model="compromiso_acciones" rows="3"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    placeholder="¿Qué acciones concretas se realizarán?"></textarea>
+                                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['compromiso_acciones'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <span class="text-red-500 text-xs"><?php echo e($message); ?></span> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
+                            </div>
+
+                            <!-- Recursos de Apoyo -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Recursos de Apoyo</label>
+                                <textarea wire:model="compromiso_recursos" rows="2"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    placeholder="Capacitación, mentoring, herramientas, etc."></textarea>
+                            </div>
+
+                            <!-- Botones -->
+                            <div class="flex justify-end space-x-3 pt-4">
+                                <button type="button" wire:click="cerrarFormularioCompromiso"
+                                    class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors">
+                                    Cancelar
+                                </button>
+                                <button type="submit"
+                                    class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                                    <?php echo e($compromisoEditando ? 'Actualizar' : 'Crear Compromiso'); ?>
+
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+
                 <!-- Footer del Reporte -->
                 <footer class="mt-8 bg-white rounded-xl shadow-lg p-6 text-center text-gray-500 text-sm">
                     <p class="font-semibold text-gray-700">E360 Pro - Sistema de Evaluación 360°</p>

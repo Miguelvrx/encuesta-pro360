@@ -3,10 +3,12 @@
 namespace App\Livewire\Encuesta\Resultado;
 
 use App\Models\Competencia;
+use App\Models\Compromiso;
 use App\Models\Departamento;
 use App\Models\Empresa;
 use App\Models\Evaluacion;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -54,6 +56,10 @@ class ReporteEvaluacion extends Component
             $this->calcularResultados();
         }
     }
+
+
+
+
 
     // NUEVO MÉTODO: Agrupar evaluaciones por nombre y fecha
     protected function obtenerEvaluacionesUnicas()
@@ -672,10 +678,154 @@ class ReporteEvaluacion extends Component
         return 'https://quickchart.io/chart?width=800&height=300&chart=' . urlencode(json_encode($chartConfig));
     }
 
+// Agregar estas propiedades al inicio de la clase ReporteEvaluacion
+
+public $mostrarFormularioCompromiso = false;
+public $compromisoEditando = null;
+
+// Datos del formulario de compromiso
+public $compromiso_titulo = '';
+public $compromiso_descripcion = '';
+public $compromiso_fecha_vencimiento = '';
+public $compromiso_competencia = '';
+public $compromiso_nivel_actual = '';
+public $compromiso_nivel_objetivo = '';
+public $compromiso_acciones = '';
+public $compromiso_recursos = '';
+
+// Agregar estos métodos al componente
+
+public function cargarCompromisos($evaluadoId)
+{
+    if (!$this->evaluacionIdSeleccionada) {
+        return collect();
+    }
+
+    return Compromiso::where('user_id', $evaluadoId)
+        ->where('evaluacion_id', $this->evaluacionIdSeleccionada)
+        ->with(['seguimientos', 'responsable'])
+        ->orderBy('fecha_alta', 'desc')
+        ->get();
+}
+
+public function abrirFormularioCompromiso($competenciaId = null)
+{
+    $this->mostrarFormularioCompromiso = true;
+    $this->compromiso_competencia = $competenciaId;
+    
+    // Pre-cargar datos si hay una competencia seleccionada
+    if ($competenciaId && isset($this->resultadosEvaluacion[$this->usuarioEvaluadoSeleccionado]['competencias'][$competenciaId])) {
+        $competencia = $this->resultadosEvaluacion[$this->usuarioEvaluadoSeleccionado]['competencias'][$competenciaId];
+        $this->compromiso_nivel_actual = $competencia['nivel'];
+        $this->compromiso_titulo = "Mejora en " . $competencia['nombre'];
+    }
+}
+
+public function cerrarFormularioCompromiso()
+{
+    $this->mostrarFormularioCompromiso = false;
+    $this->reset([
+        'compromiso_titulo',
+        'compromiso_descripcion',
+        'compromiso_fecha_vencimiento',
+        'compromiso_competencia',
+        'compromiso_nivel_actual',
+        'compromiso_nivel_objetivo',
+        'compromiso_acciones',
+        'compromiso_recursos',
+        'compromisoEditando'
+    ]);
+}
+
+public function guardarCompromiso()
+{
+    $this->validate([
+        'compromiso_titulo' => 'required|string|max:255',
+        'compromiso_descripcion' => 'required|string',
+        'compromiso_fecha_vencimiento' => 'required|date|after:today',
+        'compromiso_nivel_objetivo' => 'required|integer|min:1|max:5',
+        'compromiso_acciones' => 'required|string',
+    ], [
+        'compromiso_titulo.required' => 'El título es obligatorio',
+        'compromiso_descripcion.required' => 'La descripción es obligatoria',
+        'compromiso_fecha_vencimiento.required' => 'La fecha de vencimiento es obligatoria',
+        'compromiso_fecha_vencimiento.after' => 'La fecha debe ser posterior a hoy',
+        'compromiso_nivel_objetivo.required' => 'El nivel objetivo es obligatorio',
+        'compromiso_acciones.required' => 'Las acciones específicas son obligatorias',
+    ]);
+
+    $evaluado = $this->resultadosEvaluacion[$this->usuarioEvaluadoSeleccionado];
+    
+    $datosCompromiso = [
+        'fecha_alta' => now(),
+        'fecha_vencimiento' => $this->compromiso_fecha_vencimiento,
+        'titulo' => $this->compromiso_titulo,
+        'descripcion_compromiso' => $this->compromiso_descripcion,
+        'estado' => 'pendiente',
+        'verificado_cumplido' => false,
+        'puntuacion_inicial' => $evaluado['promedio_general'],
+        'puntuacion_actual' => $evaluado['promedio_general'],
+        'user_id' => $this->usuarioEvaluadoSeleccionado,
+        'responsable_id' => Auth::id(),
+        'evaluacion_id' => $this->evaluacionIdSeleccionada,
+        'tipo_compromiso' => 'mejora_competencia',
+        'usuario_rol' => Auth::user()->getRoleNames()->first() ?? 'evaluador',
+        'competencia' => $this->compromiso_competencia ?: null,
+        'nivel_actual' => $this->compromiso_nivel_actual ?: null,
+        'nivel_objetivo' => $this->compromiso_nivel_objetivo,
+        'acciones_especificas' => $this->compromiso_acciones,
+        'recursos_apoyo' => $this->compromiso_recursos ?: null,
+    ];
+
+    if ($this->compromisoEditando) {
+        $compromiso = Compromiso::find($this->compromisoEditando);
+        $compromiso->update($datosCompromiso);
+        session()->flash('mensaje', 'Compromiso actualizado exitosamente');
+    } else {
+        Compromiso::create($datosCompromiso);
+        session()->flash('mensaje', 'Compromiso creado exitosamente');
+    }
+
+    $this->cerrarFormularioCompromiso();
+}
+
+public function editarCompromiso($compromisoId)
+{
+    $compromiso = Compromiso::findOrFail($compromisoId);
+    
+    $this->compromisoEditando = $compromisoId;
+    $this->compromiso_titulo = $compromiso->titulo;
+    $this->compromiso_descripcion = $compromiso->descripcion_compromiso;
+    $this->compromiso_fecha_vencimiento = $compromiso->fecha_vencimiento->format('Y-m-d');
+    $this->compromiso_competencia = $compromiso->competencia;
+    $this->compromiso_nivel_actual = $compromiso->nivel_actual;
+    $this->compromiso_nivel_objetivo = $compromiso->nivel_objetivo;
+    $this->compromiso_acciones = $compromiso->acciones_especificas;
+    $this->compromiso_recursos = $compromiso->recursos_apoyo;
+    
+    $this->mostrarFormularioCompromiso = true;
+}
+
+public function eliminarCompromiso($compromisoId)
+{
+    Compromiso::findOrFail($compromisoId)->delete();
+    session()->flash('mensaje', 'Compromiso eliminado exitosamente');
+}
+
+public function cambiarEstadoCompromiso($compromisoId, $nuevoEstado)
+{
+    $compromiso = Compromiso::findOrFail($compromisoId);
+    $compromiso->update(['estado' => $nuevoEstado]);
+    session()->flash('mensaje', 'Estado actualizado exitosamente');
+}
+
     public function render()
     {
         return view('livewire.encuesta.resultado.reporte-evaluacion', [
             'resultados' => $this->resultadosEvaluacion,
+            'compromisos' => $this->usuarioEvaluadoSeleccionado
+                ? $this->cargarCompromisos($this->usuarioEvaluadoSeleccionado)
+                : collect(),
         ])->layout('layouts.app');
     }
     // public function render()

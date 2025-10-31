@@ -34,6 +34,7 @@ class MenuNavegacion extends Component
         'reaking-excelencia' => 'rakingexcelencias',
         'asignar-roles' => 'rolespermisos',
         'gestion-roles' => 'rolespermisos',
+        'crear-compromiso' => 'compromisosusers',
 
 
         // 'index' => 'usuarios',

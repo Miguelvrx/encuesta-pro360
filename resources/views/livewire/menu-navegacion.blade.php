@@ -443,7 +443,42 @@
 
                                                 <!-- Navegación de reanking de excelencia final -->
 
-
+                                                <!-- Navegación de Compromiso -->
+                                                <div class="mt-3">
+                                                    <button wire:click="toggleMenu('compromisosusers')" class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg group transition-all duration-200 ease-in-out 
+        {{ $this->isActiveRouteGroup(['crear-compromiso']) ? 'bg-blue-50 text-blue-600 shadow-sm' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50 hover:shadow-md' }}">
+                                                        <div class="flex items-center">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 transition-colors duration-200 
+                {{ $this->isActiveRouteGroup(['crear-compromiso']) ? 'text-blue-500' : 'text-gray-400 group-hover:text-blue-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m11 17 2 2a1 1 0 1 0 3-3"></path>
+                                                                <path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"></path>
+                                                                <path d="m21 3 1 11h-2"></path>
+                                                                <path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3"></path>
+                                                                <path d="M3 4h8"></path>
+                                                            </svg>
+                                                            <span class="text-sm font-medium">Compromiso</span>
+                                                        </div>
+                                                        <svg class="w-4 h-4 transition-all duration-300 ease-in-out 
+            {{ $this->isActiveRouteGroup(['crear-compromiso']) ? 'text-blue-400' : 'text-gray-400' }} 
+            {{ $this->isMenuOpen('compromisosusers') ? 'rotate-180' : 'rotate-0' }}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                                        </svg>
+                                                    </button>
+                                                    <div class="overflow-hidden transition-all duration-300 ease-in-out 
+        {{ $this->isMenuOpen('compromisosusers') ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0' }} mt-1 ml-4 space-y-1">
+                                                        <!-- CORRECCIÓN: Usar la ruta SIN parámetros -->
+                                                        <a href="{{ route('crear-compromiso') }}"
+                                                            wire:click="closeMenus"
+                                                            class="flex items-center px-3 py-2.5 rounded-lg group transition-all duration-200 ease-in-out 
+            {{ $this->isActiveRoute('crear-compromiso') ? 'bg-blue-50 text-blue-600 border-r-4 border-blue-600 shadow-sm' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50 hover:shadow-md' }}">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 transition-colors duration-200 
+                {{ $this->isActiveRoute('crear-compromiso') ? 'text-blue-500' : 'text-gray-400 group-hover:text-blue-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                                            </svg>
+                                                            <span class="text-sm">Crear Compromiso</span>
+                                                        </a>
+                                                    </div>
+                                                </div>
 
                                                 <!-- Navegación de Roles y Permisos   -->
                                                 <div class="mt-3">

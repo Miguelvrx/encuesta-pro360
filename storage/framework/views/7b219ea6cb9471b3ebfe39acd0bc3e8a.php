@@ -15,33 +15,33 @@
                 </div>
 
                 <!-- Información del contexto -->
-                @if($competencia && $puntuacionActual)
+                <!--[if BLOCK]><![endif]--><?php if($competencia && $puntuacionActual): ?>
                 <div class="bg-indigo-50 rounded-lg p-4 mb-6">
                     <h3 class="font-semibold text-indigo-800 mb-2">Contexto de la Evaluación</h3>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                         <div>
                             <p class="text-gray-600">Competencia</p>
-                            <p class="font-semibold">{{ $competencia }}</p>
+                            <p class="font-semibold"><?php echo e($competencia); ?></p>
                         </div>
                         <div>
                             <p class="text-gray-600">Puntuación Actual</p>
-                            <p class="font-semibold">{{ $puntuacionActual }}</p>
+                            <p class="font-semibold"><?php echo e($puntuacionActual); ?></p>
                         </div>
                         <div>
                             <p class="text-gray-600">Nivel Actual</p>
                             <!-- CORRECCIÓN: Mostrar correctamente el nivel actual -->
-                            <p class="font-semibold">{{ $nivelActual ? ($nivelesEvaluacion[$nivelActual] ?? 'N/A') : 'N/A' }}</p>
-                            @if($nivelActual)
-                            <p class="text-xs text-gray-500">(Nivel {{ $nivelActual }})</p>
-                            @endif
+                            <p class="font-semibold"><?php echo e($nivelActual ? ($nivelesEvaluacion[$nivelActual] ?? 'N/A') : 'N/A'); ?></p>
+                            <!--[if BLOCK]><![endif]--><?php if($nivelActual): ?>
+                            <p class="text-xs text-gray-500">(Nivel <?php echo e($nivelActual); ?>)</p>
+                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                         </div>
                         <div>
                             <p class="text-gray-600">Evaluación</p>
-                            <p class="font-semibold">{{ $evaluaciones->firstWhere('id_evaluacion', $evaluacionId)->tipo_evaluacion ?? 'N/A' }}</p>
+                            <p class="font-semibold"><?php echo e($evaluaciones->firstWhere('id_evaluacion', $evaluacionId)->tipo_evaluacion ?? 'N/A'); ?></p>
                         </div>
                     </div>
                 </div>
-                @endif
+                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
                 <!-- Formulario -->
                 <div class="bg-white rounded-xl shadow-lg p-6">
@@ -56,13 +56,20 @@
                                 <select wire:model="evaluacionId"
                                     class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                     <option value="">Seleccionar evaluación</option>
-                                    @foreach($evaluaciones as $eval)
-                                    <option value="{{ $eval->id_evaluacion }}">
-                                        {{ $eval->tipo_evaluacion }} ({{ $eval->fecha_inicio->format('d/m/Y') }})
+                                    <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $evaluaciones; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $eval): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($eval->id_evaluacion); ?>">
+                                        <?php echo e($eval->tipo_evaluacion); ?> (<?php echo e($eval->fecha_inicio->format('d/m/Y')); ?>)
                                     </option>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                                 </select>
-                                @error('evaluacionId') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['evaluacionId'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <span class="text-red-500 text-xs"><?php echo e($message); ?></span> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                             </div>
 
                             <div>
@@ -72,13 +79,21 @@
                                 <select wire:model="usuarioId"
                                     class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                     <option value="">Seleccionar evaluado</option>
-                                    @foreach($usuarios as $usuario)
-                                    <option value="{{ $usuario->id }}">
-                                        {{ $usuario->name }} {{ $usuario->primer_apellido }}
+                                    <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $usuarios; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $usuario): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($usuario->id); ?>">
+                                        <?php echo e($usuario->name); ?> <?php echo e($usuario->primer_apellido); ?>
+
                                     </option>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                                 </select>
-                                @error('usuarioId') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['usuarioId'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <span class="text-red-500 text-xs"><?php echo e($message); ?></span> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                             </div>
                         </div>
 
@@ -94,7 +109,14 @@
                                     <input type="text" wire:model="titulo"
                                         class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                         placeholder="Ej: Mejora en Comunicación Efectiva">
-                                    @error('titulo') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                    <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['titulo'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <span class="text-red-500 text-xs"><?php echo e($message); ?></span> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                                 </div>
 
                                 <div>
@@ -107,7 +129,14 @@
                                         <option value="mantenimiento">Mantenimiento</option>
                                         <option value="desarrollo">Desarrollo</option>
                                     </select>
-                                    @error('tipoCompromiso') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                    <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['tipoCompromiso'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <span class="text-red-500 text-xs"><?php echo e($message); ?></span> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                                 </div>
                             </div>
                             
@@ -120,7 +149,14 @@
                                 <textarea wire:model="descripcion" rows="3"
                                     class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                     placeholder="Describe el propósito y objetivos del compromiso..."></textarea>
-                                @error('descripcion') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['descripcion'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <span class="text-red-500 text-xs"><?php echo e($message); ?></span> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                             </div>
 
                             <!-- Niveles y Fechas -->
@@ -131,11 +167,11 @@
                                     </label>
                                     <!-- CORRECCIÓN: Usar $nivelActual para obtener el nombre del nivel -->
                                     <input type="text"
-                                        value="{{ $nivelActual ? ($nivelesEvaluacion[$nivelActual] ?? 'N/A') : 'N/A' }}"
+                                        value="<?php echo e($nivelActual ? ($nivelesEvaluacion[$nivelActual] ?? 'N/A') : 'N/A'); ?>"
                                         class="w-full border-gray-300 rounded-lg shadow-sm bg-gray-50" readonly>
-                                    @if($nivelActual)
-                                    <p class="text-xs text-gray-500 mt-1">Nivel {{ $nivelActual }}</p>
-                                    @endif
+                                    <!--[if BLOCK]><![endif]--><?php if($nivelActual): ?>
+                                    <p class="text-xs text-gray-500 mt-1">Nivel <?php echo e($nivelActual); ?></p>
+                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                 </div>
 
                                 <div>
@@ -145,16 +181,24 @@
                                     <select wire:model="nivelObjetivo"
                                         class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                         <option value="">Seleccionar nivel</option>
-                                        @foreach($nivelesEvaluacion as $nivel => $nombre)
-                                        <option value="{{ $nivel }}">
-                                            {{ $nivel }} - {{ $nombre }}
-                                            @if($nivelActual && $nivel == $nivelActual)
+                                        <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $nivelesEvaluacion; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $nivel => $nombre): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <option value="<?php echo e($nivel); ?>">
+                                            <?php echo e($nivel); ?> - <?php echo e($nombre); ?>
+
+                                            <!--[if BLOCK]><![endif]--><?php if($nivelActual && $nivel == $nivelActual): ?>
                                             (Actual)
-                                            @endif
+                                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                         </option>
-                                        @endforeach
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                                     </select>
-                                    @error('nivelObjetivo') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                    <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['nivelObjetivo'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <span class="text-red-500 text-xs"><?php echo e($message); ?></span> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                                 </div>
 
                                 <div>
@@ -163,8 +207,15 @@
                                     </label>
                                     <input type="date" wire:model="fechaVencimiento"
                                         class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                        min="{{ now()->addDay()->format('Y-m-d') }}">
-                                    @error('fechaVencimiento') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                        min="<?php echo e(now()->addDay()->format('Y-m-d')); ?>">
+                                    <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['fechaVencimiento'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <span class="text-red-500 text-xs"><?php echo e($message); ?></span> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                                 </div>
                             </div>
                             <!-- Acciones Específicas -->
@@ -173,17 +224,24 @@
                                     <label class="block text-sm font-medium text-gray-700">
                                         Acciones Específicas *
                                     </label>
-                                    @if($competencia)
+                                    <!--[if BLOCK]><![endif]--><?php if($competencia): ?>
                                     <button type="button" wire:click="sugerirAcciones"
                                         class="text-sm text-indigo-600 hover:text-indigo-800">
                                         🚀 Sugerir Acciones
                                     </button>
-                                    @endif
+                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                 </div>
                                 <textarea wire:model="accionesEspecificas" rows="4"
                                     class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                     placeholder="Lista las acciones concretas a realizar..."></textarea>
-                                @error('accionesEspecificas') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['accionesEspecificas'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <span class="text-red-500 text-xs"><?php echo e($message); ?></span> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                             </div>
 
                             <!-- Recursos y Responsable -->
@@ -204,13 +262,21 @@
                                     <select wire:model="responsableId"
                                         class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                         <option value="">Seleccionar responsable</option>
-                                        @foreach($responsables as $responsable)
-                                        <option value="{{ $responsable->id }}">
-                                            {{ $responsable->name }} {{ $responsable->primer_apellido }}
+                                        <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $responsables; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $responsable): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <option value="<?php echo e($responsable->id); ?>">
+                                            <?php echo e($responsable->name); ?> <?php echo e($responsable->primer_apellido); ?>
+
                                         </option>
-                                        @endforeach
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                                     </select>
-                                    @error('responsableId') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                    <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['responsableId'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <span class="text-red-500 text-xs"><?php echo e($message); ?></span> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                                 </div>
                             </div>
                         </div>
@@ -230,23 +296,23 @@
                 </div>
 
                 <!-- Mensajes de éxito/error -->
-                @if (session()->has('success'))
+                <!--[if BLOCK]><![endif]--><?php if(session()->has('success')): ?>
                 <div class="mt-6 bg-green-50 border border-green-200 rounded-lg p-4">
                     <div class="flex items-center">
                         <div class="text-green-600 mr-3">✅</div>
-                        <p class="text-green-800">{{ session('success') }}</p>
+                        <p class="text-green-800"><?php echo e(session('success')); ?></p>
                     </div>
                 </div>
-                @endif
+                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
-                @if (session()->has('error'))
+                <?php if(session()->has('error')): ?>
                 <div class="mt-6 bg-red-50 border border-red-200 rounded-lg p-4">
                     <div class="flex items-center">
                         <div class="text-red-600 mr-3">❌</div>
-                        <p class="text-red-800">{{ session('error') }}</p>
+                        <p class="text-red-800"><?php echo e(session('error')); ?></p>
                     </div>
                 </div>
-                @endif
+                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
             </div>
         </div>
-    </div>
+    </div><?php /**PATH D:\laragon\www\encuesta-pro360\resources\views/livewire/encuesta/compromiso/crear-compromiso.blade.php ENDPATH**/ ?>

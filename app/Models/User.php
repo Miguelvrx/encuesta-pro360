@@ -79,6 +79,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'fecha_registro_usuario' => 'date',
+             'estado' => 'string' // o el cast apropiado
         ];
     }
 
